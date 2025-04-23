@@ -1,14 +1,16 @@
 package gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,6 +20,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 
 import connectDB.ConnectDB;
 import dao.NhanVienDAO;
@@ -32,10 +36,17 @@ public class Start extends JFrame implements ActionListener {
 
     public Start() {
         super("Đăng Nhập");
-        setSize(450, 250);
+        setSize(400, 300);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
+        
+        try {
+            // Set system look and feel
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Kết nối CSDL
         try {
@@ -46,49 +57,109 @@ public class Start extends JFrame implements ActionListener {
             e.printStackTrace();
         }
 
+        // Main panel with padding
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridBagLayout());
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(Color.WHITE);
+        setContentPane(mainPanel);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+
         // Tiêu đề
         JLabel lblTD = new JLabel("ĐĂNG NHẬP TÀI KHOẢN", SwingConstants.CENTER);
-        lblTD.setForeground(new Color(33, 150, 243));
+        lblTD.setForeground(new Color(0, 153, 255)); // Bright blue color
         lblTD.setFont(new Font("Arial", Font.BOLD, 22));
-        lblTD.setPreferredSize(new Dimension(50, 55));
 
         // Nhãn và trường nhập
-        JLabel lblTK = new JLabel("Tài khoản:");
-        lblTK.setFont(new Font("Arial", Font.BOLD, 15));
-        JLabel lblMK = new JLabel("Mật khẩu:");
-        lblMK.setFont(new Font("Arial", Font.BOLD, 15));
+        JLabel lblTK = new JLabel("Tài khoản:", SwingConstants.RIGHT);
+        lblTK.setFont(new Font("Arial", Font.PLAIN, 14));
+        
+        JLabel lblMK = new JLabel("Mật khẩu:", SwingConstants.RIGHT);
+        lblMK.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        // Text fields with border
+        txtTK = new JTextField(20);
+        txtTK.setPreferredSize(new Dimension(200, 30));
+        txtTK.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        
+        txtMK = new JPasswordField(20);
+        txtMK.setPreferredSize(new Dimension(200, 30));
+        txtMK.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        txtMK.setEchoChar('*');
+
+        // Buttons with modern styling
+        btnTogglePassword = new JButton("Hiện");
+        btnTogglePassword.setPreferredSize(new Dimension(70, 30));
+        btnTogglePassword.setBackground(new Color(230, 230, 230));
+        btnTogglePassword.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        btnTogglePassword.setFocusPainted(false);
 
         btnDN = new JButton("Đăng nhập");
-        btnTogglePassword = new JButton("Hiện");
-        btnTogglePassword.setPreferredSize(new Dimension(60, 35));
+        btnDN.setPreferredSize(new Dimension(120, 30));
+        btnDN.setBackground(new Color(230, 230, 230));
+        btnDN.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        btnDN.setFocusPainted(false);
 
-        Dimension d2 = new Dimension(10, 35);
-        txtTK = new JTextField(27);
-        txtMK = new JPasswordField(20);
-        txtTK.setPreferredSize(d2);
-        txtMK.setPreferredSize(d2);
+        // Add title
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 3;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 30, 0);
+        mainPanel.add(lblTD, gbc);
 
-        add(lblTD, BorderLayout.NORTH);
+        // Add username label
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.insets = new Insets(5, 0, 5, 10);
+        mainPanel.add(lblTK, gbc);
 
-        // Panel chính
-        JPanel pCenter = new JPanel();
-        pCenter.setLayout(new GridLayout(3, 1, 0, 10));
-        add(pCenter);
+        // Add username field
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 0, 5, 0);
+        mainPanel.add(txtTK, gbc);
 
-        JPanel p1 = new JPanel();
-        JPanel p2 = new JPanel(new FlowLayout());
-        JPanel p3 = new JPanel();
+        // Add password label
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.insets = new Insets(5, 0, 5, 10);
+        mainPanel.add(lblMK, gbc);
 
-        p1.add(lblTK);
-        p1.add(txtTK);
-        p2.add(lblMK);
-        p2.add(txtMK);
-        p2.add(btnTogglePassword);
-        p3.add(btnDN);
+        // Add password field
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 0, 5, 10);
+        mainPanel.add(txtMK, gbc);
 
-        pCenter.add(p1);
-        pCenter.add(p2);
-        pCenter.add(p3);
+        // Add toggle password button
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 0, 5, 0);
+        mainPanel.add(btnTogglePassword, gbc);
+
+        // Add login button (centered)
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(25, 0, 0, 0);
+        mainPanel.add(btnDN, gbc);
 
         // Sự kiện toggle mật khẩu
         btnTogglePassword.addActionListener(e -> {
@@ -107,6 +178,13 @@ public class Start extends JFrame implements ActionListener {
         btnDN.addActionListener(this);
         txtTK.addActionListener(e -> txtMK.requestFocus());
         txtMK.addActionListener(e -> btnDN.doClick());
+        
+        // Try to set window icon if available
+        try {
+            setIconImage(new ImageIcon(getClass().getResource("/img/logo.png")).getImage());
+        } catch (Exception e) {
+            // Icon not found, continue without it
+        }
     }
 
     @Override
@@ -132,6 +210,13 @@ public class Start extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Start().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            new Start().setVisible(true);
+        });
     }
 }
