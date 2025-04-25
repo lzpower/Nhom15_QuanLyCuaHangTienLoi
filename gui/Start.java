@@ -23,8 +23,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
-import connectDB.ConnectDB;
-import dao.NhanVienDAO;
+import src.dao.NhanVienDAO;
+
 
 public class Start extends JFrame implements ActionListener {
     private JTextField txtTK;

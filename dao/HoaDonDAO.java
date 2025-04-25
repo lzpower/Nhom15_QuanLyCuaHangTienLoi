@@ -14,11 +14,47 @@ import entity.HoaDon;
 
 public class HoaDonDAO {
     private Connection con;
-
-    public HoaDonDAO() {
-        con = ConnectDB.getConnection();
+    //Xuyến 
+    public Connection getConnection() {
+        return ConnectDB.getConnection(); // Trả về kết nối từ lớp ConnectDB
+    }
+    public HoaDonDAO(Connection conn) {
+        this.con = conn;
     }
 
+    public HoaDonDAO() {
+		// TODO Auto-generated constructor stub
+	}
+	// Phương thức lấy hóa đơn trong khoảng ngày
+    public ResultSet getHoaDonByDateRange(String fromDate, String toDate) throws SQLException {
+    	String query = "SELECT h.maHoaDon, h.ngayLap, sp.tenSP, lsp.tenLoaiSP, cthd.soLuong, (cthd.soLuong * cthd.donGia) AS doanhThu " +
+                "FROM HoaDon h " +
+                "JOIN ChiTietHoaDon cthd ON h.maHoaDon = cthd.maHoaDon " +
+                "JOIN SanPham sp ON cthd.maSP = sp.maSP " +
+                "JOIN LoaiSanPham lsp ON sp.maLoaiSP = lsp.maLoaiSP " +  // Thêm JOIN với bảng LoaiSanPham
+                "WHERE h.ngayLap BETWEEN ? AND ?";
+ try (PreparedStatement ps = con.prepareStatement(query)) {
+     ps.setDate(1, java.sql.Date.valueOf(fromDate)); // Đảm bảo 'fromDate' ở dạng String đúng định dạng 'yyyy-mm-dd'
+     ps.setDate(2, java.sql.Date.valueOf(toDate));   // Đảm bảo 'toDate' ở dạng String đúng định dạng 'yyyy-mm-dd'
+
+     try (ResultSet rs = ps.executeQuery()) {
+         while (rs.next()) {
+             String maHoaDon = rs.getString("maHoaDon");
+             Date ngayLap = rs.getDate("ngayLap");
+             String tenSP = rs.getString("tenSP");
+             String loaiSP = rs.getString("loaiSP");
+             int soLuong = rs.getInt("soLuong");
+             double doanhThu = rs.getDouble("doanhThu");
+         }
+     }
+ } catch (SQLException e) {
+     e.printStackTrace();
+ }
+return null;
+
+    }
+    
+    
     public boolean themHoaDon(HoaDon hoaDon) {
         String sql = "INSERT INTO HoaDon(maHoaDon, ngayLap, maNhanVien) VALUES(?, ?, ?)";
         try {

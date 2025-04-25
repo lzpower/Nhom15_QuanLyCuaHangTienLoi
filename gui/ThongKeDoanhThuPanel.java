@@ -4,18 +4,14 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import dao.ChiTietHoaDonDAO;
 import dao.HoaDonDAO;
-import dao.SanPhamDAO;
-import entity.ChiTietHoaDon;
 import entity.HoaDon;
-import entity.SanPham;
 
 public class ThongKeDoanhThuPanel extends JPanel {
 
@@ -24,22 +20,27 @@ public class ThongKeDoanhThuPanel extends JPanel {
     private JLabel lblTotalRevenueValue;
     private JTextField txtFrom, txtTo;
     private List<Object[]> originalData;
-    
-    private HoaDonDAO hoaDonDAO;
-    private ChiTietHoaDonDAO chiTietHoaDonDAO;
-    private SanPhamDAO sanPhamDAO;
 
-    public ThongKeDoanhThuPanel() {
-        setLayout(new BorderLayout());
-        originalData = new ArrayList<>();
-        
-        // Khởi tạo DAO
-        hoaDonDAO = new HoaDonDAO();
-        chiTietHoaDonDAO = new ChiTietHoaDonDAO();
-        sanPhamDAO = new SanPhamDAO();
-        
-        createThongKe();
-    }
+    private HoaDonDAO hoaDonDAO;
+	private Container container;
+	private Connection conn;
+	private String query;
+
+	public ThongKeDoanhThuPanel(Connection conn) {
+	    setLayout(new BorderLayout());
+	    this.conn = conn; // bạn cần set conn nếu muốn dùng lại trong loadAllData
+	    originalData = new ArrayList<>();
+	    hoaDonDAO = new HoaDonDAO(conn);
+	    createThongKe();
+	    
+	    try {
+	        loadAllData(); // <-- thêm dòng này
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+
 
     private void createThongKe() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -81,9 +82,6 @@ public class ThongKeDoanhThuPanel extends JPanel {
 
         lblTotalRevenueValue = new JLabel("Tổng doanh thu: 0 VNĐ");
 
-        // Lấy dữ liệu thống kê từ CSDL
-        loadThongKeData();
-
         JPanel pSort = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btnRevenueAsc = new JButton("Doanh thu tăng");
         JButton btnRevenueDesc = new JButton("Doanh thu giảm");
@@ -105,76 +103,112 @@ public class ThongKeDoanhThuPanel extends JPanel {
 
         panel.add(pSort, BorderLayout.SOUTH);
 
-        btnFilter.addActionListener(e -> filterByDate());
+        btnFilter.addActionListener(e -> {
+            try {
+                filterByDate();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        });
+
         btnRefresh.addActionListener(e -> refreshTable());
 
         add(panel, BorderLayout.CENTER);
     }
-    
-    private void loadThongKeData() {
-        // Xóa dữ liệu cũ
+
+    private void loadAllData() throws SQLException {
         modelThongKe.setRowCount(0);
         originalData.clear();
-        
-        // Lấy danh sách hóa đơn
-        List<HoaDon> danhSachHoaDon = hoaDonDAO.getAllHoaDon();
-        
-        // Nếu không có dữ liệu, thêm dữ liệu mẫu
-        if (danhSachHoaDon.isEmpty()) {
-            addSampleData();
-            return;
+
+        String sql = "SELECT hd.ngayLap, sp.tenSP, lsp.tenLoaiSP, " +
+                "SUM(cthd.soLuong) AS soLuong, " +
+                "SUM(cthd.soLuong * cthd.donGia) AS doanhThu " +
+                "FROM HoaDon hd " +
+                "JOIN ChiTietHoaDon cthd ON hd.maHoaDon = cthd.maHoaDon " +
+                "JOIN SanPham sp ON cthd.maSP = sp.maSP " +
+                "JOIN LoaiSanPham lsp ON sp.maLoaiSP = lsp.maLoaiSP " +
+                "GROUP BY hd.ngayLap, sp.tenSP, lsp.tenLoaiSP " +
+                "ORDER BY hd.ngayLap ASC";
+
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+
+        double totalRevenue = 0;
+        while (rs.next()) {
+            String ngay = rs.getString("ngayLap");
+            String tenSP = rs.getString("tenSP");
+            String loaiSP = rs.getString("tenloaiSP");
+            int soLuong = rs.getInt("soLuong");
+            double doanhThu = rs.getDouble("doanhThu");
+
+            modelThongKe.addRow(new Object[]{ngay, tenSP, loaiSP, soLuong, doanhThu});
+            totalRevenue += doanhThu;
         }
-        
-        // Duyệt qua từng hóa đơn
-        for (HoaDon hoaDon : danhSachHoaDon) {
-            // Lấy chi tiết hóa đơn
-            List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.getChiTietHoaDonTheoMaHD(hoaDon.getMaHoaDon());
-            
-            // Duyệt qua từng chi tiết
-            for (ChiTietHoaDon chiTiet : chiTietList) {
-                // Lấy thông tin sản phẩm
-                SanPham sp = sanPhamDAO.getSanPhamTheoMa(chiTiet.getMaSanPham());
-                if (sp != null) {
-                    // Định dạng ngày
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    String ngay = sdf.format(hoaDon.getNgayLap());
-                    
-                    // Tính doanh thu
-                    double doanhThu = chiTiet.getSoLuong() * chiTiet.getDonGia();
-                    
-                    // Thêm vào bảng
-                    Object[] row = {
-                            ngay,
-                            sp.getTenSP(),
-                            sp.getLoaiSP().getTenLoaiSP(),
-                            chiTiet.getSoLuong(),
-                            String.format("%,.0f VNĐ", doanhThu)
-                    };
-                    
-                    modelThongKe.addRow(row);
-                    originalData.add(row.clone());
-                }
-            }
+
+        lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,.0f VNĐ", totalRevenue));
+    }
+    private void refreshTable() {
+        try {
+            loadAllData(); // gọi hàm mới
+            txtFrom.setText("");
+            txtTo.setText("");
+            JOptionPane.showMessageDialog(this, "Dữ liệu đã được làm mới!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi làm mới dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
-        
-        updateTotalRevenue();
     }
 
-    private void addSampleData() {
-        Object[][] sampleData = {
-            {"2025-04-22", "Đồ hộp cá ngừ", "Đồ hộp", 150, "15,000 VNĐ"},
-            {"2025-04-22", "Đồ hộp thịt heo", "Đồ hộp", 100, "12,000 VNĐ"},
-            {"2025-04-21", "Đồ hộp đậu xanh", "Đồ hộp", 200, "10,000 VNĐ"},
-            {"2025-04-20", "Đồ hộp ngô", "Đồ hộp", 250, "12,500 VNĐ"},
-            {"2025-04-19", "Bánh sữa", "Bánh", 80, "8,000 VNĐ"}
-        };
+   public void filterByDate() throws SQLException {
+    String fromDate = txtFrom.getText().trim();
+    String toDate = txtTo.getText().trim();
 
-        for (Object[] row : sampleData) {
-            modelThongKe.addRow(row);
-            originalData.add(row.clone());
-        }
-        updateTotalRevenue();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    try {
+        sdf.setLenient(false);
+        sdf.parse(fromDate);
+        sdf.parse(toDate);
+    } catch (ParseException e) {
+        JOptionPane.showMessageDialog(this, "Định dạng ngày không hợp lệ! Vui lòng nhập ngày theo định dạng yyyy-MM-dd.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        return;
     }
+
+    modelThongKe.setRowCount(0);
+
+    String sql = "SELECT hd.ngayLap, sp.tenSP, sp.loaiSP, SUM(cthd.soLuong) AS soLuong, SUM(cthd.soLuong * sp.gia) AS doanhThu " +
+                 "FROM HoaDon hd " +
+                 "JOIN ChiTietHoaDon cthd ON hd.idHoaDon = cthd.idHoaDon " +
+                 "JOIN SanPham sp ON cthd.idSanPham = sp.idSanPham " +
+                 "WHERE hd.ngayLap BETWEEN ? AND ? " +
+                 "GROUP BY hd.ngayLap, sp.tenSP, sp.loaiSP " +
+                 "ORDER BY hd.ngayLap ASC";
+
+    PreparedStatement ps = conn.prepareStatement(sql);
+    ps.setDate(1, java.sql.Date.valueOf(fromDate));
+    ps.setDate(2, java.sql.Date.valueOf(toDate));
+
+    ResultSet rs = ps.executeQuery();
+
+    double totalRevenue = 0;
+    boolean hasData = false;
+
+    while (rs.next()) {
+        hasData = true;
+        String ngay = rs.getString("ngayLap");
+        String tenSP = rs.getString("tenSP");
+        String loaiSP = rs.getString("loaiSP");
+        int soLuong = rs.getInt("soLuong");
+        double doanhThu = rs.getDouble("doanhThu");
+
+        modelThongKe.addRow(new Object[] {ngay, tenSP, loaiSP, soLuong, doanhThu});
+        totalRevenue += doanhThu;
+    }
+
+    if (!hasData) {
+        JOptionPane.showMessageDialog(this, "Không có dữ liệu cho khoảng thời gian đã chọn.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,.0f VNĐ", totalRevenue));
+}
 
     private void sortByColumn(String columnName, boolean ascending) {
         int colIndex = columnName.equals("Doanh thu") ? 4 : 3;
@@ -213,80 +247,7 @@ public class ThongKeDoanhThuPanel extends JPanel {
         }
     }
 
-    private void filterByDate() {
-        String fromDate = txtFrom.getText().trim();
-        String toDate = txtTo.getText().trim();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        sdf.setLenient(false);
 
-        try {
-            Date from = fromDate.isEmpty() ? null : sdf.parse(fromDate);
-            Date to = toDate.isEmpty() ? null : sdf.parse(toDate);
-
-            if (from != null && to != null && from.after(to)) {
-                JOptionPane.showMessageDialog(this, "Ngày bắt đầu phải trước ngày kết thúc!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            // Lọc dữ liệu theo ngày
-            List<HoaDon> danhSachHoaDon;
-            if (from != null && to != null) {
-                danhSachHoaDon = hoaDonDAO.getHoaDonTheoNgay(from, to);
-            } else {
-                danhSachHoaDon = hoaDonDAO.getAllHoaDon();
-            }
-            
-            // Xóa dữ liệu cũ
-            modelThongKe.setRowCount(0);
-            originalData.clear();
-            
-            // Duyệt qua từng hóa đơn
-            for (HoaDon hoaDon : danhSachHoaDon) {
-                Date ngayLap = hoaDon.getNgayLap();
-                if ((from == null || !ngayLap.before(from)) && (to == null || !ngayLap.after(to))) {
-                    // Lấy chi tiết hóa đơn
-                    List<ChiTietHoaDon> chiTietList = chiTietHoaDonDAO.getChiTietHoaDonTheoMaHD(hoaDon.getMaHoaDon());
-                    
-                    // Duyệt qua từng chi tiết
-                    for (ChiTietHoaDon chiTiet : chiTietList) {
-                        // Lấy thông tin sản phẩm
-                        SanPham sp = sanPhamDAO.getSanPhamTheoMa(chiTiet.getMaSanPham());
-                        if (sp != null) {
-                            // Định dạng ngày
-                            String ngay = sdf.format(hoaDon.getNgayLap());
-                            
-                            // Tính doanh thu
-                            double doanhThu = chiTiet.getSoLuong() * chiTiet.getDonGia();
-                            
-                            // Thêm vào bảng
-                            Object[] row = {
-                                    ngay,
-                                    sp.getTenSP(),
-                                    sp.getLoaiSP().getTenLoaiSP(),
-                                    chiTiet.getSoLuong(),
-                                    String.format("%,.0f VNĐ", doanhThu)
-                            };
-                            
-                            modelThongKe.addRow(row);
-                            originalData.add(row.clone());
-                        }
-                    }
-                }
-            }
-            
-            updateTotalRevenue();
-            JOptionPane.showMessageDialog(this, "Lọc dữ liệu thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-        } catch (ParseException e) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập ngày theo định dạng yyyy-MM-dd!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void refreshTable() {
-        loadThongKeData();
-        txtFrom.setText("");
-        txtTo.setText("");
-        JOptionPane.showMessageDialog(this, "Dữ liệu đã được làm mới!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-    }
 
     private void updateTotalRevenue() {
         long total = 0;
@@ -294,5 +255,15 @@ public class ThongKeDoanhThuPanel extends JPanel {
             total += parseCurrency(modelThongKe.getValueAt(i, 4).toString());
         }
         lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,d VNĐ", total));
+    }
+    
+
+    private void showPanel(JPanel panel) {
+        // Assuming you have a container like a JFrame or JPanel to add the panel
+        // Example:
+        container.removeAll();
+        container.add(panel);
+        container.revalidate();
+        container.repaint();
     }
 }

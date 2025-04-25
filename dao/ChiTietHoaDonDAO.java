@@ -16,7 +16,10 @@ public class ChiTietHoaDonDAO {
     public ChiTietHoaDonDAO() {
         con = ConnectDB.getConnection();
     }
-
+    //Xuyến
+    public ChiTietHoaDonDAO(Connection conn) {
+        this.con = conn;
+    }
     public boolean themChiTietHoaDon(ChiTietHoaDon chiTiet) {
         String sql = "INSERT INTO ChiTietHoaDon(maHoaDon, maSanPham, soLuong, donGia) VALUES(?, ?, ?, ?)";
         try {

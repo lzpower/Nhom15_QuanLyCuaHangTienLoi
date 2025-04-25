@@ -17,7 +17,9 @@ public class LoaiSanPhamDAO {
     public LoaiSanPhamDAO() {
         con = ConnectDB.getConnection();
     }
-
+    public LoaiSanPhamDAO(Connection conn) {
+        this.con = conn;
+    }
     public boolean themLoaiSanPham(LoaiSanPham loaiSP) {
         String sql = "INSERT INTO LoaiSanPham(maLoaiSP, tenLoaiSP) VALUES(?, ?)";
         try {
