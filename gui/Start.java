@@ -23,8 +23,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
+<<<<<<< HEAD
 import connectDB.ConnectDB;
 import dao.NhanVienDAO;
+=======
+import src.dao.NhanVienDAO;
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 
 
 public class Start extends JFrame implements ActionListener {

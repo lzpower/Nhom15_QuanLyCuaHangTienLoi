@@ -14,7 +14,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+<<<<<<< HEAD
 import java.net.URL;
+=======
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 import java.util.List;
 
 public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListener {
@@ -38,7 +41,10 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
     private JTextField txtSLThem;
     private JTextField txtGiaNhap;
     private JTextField txtGiaBan;
+<<<<<<< HEAD
     private JTextField txtUrlHinhAnh;
+=======
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
     
     private SanPhamDAO sanPhamDAO;
     private LoaiSanPhamDAO loaiSanPhamDAO;
@@ -54,14 +60,48 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         // Lấy danh sách loại sản phẩm
         danhSachLoaiSP = loaiSanPhamDAO.getAllLoaiSanPham();
         if (danhSachLoaiSP.isEmpty()) {
+<<<<<<< HEAD
             JOptionPane.showMessageDialog(this, "Không có loại sản phẩm nào trong CSDL!");
+=======
+            // Thêm dữ liệu mẫu nếu không có
+            danhSachLoaiSP.add(new LoaiSanPham("LSP001", "Thịt, cá, trứng, hải sản"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP002", "Rau, củ, nấm, trái cây"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP003", "Bia, nước giải khát"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP004", "Sữa các loại"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP005", "Gạo, bột, Đồ khô"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP006", "Dầu ăn, nước chấm, gia vị"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP007", "Mì, miến, cháo, phở"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP008", "Kem, sữa chua"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP009", "Thực phẩm đông mát"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP010", "Bánh kẹo các loại"));
+            danhSachLoaiSP.add(new LoaiSanPham("LSP011", "Chăm sóc cá nhân"));
+            
+            // Lưu vào CSDL
+            for (LoaiSanPham loaiSP : danhSachLoaiSP) {
+                loaiSanPhamDAO.themLoaiSanPham(loaiSP);
+            }
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
         }
 
         JPanel pBorder = new JPanel(new BorderLayout());
         pBorder.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(pBorder);
+<<<<<<< HEAD
         
         
+=======
+
+        // Tao 3 nut chinh: Tao HD, Cap Nhat, Thong Ke
+        JPanel pTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        btnTaoHD = new JButton("Tạo hóa đơn");        
+        btnCapNhat = new JButton("Cập nhật");
+        btnThongKe = new JButton("Thống kê");
+        pTop.add(btnTaoHD);    
+        pTop.add(btnCapNhat);
+        pTop.add(btnThongKe);
+        
+        pBorder.add(pTop, BorderLayout.NORTH);
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 
         // Trung tam: Tim SP va Bang SP
         JPanel pCenter = new JPanel();
@@ -89,6 +129,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pCenter.add(pTim, BorderLayout.NORTH);
 
         // Bang SP
+<<<<<<< HEAD
         String[] columnNames = {"Hình ảnh", "Mã sản phẩm", "Tên sản phẩm", "Loại", "Số lượng", "Giá nhập", "Giá bán"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -114,6 +155,16 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         productTable.getColumnModel().getColumn(4).setPreferredWidth(150);  // Cột "Số lượng"
         productTable.getColumnModel().getColumn(5).setPreferredWidth(150);  // Cột "Giá nhập"
         productTable.getColumnModel().getColumn(6).setPreferredWidth(150);  // Cột "Giá bán"
+=======
+        String[] columnNames = {"Mã sản phẩm", "Tên sản phẩm", "Loại", "Số lượng", "Giá nhập", "Giá bán"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make table cells non-editable
+            }
+        };
+        productTable = new JTable(tableModel);
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
         JScrollPane scrollPane = new JScrollPane(productTable);
         pCenter.add(scrollPane, BorderLayout.CENTER);
         
@@ -211,6 +262,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         
         pNhap.add(pGia);
         pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
+<<<<<<< HEAD
         
         // Hinh anh
         JPanel pHinhAnh = new JPanel(new BorderLayout());
@@ -221,6 +273,8 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pHinhAnh.add(txtUrlHinhAnh, BorderLayout.CENTER);
         pNhap.add(pHinhAnh);
         pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
+=======
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 
         // Cac button
         JPanel pNut = new JPanel(new GridLayout(4, 0, 10, 10));
@@ -238,7 +292,11 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pBottom.add(pNhap, BorderLayout.CENTER);
         pBottom.add(pNut, BorderLayout.EAST);
 
+<<<<<<< HEAD
         pBorder.add(pBottom, BorderLayout.NORTH);
+=======
+        pBorder.add(pBottom, BorderLayout.SOUTH);
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
         
         // Su kien
         btnTim.addActionListener(this);
@@ -256,6 +314,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
     private void loadSanPhamData() {
         tableModel.setRowCount(0);
         List<SanPham> danhSachSP = sanPhamDAO.getAllSanPham();
+<<<<<<< HEAD
         if (danhSachSP == null || danhSachSP.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Không có sản phẩm nào trong cơ sở dữ liệu!");
             return;
@@ -308,6 +367,19 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         }
         return icon;
     }
+=======
+        for (SanPham sp : danhSachSP) {
+            tableModel.addRow(new Object[]{
+                    sp.getMaSP(),
+                    sp.getTenSP(),
+                    sp.getLoaiSP().getTenLoaiSP(),
+                    sp.getSlHienCo(),
+                    sp.getGiaNhap(),
+                    sp.getGiaBan()
+            });
+        }
+    }
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 
     public void xoaTextField() {
         txtMa.setText("");
@@ -318,7 +390,10 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         txtGiaNhap.setText("");
         txtGiaBan.setText("");
         txtMa.setEditable(true);
+<<<<<<< HEAD
         txtUrlHinhAnh.setText("");
+=======
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
     }
 
     private boolean validData() {
@@ -326,7 +401,10 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         String ten = txtTen.getText().trim();
         String slThem = txtSLThem.getText().trim();
         String giaNhap = txtGiaNhap.getText().trim();
+<<<<<<< HEAD
         String urlHinhAnh = txtUrlHinhAnh.getText().trim();
+=======
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 
         // Check for empty fields
         if (ma.isEmpty()) {
@@ -345,11 +423,15 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             JOptionPane.showMessageDialog(this, "Giá nhập không được để trống.");
             return false;
         }
+<<<<<<< HEAD
         if (urlHinhAnh.isEmpty()) {
             JOptionPane.showMessageDialog(this, "URL hình ảnh không được để trống.");
             return false;
         }
 
+=======
+        
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
         // Kiểm tra số lượng và giá nhập là số hợp lệ
         try {
             int sl = Integer.parseInt(slThem);
@@ -361,7 +443,11 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             JOptionPane.showMessageDialog(this, "Số lượng thêm phải là số nguyên.");
             return false;
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
         try {
             double gia = Double.parseDouble(giaNhap);
             if (gia <= 0) {
@@ -372,6 +458,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             JOptionPane.showMessageDialog(this, "Giá nhập phải là số thực.");
             return false;
         }
+<<<<<<< HEAD
 
         // Kiểm tra URL hình ảnh hợp lệ
         if (!urlHinhAnh.matches(".*\\.(png|jpg|jpeg|gif)$")) {
@@ -389,20 +476,35 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         return true;
     }
     
+=======
+        
+        return true;
+    }
+
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
     @Override
     public void mouseClicked(MouseEvent e) {
         int row = productTable.getSelectedRow();
         if (row >= 0) {
+<<<<<<< HEAD
             txtMa.setText(productTable.getValueAt(row, 1).toString());
             txtTen.setText(productTable.getValueAt(row, 2).toString());
 
             String tenLoai = productTable.getValueAt(row, 3).toString();
+=======
+            txtMa.setText(productTable.getValueAt(row, 0).toString());
+            txtTen.setText(productTable.getValueAt(row, 1).toString());
+            
+            // Tìm và chọn loại sản phẩm trong combobox
+            String tenLoai = productTable.getValueAt(row, 2).toString();
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             for (int i = 0; i < cbxLoai.getItemCount(); i++) {
                 if (cbxLoai.getItemAt(i).equals(tenLoai)) {
                     cbxLoai.setSelectedIndex(i);
                     break;
                 }
             }
+<<<<<<< HEAD
 
             txtSLHienCo.setText(productTable.getValueAt(row, 4).toString());
             txtSLThem.setText("0");
@@ -414,6 +516,14 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             if (sp != null) {
                 txtUrlHinhAnh.setText(sp.getUrlHinhAnh());
             }
+=======
+            
+            txtSLHienCo.setText(productTable.getValueAt(row, 3).toString());
+            txtSLThem.setText("0");
+            txtGiaNhap.setText(productTable.getValueAt(row, 4).toString());
+            txtGiaBan.setText(productTable.getValueAt(row, 5).toString());
+            txtMa.setEditable(false); // Không cho phép sửa mã sản phẩm
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
         }
     }
 
@@ -438,14 +548,23 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         Object o = e.getSource();
         if (o.equals(btnThem)) {
             if (!validData()) return;
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             String maSP = txtMa.getText().trim();
             String tenSP = txtTen.getText().trim();
             String tenLoaiSP = cbxLoai.getSelectedItem().toString();
             int soLuong = Integer.parseInt(txtSLThem.getText().trim());
             double giaNhap = Double.parseDouble(txtGiaNhap.getText().trim());
+<<<<<<< HEAD
             String urlHinhAnh = txtUrlHinhAnh.getText().trim();
 
+=======
+            
+            // Tìm mã loại sản phẩm từ tên
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             String maLoaiSP = null;
             for (LoaiSanPham loaiSP : danhSachLoaiSP) {
                 if (loaiSP.getTenLoaiSP().equals(tenLoaiSP)) {
@@ -453,16 +572,26 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                     break;
                 }
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             if (maLoaiSP == null) {
                 JOptionPane.showMessageDialog(this, "Không tìm thấy loại sản phẩm!");
                 return;
             }
+<<<<<<< HEAD
 
+=======
+            
+            // Kiểm tra sản phẩm đã tồn tại chưa
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             if (sanPhamDAO.getSanPhamTheoMa(maSP) != null) {
                 JOptionPane.showMessageDialog(this, "Mã sản phẩm đã tồn tại!");
                 return;
             }
+<<<<<<< HEAD
 
             LoaiSanPham loaiSP = new LoaiSanPham(maLoaiSP, tenLoaiSP);
             SanPham sp = new SanPham(maSP, tenSP, loaiSP, soLuong, giaNhap, urlHinhAnh);
@@ -480,6 +609,27 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                     sp.getGiaBan()
                 });
 
+=======
+            
+            // Tạo đối tượng loại sản phẩm
+            LoaiSanPham loaiSP = new LoaiSanPham(maLoaiSP, tenLoaiSP);
+            
+            // Tạo đối tượng sản phẩm
+            SanPham sp = new SanPham(maSP, tenSP, loaiSP, soLuong, giaNhap);
+            
+            // Thêm vào CSDL
+            if (sanPhamDAO.themSanPham(sp)) {
+                // Cập nhật bảng
+                tableModel.addRow(new Object[]{
+                        sp.getMaSP(),
+                        sp.getTenSP(),
+                        sp.getLoaiSP().getTenLoaiSP(),
+                        sp.getSlHienCo(),
+                        sp.getGiaNhap(),
+                        sp.getGiaBan()
+                });
+                
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                 xoaTextField();
                 JOptionPane.showMessageDialog(this, "Thêm sản phẩm thành công!");
             } else {
@@ -488,7 +638,11 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         } else if (o.equals(btnXoa)) {
             int row = productTable.getSelectedRow();
             if (row >= 0) {
+<<<<<<< HEAD
                 String maSP = tableModel.getValueAt(row, 1).toString();
+=======
+                String maSP = tableModel.getValueAt(row, 0).toString();
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                 int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa sản phẩm này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     if (sanPhamDAO.xoaSanPham(maSP)) {
@@ -512,7 +666,11 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             }
         } else if (o.equals(btnLuu)) {
             if (!validData()) return;
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             int row = productTable.getSelectedRow();
             if (row >= 0) {
                 String maSP = txtMa.getText().trim();
@@ -522,8 +680,13 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 int slThem = Integer.parseInt(txtSLThem.getText().trim());
                 int slMoi = slHienCo + slThem;
                 double giaNhap = Double.parseDouble(txtGiaNhap.getText().trim());
+<<<<<<< HEAD
                 String urlHinhAnh = txtUrlHinhAnh.getText().trim();
 
+=======
+                
+                // Tìm mã loại sản phẩm từ tên
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                 String maLoaiSP = null;
                 for (LoaiSanPham loaiSP : danhSachLoaiSP) {
                     if (loaiSP.getTenLoaiSP().equals(tenLoaiSP)) {
@@ -531,11 +694,16 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                         break;
                     }
                 }
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                 if (maLoaiSP == null) {
                     JOptionPane.showMessageDialog(this, "Không tìm thấy loại sản phẩm!");
                     return;
                 }
+<<<<<<< HEAD
 
                 LoaiSanPham loaiSP = new LoaiSanPham(maLoaiSP, tenLoaiSP);
                 SanPham sp = new SanPham(maSP, tenSP, loaiSP, slMoi, giaNhap, urlHinhAnh);
@@ -550,6 +718,24 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                     tableModel.setValueAt(giaNhap, row, 5);
                     tableModel.setValueAt(sp.getGiaBan(), row, 6);
 
+=======
+                
+                // Tạo đối tượng loại sản phẩm
+                LoaiSanPham loaiSP = new LoaiSanPham(maLoaiSP, tenLoaiSP);
+                
+                // Tạo đối tượng sản phẩm
+                SanPham sp = new SanPham(maSP, tenSP, loaiSP, slMoi, giaNhap);
+                
+                // Cập nhật vào CSDL
+                if (sanPhamDAO.capNhatSanPham(sp)) {
+                    // Cập nhật bảng
+                    tableModel.setValueAt(tenSP, row, 1);
+                    tableModel.setValueAt(tenLoaiSP, row, 2);
+                    tableModel.setValueAt(slMoi, row, 3);
+                    tableModel.setValueAt(giaNhap, row, 4);
+                    tableModel.setValueAt(sp.getGiaBan(), row, 5);
+                    
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                     xoaTextField();
                     JOptionPane.showMessageDialog(this, "Cập nhật sản phẩm thành công!");
                 } else {
@@ -564,14 +750,23 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 loadSanPhamData();
                 return;
             }
+<<<<<<< HEAD
 
             List<SanPham> ketQuaTimKiem = sanPhamDAO.timKiemSanPham(tuKhoa);
 
+=======
+            
+            // Tìm kiếm sản phẩm
+            List<SanPham> ketQuaTimKiem = sanPhamDAO.timKiemSanPham(tuKhoa);
+            
+            // Hiển thị kết quả
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             tableModel.setRowCount(0);
             if (ketQuaTimKiem.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Không tìm thấy sản phẩm với từ khóa: " + tuKhoa);
             } else {
                 for (SanPham sp : ketQuaTimKiem) {
+<<<<<<< HEAD
                 	ImageIcon icon = loadImageIcon(sp.getUrlHinhAnh());
                     
                     tableModel.addRow(new Object[]{
@@ -582,6 +777,15 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                         sp.getSlHienCo(),
                         sp.getGiaNhap(),
                         sp.getGiaBan()
+=======
+                    tableModel.addRow(new Object[]{
+                            sp.getMaSP(),
+                            sp.getTenSP(),
+                            sp.getLoaiSP().getTenLoaiSP(),
+                            sp.getSlHienCo(),
+                            sp.getGiaNhap(),
+                            sp.getGiaBan()
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                     });
                 }
             }
@@ -591,7 +795,12 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 loadSanPhamData();
                 return;
             }
+<<<<<<< HEAD
 
+=======
+            
+            // Tìm mã loại sản phẩm từ tên
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             String maLoaiSP = null;
             for (LoaiSanPham loaiSP : danhSachLoaiSP) {
                 if (loaiSP.getTenLoaiSP().equals(tenLoaiSP)) {
@@ -599,19 +808,32 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                     break;
                 }
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             if (maLoaiSP == null) {
                 JOptionPane.showMessageDialog(this, "Không tìm thấy loại sản phẩm!");
                 return;
             }
+<<<<<<< HEAD
 
             List<SanPham> ketQuaLoc = sanPhamDAO.getSanPhamTheoLoai(maLoaiSP);
 
+=======
+            
+            // Lọc sản phẩm theo loại
+            List<SanPham> ketQuaLoc = sanPhamDAO.getSanPhamTheoLoai(maLoaiSP);
+            
+            // Hiển thị kết quả
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             tableModel.setRowCount(0);
             if (ketQuaLoc.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Không có sản phẩm thuộc loại: " + tenLoaiSP);
             } else {
                 for (SanPham sp : ketQuaLoc) {
+<<<<<<< HEAD
                 	ImageIcon icon = loadImageIcon(sp.getUrlHinhAnh());
 
                     tableModel.addRow(new Object[]{
@@ -622,6 +844,15 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                         sp.getSlHienCo(),
                         sp.getGiaNhap(),
                         sp.getGiaBan()
+=======
+                    tableModel.addRow(new Object[]{
+                            sp.getMaSP(),
+                            sp.getTenSP(),
+                            sp.getLoaiSP().getTenLoaiSP(),
+                            sp.getSlHienCo(),
+                            sp.getGiaNhap(),
+                            sp.getGiaBan()
+>>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                     });
                 }
             }
