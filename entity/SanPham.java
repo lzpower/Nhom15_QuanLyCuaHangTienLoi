@@ -7,10 +7,6 @@ public class SanPham {
 	private int slHienCo;
 	private double giaNhap;
 	private double giaBan; 
-<<<<<<< HEAD
-	private String urlHinhAnh;
-=======
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 	
 	public String getMaSP() {
 		return maSP;
@@ -78,43 +74,12 @@ public class SanPham {
 		return giaBan;
 	}
 	
-<<<<<<< HEAD
-	public String getUrlHinhAnh() {
-	    return urlHinhAnh;
-	}
-
-	public void setUrlHinhAnh(String urlHinhAnh) {
-	    this.urlHinhAnh = urlHinhAnh;
-	}
-
-	public SanPham(String maSP, String tenSP, LoaiSanPham loaiSP, int slHienCo, double giaNhap, double giaBan,
-			String urlHinhAnh) {
-=======
 
 	public SanPham(String maSP, String tenSP, LoaiSanPham loaiSP, int slHienCo, double giaNhap) {
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 		setMaSP(maSP);
 		setTenSP(tenSP);
 		setLoaiSP(loaiSP);
 		setSlHienCo(slHienCo);
-<<<<<<< HEAD
-		setGiaNhap(giaNhap);
-		this.giaBan = giaBan;
-		setUrlHinhAnh(urlHinhAnh);
-	}
-
-	public SanPham(String maSP, String tenSP, LoaiSanPham loaiSP, int slHienCo, double giaNhap, String urlHinhAnh) {
-		setMaSP(maSP);
-		setTenSP(tenSP);
-		setLoaiSP(loaiSP);
-		setSlHienCo(slHienCo);
-		setGiaNhap(giaNhap);
-		setUrlHinhAnh(urlHinhAnh);
-	}
-	
-
-	
-=======
 		setGiaNhap(giaNhap); 
 	}
 	public SanPham(String maSP, String tenSP,double giaNhap) {
@@ -122,7 +87,6 @@ public class SanPham {
 		setTenSP(tenSP);
 		setGiaNhap(giaNhap); 
 	}
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 
 
 	

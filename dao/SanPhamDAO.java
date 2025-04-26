@@ -17,31 +17,20 @@ public class SanPhamDAO {
         loaiSanPhamDAO = new LoaiSanPhamDAO();
     }
 
-<<<<<<< HEAD
-=======
     // Constructor overload for testing
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
     public SanPhamDAO(Connection conn) {
         this.con = conn;
         this.loaiSanPhamDAO = new LoaiSanPhamDAO();
     }
 
     public boolean themSanPham(SanPham sanPham) {
-<<<<<<< HEAD
-        String sql = "INSERT INTO SanPham(maSP, tenSP, maLoaiSP, slHienCo, giaNhap, img) VALUES(?, ?, ?, ?, ?, ?)";
-=======
         String sql = "INSERT INTO SanPham(maSP, tenSP, maLoaiSP, slHienCo, giaNhap) VALUES(?, ?, ?, ?, ?)";
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
             stmt.setString(1, sanPham.getMaSP());
             stmt.setString(2, sanPham.getTenSP());
             stmt.setString(3, sanPham.getLoaiSP().getMaLoaiSP());
             stmt.setInt(4, sanPham.getSlHienCo());
             stmt.setDouble(5, sanPham.getGiaNhap());
-<<<<<<< HEAD
-            stmt.setString(6, sanPham.getUrlHinhAnh());
-=======
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -61,22 +50,13 @@ public class SanPhamDAO {
     }
 
     public boolean capNhatSanPham(SanPham sanPham) {
-<<<<<<< HEAD
-        String sql = "UPDATE SanPham SET tenSP = ?, maLoaiSP = ?, slHienCo = ?, giaNhap = ?, img = ? WHERE maSP = ?";
-=======
         String sql = "UPDATE SanPham SET tenSP = ?, maLoaiSP = ?, slHienCo = ?, giaNhap = ? WHERE maSP = ?";
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
             stmt.setString(1, sanPham.getTenSP());
             stmt.setString(2, sanPham.getLoaiSP().getMaLoaiSP());
             stmt.setInt(3, sanPham.getSlHienCo());
             stmt.setDouble(4, sanPham.getGiaNhap());
-<<<<<<< HEAD
-            stmt.setString(5, sanPham.getUrlHinhAnh());
-            stmt.setString(6, sanPham.getMaSP());
-=======
             stmt.setString(5, sanPham.getMaSP());
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -108,13 +88,7 @@ public class SanPhamDAO {
                         rs.getString("tenSP"),
                         loaiSP,
                         rs.getInt("slHienCo"),
-<<<<<<< HEAD
-                        rs.getDouble("giaNhap"),
-                        rs.getString("img") // dùng đúng tên cột ảnh
-                );
-=======
                         rs.getDouble("giaNhap"));
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -134,13 +108,7 @@ public class SanPhamDAO {
                         rs.getString("tenSP"),
                         loaiSP,
                         rs.getInt("slHienCo"),
-<<<<<<< HEAD
-                        rs.getDouble("giaNhap"),
-                        rs.getString("img")
-                );
-=======
                         rs.getDouble("giaNhap"));
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                 danhSachSanPham.add(sanPham);
             }
         } catch (SQLException e) {
@@ -162,13 +130,7 @@ public class SanPhamDAO {
                         rs.getString("tenSP"),
                         loaiSP,
                         rs.getInt("slHienCo"),
-<<<<<<< HEAD
-                        rs.getDouble("giaNhap"),
-                        rs.getString("img")
-                );
-=======
                         rs.getDouble("giaNhap"));
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                 danhSachSanPham.add(sanPham);
             }
         } catch (SQLException e) {
@@ -191,13 +153,7 @@ public class SanPhamDAO {
                         rs.getString("tenSP"),
                         loaiSP,
                         rs.getInt("slHienCo"),
-<<<<<<< HEAD
-                        rs.getDouble("giaNhap"),
-                        rs.getString("img")
-                );
-=======
                         rs.getDouble("giaNhap"));
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
                 danhSachSanPham.add(sanPham);
             }
         } catch (SQLException e) {
@@ -208,11 +164,7 @@ public class SanPhamDAO {
 
     public String taoMaSanPhamMoi() {
         String maSP = "SP";
-<<<<<<< HEAD
-        String sql = "SELECT maSP FROM SanPham ORDER BY maSP DESC LIMIT 1";
-=======
         String sql = "SELECT maSP FROM SanPham ORDER BY maSP DESC LIMIT 1"; // ✅ Sửa TOP 1 → LIMIT 1
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
         try (Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {

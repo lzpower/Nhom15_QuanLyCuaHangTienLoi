@@ -6,13 +6,15 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import dao.NhanVienDAO;
 import entity.NhanVien;
 
-public class QuanLiNVPanel extends JPanel {
+public class QuanLiNVPanel extends JPanel implements MouseListener {
     private DefaultTableModel nvTableModel;
     private JTable nvTable;
     private JTextField txtTimNV, txtMaNV, txtTenNV, txtChucVu, txtSoDienThoai, txtTenDangNhap;
@@ -145,12 +147,10 @@ public class QuanLiNVPanel extends JPanel {
         JButton btnXoaNV = new JButton("Xóa");
         JButton btnXoaTrang = new JButton("Xoá trắng");
         JButton btnSuaNV = new JButton("Sửa");
-        JButton btnLuuNV = new JButton("Lưu");
         pBtn.add(btnThemNV);
         pBtn.add(btnXoaNV);
         pBtn.add(btnXoaTrang);
         pBtn.add(btnSuaNV);
-        pBtn.add(btnLuuNV);
 
         pBottom.add(pNhap, BorderLayout.CENTER);
         pBottom.add(pBtn, BorderLayout.SOUTH);
@@ -167,7 +167,16 @@ public class QuanLiNVPanel extends JPanel {
                     nv.getMatKhau()
             });
         }
-        
+        //mouselistener
+        nvTable.addMouseListener(this);
+        txtTimNV.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				btnTimNV.doClick();
+			}
+		}	);
         // Xóa trắng
         btnXoaTrang.addActionListener(new ActionListener() {
             @Override
@@ -194,6 +203,8 @@ public class QuanLiNVPanel extends JPanel {
                                 nv.getMatKhau()
                         });
                     }
+                    JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Vui lòng nhập mã nhân viên!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    txtTimNV.requestFocus();
                     return;
                 }
 
@@ -204,7 +215,10 @@ public class QuanLiNVPanel extends JPanel {
                 nvTableModel.setRowCount(0);
                 if (ketQuaTimKiem.isEmpty()) {
                     JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Không tìm thấy nhân viên với từ khóa: " + keyword, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                    txtTimNV.setText("");
+                    dienvaotable();
                 } else {
+                	txtTimNV.setText("");
                     for (NhanVien nv : ketQuaTimKiem) {
                         nvTableModel.addRow(new Object[]{
                                 nv.getMaNV(),
@@ -287,42 +301,42 @@ public class QuanLiNVPanel extends JPanel {
                     int confirm = JOptionPane.showConfirmDialog(QuanLiNVPanel.this, "Bạn có chắc muốn xóa nhân viên " + maNV + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         if (nhanVienDAO.xoaNhanVien(maNV)) {
-                            danhSachNhanVien.removeIf(nv -> nv.getMaNV().equals(maNV));
+                            danhSachNhanVien.removeIf(nv -> nv.getMaNV().equalsIgnoreCase(maNV));
                             nvTableModel.removeRow(selectedRow);
                             JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Xóa nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Lỗi khi xóa nhân viên từ CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Nhân viên đã có hoá đơn, không thể xoá!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } else {
-                    JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Vui lòng chọn một nhân viên để xóa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Vui lòng chọn nhân viên để xoá!", "Thông báo", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
 
         // Sự kiện sửa nhân viên
-        btnSuaNV.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = nvTable.getSelectedRow();
-                if (selectedRow >= 0) {
-                    String maNV = (String) nvTableModel.getValueAt(selectedRow, 0);
-                    txtMaNV.setText(maNV);
-                    txtTenNV.setText((String) nvTableModel.getValueAt(selectedRow, 1));
-                    txtChucVu.setText((String) nvTableModel.getValueAt(selectedRow, 2));
-                    txtSoDienThoai.setText((String) nvTableModel.getValueAt(selectedRow, 3));
-                    txtTenDangNhap.setText((String) nvTableModel.getValueAt(selectedRow, 4));
-                    txtMatKhau.setText((String) nvTableModel.getValueAt(selectedRow, 5));
-                    txtMaNV.setEditable(false); // Không cho sửa mã NV
-                    txtTenDangNhap.setEditable(false); // Không cho sửa tên đăng nhập
-                } else {
-                    JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Vui lòng chọn một nhân viên để sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
-                }
-            }
-        });
+//        btnSuaNV.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                int selectedRow = nvTable.getSelectedRow();
+//                if (selectedRow >= 0) {
+//                    String maNV = (String) nvTableModel.getValueAt(selectedRow, 0);
+//                    txtMaNV.setText(maNV);
+//                    txtTenNV.setText((String) nvTableModel.getValueAt(selectedRow, 1));
+//                    txtChucVu.setText((String) nvTableModel.getValueAt(selectedRow, 2));
+//                    txtSoDienThoai.setText((String) nvTableModel.getValueAt(selectedRow, 3));
+//                    txtTenDangNhap.setText((String) nvTableModel.getValueAt(selectedRow, 4));
+//                    txtMatKhau.setText((String) nvTableModel.getValueAt(selectedRow, 5));
+//                    txtMaNV.setEditable(false); // Không cho sửa mã NV
+//                    txtTenDangNhap.setEditable(false); // Không cho sửa tên đăng nhập
+//                } else {
+//                    JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Vui lòng chọn một nhân viên để sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+//                }
+//            }
+//        });
 
         // Sự kiện lưu nhân viên
-        btnLuuNV.addActionListener(new ActionListener() {
+        btnSuaNV.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = nvTable.getSelectedRow();
@@ -369,7 +383,7 @@ public class QuanLiNVPanel extends JPanel {
                             txtTenDangNhap.setEditable(true);
                             JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Cập nhật nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            throw new IllegalArgumentException("Lỗi khi cập nhật nhân viên trong CSDL!");
+                            throw new IllegalArgumentException("Nhân viên đã có hoá đơn, không thể xoá!");
                         }
                     } catch (IllegalArgumentException ex) {
                         JOptionPane.showMessageDialog(QuanLiNVPanel.this, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -391,7 +405,56 @@ public class QuanLiNVPanel extends JPanel {
         txtSoDienThoai.setText("");
         txtTenDangNhap.setText("");
         txtMatKhau.setText("");
+        nvTable.clearSelection();
         txtMaNV.setEditable(true);
         txtTenDangNhap.setEditable(true);
     }
+    public void dienvaotable() {
+    	nvTableModel.setRowCount(0);
+    	for (NhanVien nv : danhSachNhanVien) {
+            nvTableModel.addRow(new Object[]{
+                    nv.getMaNV(),
+                    nv.getTenNV(),
+                    nv.getChucVu(),
+                    nv.getSoDT(),
+                    nv.getTenDangNhap(),
+                    nv.getMatKhau()
+            });
+        }
+    }
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		int row=nvTable.getSelectedRow();
+		txtMaNV.setText(nvTable.getValueAt(row, 0).toString());
+		txtTenNV.setText(nvTable.getValueAt(row, 1).toString());
+		txtChucVu.setText(nvTable.getValueAt(row, 2).toString());
+		txtSoDienThoai.setText(nvTable.getValueAt(row, 3).toString());
+		txtTenDangNhap.setText(nvTable.getValueAt(row, 4).toString());
+		txtMatKhau.setText(nvTable.getValueAt(row, 5).toString());
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 }

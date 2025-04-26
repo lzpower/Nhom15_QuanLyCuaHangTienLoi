@@ -6,13 +6,15 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import dao.KhachHangDAO;
 import entity.KhachHang;
 
-public class QuanLiKHPanel extends JPanel {
+public class QuanLiKHPanel extends JPanel implements MouseListener {
     private DefaultTableModel khTableModel;
     private JTable khTable;
     private JTextField txtTimKH, txtMaKH, txtTenKH, txtSoDienThoai, txtSoDiem;
@@ -123,13 +125,13 @@ public class QuanLiKHPanel extends JPanel {
         JButton btnThemKH = new JButton("Thêm");
         JButton btnXoaKH = new JButton("Xóa");
         JButton btnXoaTrang = new JButton("Xoá trắng");
+        //JButton btnSuaKH = new JButton("Sửa");
         JButton btnSuaKH = new JButton("Sửa");
-        JButton btnLuuKH = new JButton("Lưu");
         pBtn.add(btnThemKH);
         pBtn.add(btnXoaKH);
         pBtn.add(btnXoaTrang);
+        //pBtn.add(btnSuaKH);
         pBtn.add(btnSuaKH);
-        pBtn.add(btnLuuKH);
 
         pBottom.add(pNhap, BorderLayout.CENTER);
         pBottom.add(pBtn, BorderLayout.SOUTH);
@@ -144,7 +146,14 @@ public class QuanLiKHPanel extends JPanel {
                     kh.getSoDiem()
             });
         }
-
+        txtTimKH.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				btnTimKH.doClick();
+			}
+		});
         // Sự kiện tìm kiếm
         btnTimKH.addActionListener(new ActionListener() {
             @Override
@@ -161,6 +170,8 @@ public class QuanLiKHPanel extends JPanel {
                                 kh.getSoDiem()
                         });
                     }
+                    JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Vui lòng nhập mã khách hàng!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    txtTimKH.requestFocus();
                     return;
                 }
 
@@ -171,7 +182,10 @@ public class QuanLiKHPanel extends JPanel {
                 khTableModel.setRowCount(0);
                 if (ketQuaTimKiem.isEmpty()) {
                     JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Không tìm thấy khách hàng với từ khóa: " + keyword, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                    txtTimKH.setText("");
+                    dienvaoTable();
                 } else {
+                	txtTimKH.setText("");
                     for (KhachHang kh : ketQuaTimKiem) {
                         khTableModel.addRow(new Object[]{
                                 kh.getMaKH(),
@@ -183,7 +197,8 @@ public class QuanLiKHPanel extends JPanel {
                 }
             }
         });
-        
+      //mouselistener
+        khTable.addMouseListener(this);
         // Sự kiện xóa trắng
         btnXoaTrang.addActionListener(new ActionListener() {
             @Override
@@ -257,7 +272,7 @@ public class QuanLiKHPanel extends JPanel {
                             khTableModel.removeRow(selectedRow);
                             JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Xóa khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         } else {
-                            JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Lỗi khi xóa khách hàng từ CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Khách hàng đã có hoá đơn không thể xoá!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } else {
@@ -267,25 +282,25 @@ public class QuanLiKHPanel extends JPanel {
         });
 
         // Sự kiện sửa khách hàng
-        btnSuaKH.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = khTable.getSelectedRow();
-                if (selectedRow >= 0) {
-                    String maKH = (String) khTableModel.getValueAt(selectedRow, 0);
-                    txtMaKH.setText(maKH);
-                    txtTenKH.setText((String) khTableModel.getValueAt(selectedRow, 1));
-                    txtSoDienThoai.setText((String) khTableModel.getValueAt(selectedRow, 2));
-                    txtSoDiem.setText(String.valueOf(khTableModel.getValueAt(selectedRow, 3)));
-                    txtMaKH.setEditable(false); // Không cho sửa mã KH
-                } else {
-                    JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Vui lòng chọn một khách hàng để sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
-                }
-            }
-        });
+//        btnSuaKH.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                int selectedRow = khTable.getSelectedRow();
+//                if (selectedRow >= 0) {
+////                    String maKH = (String) khTableModel.getValueAt(selectedRow, 0);
+////                    txtMaKH.setText(maKH);
+////                    txtTenKH.setText((String) khTableModel.getValueAt(selectedRow, 1));
+////                    txtSoDienThoai.setText((String) khTableModel.getValueAt(selectedRow, 2));
+////                    txtSoDiem.setText(String.valueOf(khTableModel.getValueAt(selectedRow, 3)));
+//                    txtMaKH.setEditable(false); // Không cho sửa mã KH
+//                } else {
+//                    JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Vui lòng chọn một khách hàng để sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+//                }
+//            }
+//        });
 
         // Sự kiện lưu khách hàng
-        btnLuuKH.addActionListener(new ActionListener() {
+        btnSuaKH.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = khTable.getSelectedRow();
@@ -336,7 +351,7 @@ public class QuanLiKHPanel extends JPanel {
                         JOptionPane.showMessageDialog(QuanLiKHPanel.this, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Vui lòng chọn một khách hàng để lưu!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Vui lòng chọn một khách hàng để sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
@@ -350,6 +365,51 @@ public class QuanLiKHPanel extends JPanel {
         txtTenKH.setText("");
         txtSoDienThoai.setText("");
         txtSoDiem.setText("");
+        khTable.clearSelection();
         txtMaKH.setEditable(true);
     }
+    public void dienvaoTable() {
+    	khTableModel.setRowCount(0);
+        for (KhachHang kh : danhSachKhachHang) {
+            khTableModel.addRow(new Object[]{
+                    kh.getMaKH(),
+                    kh.getTenKH(),
+                    kh.getSoDT(),
+                    kh.getSoDiem()
+            });
+        }
+    }
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		int row=khTable.getSelectedRow();
+		txtMaKH.setText(khTable.getValueAt(row, 0).toString());
+		txtTenKH.setText(khTable.getValueAt(row, 1).toString());
+		txtSoDienThoai.setText(khTable.getValueAt(row, 2).toString());
+		txtSoDiem.setText(khTable.getValueAt(row, 3).toString());
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 }

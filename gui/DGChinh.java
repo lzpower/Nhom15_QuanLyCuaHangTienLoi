@@ -2,9 +2,16 @@ package gui;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import connectDB.ConnectDB;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DGChinh extends JFrame {
     private JPanel contentPanel;
@@ -15,8 +22,10 @@ public class DGChinh extends JFrame {
     private JButton btnQuanLiNV;
     private JButton btnQuanLiKH;
     private JButton btnDangXuat;
+    private String vaitro;
 
-    public DGChinh() {
+    public DGChinh(String vaitro) {
+        this.vaitro = vaitro;
         setTitle("Cửa Hàng Tiện Lợi - Hệ Thống Quản Lý");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -41,19 +50,36 @@ public class DGChinh extends JFrame {
 
         // Add buttons to left panel
         leftPanel.add(btnBanHang);
-        leftPanel.add(Box.createVerticalStrut(10));
+        leftPanel.add(Box.createVerticalStrut(15));
         leftPanel.add(btnQuanLiSP);
-        leftPanel.add(Box.createVerticalStrut(10));
+        leftPanel.add(Box.createVerticalStrut(15));
         leftPanel.add(btnThongKeDoanhThu);
-        leftPanel.add(Box.createVerticalStrut(10));
+        leftPanel.add(Box.createVerticalStrut(15));
         leftPanel.add(btnKhuyenMai);
-        leftPanel.add(Box.createVerticalStrut(10));
+        leftPanel.add(Box.createVerticalStrut(15));
         leftPanel.add(btnQuanLiNV);
-        leftPanel.add(Box.createVerticalStrut(10));
+        leftPanel.add(Box.createVerticalStrut(15));
         leftPanel.add(btnQuanLiKH);
-        leftPanel.add(Box.createVerticalStrut(10));
+        leftPanel.add(Box.createVerticalStrut(15));
         leftPanel.add(btnDangXuat);
+        leftPanel.add(Box.createVerticalStrut(15));
 
+        leftPanel.add(Box.createVerticalGlue());
+
+        // Add in4 panel at the bottom
+        JPanel in4 = new JPanel();
+        JLabel timeLabel = new JLabel();
+        timeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        in4.add(timeLabel);
+
+        // Update time every second
+        JLabel lbTenNV=new JLabel("Tên nhân viên:");
+        in4.add(lbTenNV);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Timer timer = new Timer(1000, e -> timeLabel.setText(sdf.format(new Date())));
+        timer.start();
+
+        leftPanel.add(in4);
         // Content panel for right side
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
@@ -62,25 +88,41 @@ public class DGChinh extends JFrame {
         // Add panels to frame
         add(leftPanel, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
-
+        
+        //Xuyến 
+        
         // Add action listeners
-        addButtonListeners();
+        try {
+			addButtonListeners();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     private JButton createButton(String text) {
         JButton button = new JButton(text);
-        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        button.setMaximumSize(new Dimension(210, 100));
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setFont(new Font("Arial", Font.PLAIN, 14));
+        button.setFont(new Font("Arial", Font.PLAIN, 16));
         return button;
     }
 
-    private void addButtonListeners() {
+    private void addButtonListeners() throws SQLException {
         btnBanHang.addActionListener(e -> showPanel(new BanHangPanel()));
         btnQuanLiSP.addActionListener(e -> showPanel(new QuanLiSPPanel()));
-        btnThongKeDoanhThu.addActionListener(e -> showPanel(new ThongKeDoanhThuPanel()));
+        btnThongKeDoanhThu.addActionListener(e -> {
+            Connection conn = ConnectDB.getInstance().getConnection(); // Lấy kết nối từ ConnectDB
+			showPanel(new ThongKeDoanhThuPanel(conn)); // Truyền kết nối vào panel
+        });
         btnKhuyenMai.addActionListener(e -> showPanel(new KhuyenMaiPanel()));
-        btnQuanLiNV.addActionListener(e -> showPanel(new QuanLiNVPanel()));
+        btnQuanLiNV.addActionListener(e -> {
+            if (vaitro.equalsIgnoreCase("admin")) {
+                showPanel(new QuanLiNVPanel());
+            } else {
+                JOptionPane.showMessageDialog(this, "Vui lòng đăng nhập dưới quyền admin");
+            }
+        });
         btnQuanLiKH.addActionListener(e -> showPanel(new QuanLiKHPanel()));
         btnDangXuat.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, "Bạn có muốn đăng xuất?", "Xác nhận", JOptionPane.YES_NO_OPTION);
@@ -92,6 +134,7 @@ public class DGChinh extends JFrame {
             }
         });
     }
+    // Xuyến 
 
     private void showPanel(JPanel panel) {
         contentPanel.removeAll();

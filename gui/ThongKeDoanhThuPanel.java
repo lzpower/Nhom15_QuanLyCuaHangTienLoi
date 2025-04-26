@@ -3,12 +3,6 @@ package gui;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-<<<<<<< HEAD
-
-import connectDB.ConnectDB;
-
-=======
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 import java.awt.*;
 import java.sql.*;
 import java.text.ParseException;
@@ -31,23 +25,6 @@ public class ThongKeDoanhThuPanel extends JPanel {
 	private Container container;
 	private Connection conn;
 	private String query;
-<<<<<<< HEAD
-	
-	public ThongKeDoanhThuPanel() {
-	    try {
-	        // Khởi tạo kết nối
-	        conn = ConnectDB.getConnection();
-	        if (conn == null) {
-	            throw new SQLException("Không thể thiết lập kết nối cơ sở dữ liệu");
-	        }
-	        // Khởi tạo giao diện
-	        createThongKe();
-	        // Tải dữ liệu
-	        loadAllData();
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        JOptionPane.showMessageDialog(this, "Lỗi kết nối cơ sở dữ liệu: " + e.getMessage());
-=======
 
 	public ThongKeDoanhThuPanel(Connection conn) {
 	    setLayout(new BorderLayout());
@@ -60,7 +37,6 @@ public class ThongKeDoanhThuPanel extends JPanel {
 	        loadAllData(); // <-- thêm dòng này
 	    } catch (SQLException e) {
 	        e.printStackTrace();
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
 	    }
 	}
 
@@ -140,109 +116,6 @@ public class ThongKeDoanhThuPanel extends JPanel {
         add(panel, BorderLayout.CENTER);
     }
 
-<<<<<<< HEAD
-    
-    private void loadAllData() {
-        if (conn == null) {
-            JOptionPane.showMessageDialog(this, "Kết nối cơ sở dữ liệu chưa được khởi tạo!");
-            return;
-        }
-        modelThongKe.setRowCount(0);
-        String sql = "SELECT hd.ngayLap, sp.tenSP, lsp.tenLoaiSP, SUM(cthd.soLuong) AS soLuong, SUM(cthd.soLuong * sp.giaBan) AS doanhThu " +
-                     "FROM HoaDon hd " +
-                     "JOIN ChiTietHoaDon cthd ON hd.idHoaDon = cthd.idHoaDon " +
-                     "JOIN SanPham sp ON cthd.idSanPham = sp.idSanPham " +
-                     "JOIN LoaiSanPham lsp ON sp.idLoaiSP = lsp.idLoaiSP " +
-                     "GROUP BY hd.ngayLap, sp.tenSP, lsp.tenLoaiSP " +
-                     "ORDER BY hd.ngayLap ASC";
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            double totalRevenue = 0;
-            boolean hasData = false;
-            while (rs.next()) {
-                hasData = true;
-                String ngay = rs.getString("ngayLap");
-                String tenSP = rs.getString("tenSP");
-                String loaiSP = rs.getString("tenLoaiSP");
-                int soLuong = rs.getInt("soLuong");
-                double doanhThu = rs.getDouble("doanhThu");
-                modelThongKe.addRow(new Object[]{ngay, tenSP, loaiSP, soLuong, doanhThu});
-                totalRevenue += doanhThu;
-            }
-            lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,.0f VNĐ", totalRevenue));
-            if (!hasData) {
-                JOptionPane.showMessageDialog(this, "Không có dữ liệu để hiển thị.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Lỗi tải dữ liệu: " + e.getMessage());
-        }
-    }
-    
-    private void refreshTable() {
-        loadAllData(); // gọi hàm mới
-		txtFrom.setText("");
-		txtTo.setText("");
-		JOptionPane.showMessageDialog(this, "Dữ liệu đã được làm mới!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public void filterByDate() throws SQLException {
-        if (conn == null) {
-            JOptionPane.showMessageDialog(this, "Kết nối cơ sở dữ liệu chưa được khởi tạo!");
-            return;
-        }
-        String fromDate = txtFrom.getText().trim();
-        String toDate = txtTo.getText().trim();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            sdf.setLenient(false);
-            sdf.parse(fromDate);
-            sdf.parse(toDate);
-        } catch (ParseException e) {
-            JOptionPane.showMessageDialog(this, "Định dạng ngày không hợp lệ! Vui lòng nhập ngày theo định dạng yyyy-MM-dd.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        modelThongKe.setRowCount(0);
-
-        String sql = "SELECT hd.ngayLap, sp.tenSP, lsp.tenLoaiSP, SUM(cthd.soLuong) AS soLuong, SUM(cthd.soLuong * sp.giaBan) AS doanhThu " +
-                     "FROM HoaDon hd " +
-                     "JOIN ChiTietHoaDon cthd ON hd.idHoaDon = cthd.idHoaDon " +
-                     "JOIN SanPham sp ON cthd.idSanPham = sp.idSanPham " +
-                     "JOIN LoaiSanPham lsp ON sp.idLoaiSP = lsp.idLoaiSP " +
-                     "WHERE hd.ngayLap BETWEEN ? AND ? " +
-                     "GROUP BY hd.ngayLap, sp.tenSP, lsp.tenLoaiSP " +
-                     "ORDER BY hd.ngayLap ASC";
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setDate(1, java.sql.Date.valueOf(fromDate));
-            ps.setDate(2, java.sql.Date.valueOf(toDate));
-            try (ResultSet rs = ps.executeQuery()) {
-                double totalRevenue = 0;
-                boolean hasData = false;
-                while (rs.next()) {
-                    hasData = true;
-                    String ngay = rs.getString("ngayLap");
-                    String tenSP = rs.getString("tenSP");
-                    String loaiSP = rs.getString("tenLoaiSP");
-                    int soLuong = rs.getInt("soLuong");
-                    double doanhThu = rs.getDouble("doanhThu");
-                    modelThongKe.addRow(new Object[]{ngay, tenSP, loaiSP, soLuong, doanhThu});
-                    totalRevenue += doanhThu;
-                }
-                lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,.0f VNĐ", totalRevenue));
-                if (!hasData) {
-                    JOptionPane.showMessageDialog(this, "Không có dữ liệu cho khoảng thời gian đã chọn.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Lỗi lọc dữ liệu: " + e.getMessage());
-        }
-    }
-
-=======
     private void loadAllData() throws SQLException {
         modelThongKe.setRowCount(0);
         originalData.clear();
@@ -337,7 +210,6 @@ public class ThongKeDoanhThuPanel extends JPanel {
     lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,.0f VNĐ", totalRevenue));
 }
 
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
     private void sortByColumn(String columnName, boolean ascending) {
         int colIndex = columnName.equals("Doanh thu") ? 4 : 3;
         List<Object[]> dataList = new ArrayList<>();

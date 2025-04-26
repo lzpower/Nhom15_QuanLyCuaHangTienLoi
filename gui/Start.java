@@ -23,13 +23,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
-<<<<<<< HEAD
 import connectDB.ConnectDB;
 import dao.NhanVienDAO;
-=======
-import src.dao.NhanVienDAO;
->>>>>>> 8d30f36358accfa122b287ec8e3a21af0446811d
-
 
 public class Start extends JFrame implements ActionListener {
     private JTextField txtTK;
@@ -205,7 +200,7 @@ public class Start extends JFrame implements ActionListener {
         // Kiểm tra đăng nhập từ CSDL
         if (nhanVienDAO.kiemTraDangNhap(tk, mk)) {
             SwingUtilities.invokeLater(() -> {
-                new DGChinh().setVisible(true);
+                new DGChinh(tk).setVisible(true);
                 dispose(); // Đóng form đăng nhập
             });
             JOptionPane.showMessageDialog(this, "Đăng nhập thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
