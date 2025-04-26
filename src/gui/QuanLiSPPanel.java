@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.net.URL;
 import java.util.List;
 
 public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListener {
@@ -37,7 +38,8 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
     private JTextField txtSLThem;
     private JTextField txtGiaNhap;
     private JTextField txtGiaBan;
-    
+    private JTextField txtUrlHinhAnh;
+
     private SanPhamDAO sanPhamDAO;
     private LoaiSanPhamDAO loaiSanPhamDAO;
     private List<LoaiSanPham> danhSachLoaiSP;
@@ -48,23 +50,11 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         // Khởi tạo DAO
         sanPhamDAO = new SanPhamDAO();
         loaiSanPhamDAO = new LoaiSanPhamDAO();
-        
+
         // Lấy danh sách loại sản phẩm
         danhSachLoaiSP = loaiSanPhamDAO.getAllLoaiSanPham();
         if (danhSachLoaiSP.isEmpty()) {
-            // Thêm dữ liệu mẫu nếu không có
-            danhSachLoaiSP.add(new LoaiSanPham("LSP001", "Thịt, cá, trứng, hải sản"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP002", "Rau, củ, nấm, trái cây"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP003", "Bia, nước giải khát"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP004", "Sữa các loại"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP005", "Gạo, bột, Đồ khô"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP006", "Dầu ăn, nước chấm, gia vị"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP007", "Mì, miến, cháo, phở"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP008", "Kem, sữa chua"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP009", "Thực phẩm đông mát"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP010", "Bánh kẹo các loại"));
-            danhSachLoaiSP.add(new LoaiSanPham("LSP011", "Chăm sóc cá nhân"));
-            
+            JOptionPane.showMessageDialog(this, "Không có loại sản phẩm nào trong CSDL!");
             // Lưu vào CSDL
             for (LoaiSanPham loaiSP : danhSachLoaiSP) {
                 loaiSanPhamDAO.themLoaiSanPham(loaiSP);
@@ -75,65 +65,71 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pBorder.setBorder(new EmptyBorder(10, 10, 10, 10));
         add(pBorder);
 
-        // Tao 3 nut chinh: Tao HD, Cap Nhat, Thong Ke
-        JPanel pTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        btnTaoHD = new JButton("Tạo hóa đơn");        
-        btnCapNhat = new JButton("Cập nhật");
-        btnThongKe = new JButton("Thống kê");
-        pTop.add(btnTaoHD);    
-        pTop.add(btnCapNhat);
-        pTop.add(btnThongKe);
-        
-        pBorder.add(pTop, BorderLayout.NORTH);
-
-        // Trung tam: Tim SP va Bang SP
+        // Trung tâm: Tìm SP và Bảng SP
         JPanel pCenter = new JPanel();
         pCenter.setLayout(new BorderLayout());
-        // Tim SP
+        // Tìm SP
         JPanel pTim = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pTim.setBorder(BorderFactory.createTitledBorder("Tìm sản phẩm"));
         txtTim = new JTextField(20);
         btnTim = new JButton("Tìm kiếm");
-        
+
         // Tạo danh sách loại sản phẩm cho combobox
         String[] loaiSPArray = new String[danhSachLoaiSP.size() + 1];
         loaiSPArray[0] = "Tất cả";
         for (int i = 0; i < danhSachLoaiSP.size(); i++) {
             loaiSPArray[i + 1] = danhSachLoaiSP.get(i).getTenLoaiSP();
         }
-        
+
         cbxLoc = new JComboBox<>(loaiSPArray);
         btnLoc = new JButton("Lọc theo loại");
-        
+
         pTim.add(txtTim);
         pTim.add(btnTim);
         pTim.add(cbxLoc);
         pTim.add(btnLoc);
         pCenter.add(pTim, BorderLayout.NORTH);
 
-        // Bang SP
-        String[] columnNames = {"Mã sản phẩm", "Tên sản phẩm", "Loại", "Số lượng", "Giá nhập", "Giá bán"};
+        // Bảng SP
+        String[] columnNames = {"Hình ảnh", "Mã sản phẩm", "Tên sản phẩm", "Loại", "Số lượng", "Giá nhập", "Giá bán"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make table cells non-editable
+                return false;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 0) return ImageIcon.class;
+                return super.getColumnClass(columnIndex);
             }
         };
         productTable = new JTable(tableModel);
+        productTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        productTable.setRowHeight(150);
+
+        // Điều chỉnh chiều rộng các cột
+        productTable.getColumnModel().getColumn(0).setPreferredWidth(150); // Hình ảnh
+        productTable.getColumnModel().getColumn(1).setPreferredWidth(200); // Mã sản phẩm
+        productTable.getColumnModel().getColumn(2).setPreferredWidth(600); // Tên sản phẩm
+        productTable.getColumnModel().getColumn(3).setPreferredWidth(250); // Loại
+        productTable.getColumnModel().getColumn(4).setPreferredWidth(150); // Số lượng
+        productTable.getColumnModel().getColumn(5).setPreferredWidth(150); // Giá nhập
+        productTable.getColumnModel().getColumn(6).setPreferredWidth(150); // Giá bán
+
         JScrollPane scrollPane = new JScrollPane(productTable);
         pCenter.add(scrollPane, BorderLayout.CENTER);
-        
         pBorder.add(pCenter, BorderLayout.CENTER);
 
-        // Nhap sp + cac button
+        // Nhập SP + các button
         JPanel pBottom = new JPanel();
         pBottom.setLayout(new BorderLayout());
-        // Nhap sp
+        // Nhập SP
         JPanel pNhap = new JPanel();
         pNhap.setLayout(new BoxLayout(pNhap, BoxLayout.Y_AXIS));
         pNhap.setBorder(new EmptyBorder(10, 10, 10, 10));
-        
-        // Ma SP
+
+        // Mã SP
         JPanel pMa = new JPanel(new BorderLayout());
         JLabel lblMa = new JLabel("Mã sản phẩm:");
         lblMa.setPreferredSize(new Dimension(100, 20));
@@ -143,7 +139,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pNhap.add(pMa);
         pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Ten SP
+        // Tên SP
         JPanel pTen = new JPanel(new BorderLayout());
         JLabel lblTen = new JLabel("Tên sản phẩm:");
         lblTen.setPreferredSize(new Dimension(100, 20));
@@ -152,13 +148,12 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pTen.add(txtTen, BorderLayout.CENTER);
         pNhap.add(pTen);
         pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
-        
-        // Loai + SL
+
+        // Loại + SL
         JPanel pLoaiSL = new JPanel();
         pLoaiSL.setLayout(new BoxLayout(pLoaiSL, BoxLayout.X_AXIS));
-        pNhap.setBorder(new EmptyBorder(10, 10, 10, 10));
-        
-        // Loai
+
+        // Loại
         JPanel pLoai = new JPanel(new BorderLayout());
         JLabel lblLoai = new JLabel("Loại:");
         lblLoai.setPreferredSize(new Dimension(100, 20));
@@ -167,8 +162,8 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pLoai.add(cbxLoai, BorderLayout.CENTER);
         pLoaiSL.add(pLoai);
         pLoaiSL.add(Box.createRigidArea(new Dimension(10, 10)));
-        
-        // SL Hien Co
+
+        // SL Hiện Có
         JPanel pSLHienCo = new JPanel(new BorderLayout());
         JLabel lblSLHienCo = new JLabel("Số lượng hiện có:");
         lblSLHienCo.setPreferredSize(new Dimension(110, 20));
@@ -178,8 +173,8 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pSLHienCo.add(txtSLHienCo, BorderLayout.CENTER);
         pLoaiSL.add(pSLHienCo);
         pLoaiSL.add(Box.createRigidArea(new Dimension(10, 10)));
-        
-        // SL Them
+
+        // SL Thêm
         JPanel pSLThem = new JPanel(new BorderLayout());
         JLabel lblSLThem = new JLabel("Số lượng thêm:");
         lblSLThem.setPreferredSize(new Dimension(100, 20));
@@ -188,15 +183,15 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pSLThem.add(txtSLThem, BorderLayout.CENTER);
         pLoaiSL.add(pSLThem);
         pLoaiSL.add(Box.createRigidArea(new Dimension(0, 10)));
-        
+
         pNhap.add(pLoaiSL);
         pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
-        
-        // Gia
+
+        // Giá
         JPanel pGia = new JPanel();
         pGia.setLayout(new GridLayout(1, 2, 5, 5));
-        
-        // Gia Nhap
+
+        // Giá Nhập
         JPanel pGiaNhap = new JPanel(new BorderLayout());
         JLabel lblGiaNhap = new JLabel("Giá nhập:");
         lblGiaNhap.setPreferredSize(new Dimension(100, 20));
@@ -204,21 +199,31 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pGiaNhap.add(lblGiaNhap, BorderLayout.WEST);
         pGiaNhap.add(txtGiaNhap, BorderLayout.CENTER);
         pGia.add(pGiaNhap);
-        
-        // Gia Ban
+
+        // Giá Bán
         JPanel pGiaBan = new JPanel(new BorderLayout());
         JLabel lblGiaBan = new JLabel("Giá bán:");
         lblGiaBan.setPreferredSize(new Dimension(100, 20));
-        txtGiaBan = new JTextField(); // Khởi tạo txtGiaBan
-        txtGiaBan.setEditable(false); // Đặt không cho phép chỉnh sửa
+        txtGiaBan = new JTextField();
+        txtGiaBan.setEditable(false);
         pGiaBan.add(lblGiaBan, BorderLayout.WEST);
         pGiaBan.add(txtGiaBan, BorderLayout.CENTER);
         pGia.add(pGiaBan);
-        
+
         pNhap.add(pGia);
         pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Cac button
+        // Hình ảnh
+        JPanel pHinhAnh = new JPanel(new BorderLayout());
+        JLabel lblHinhAnh = new JLabel("URL hình ảnh:");
+        lblHinhAnh.setPreferredSize(new Dimension(100, 20));
+        txtUrlHinhAnh = new JTextField();
+        pHinhAnh.add(lblHinhAnh, BorderLayout.WEST);
+        pHinhAnh.add(txtUrlHinhAnh, BorderLayout.CENTER);
+        pNhap.add(pHinhAnh);
+        pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        // Các button
         JPanel pNut = new JPanel(new GridLayout(4, 0, 10, 10));
         btnThem = new JButton("THÊM");
         btnXoa = new JButton("XÓA");
@@ -234,9 +239,9 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pBottom.add(pNhap, BorderLayout.CENTER);
         pBottom.add(pNut, BorderLayout.EAST);
 
-        pBorder.add(pBottom, BorderLayout.SOUTH);
-        
-        // Su kien
+        pBorder.add(pBottom, BorderLayout.NORTH);
+
+        // Sự kiện
         btnTim.addActionListener(this);
         btnLoc.addActionListener(this);
         btnThem.addActionListener(this);
@@ -244,24 +249,56 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         btnSua.addActionListener(this);
         btnLuu.addActionListener(this);
         productTable.addMouseListener(this);
-        
+
         // Load dữ liệu sản phẩm từ CSDL
         loadSanPhamData();
     }
-    
+
     private void loadSanPhamData() {
         tableModel.setRowCount(0);
         List<SanPham> danhSachSP = sanPhamDAO.getAllSanPham();
-        for (SanPham sp : danhSachSP) {
-            tableModel.addRow(new Object[]{
-                    sp.getMaSP(),
-                    sp.getTenSP(),
-                    sp.getLoaiSP().getTenLoaiSP(),
-                    sp.getSlHienCo(),
-                    sp.getGiaNhap(),
-                    sp.getGiaBan()
-            });
+
+        if (danhSachSP == null || danhSachSP.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Không có sản phẩm nào trong cơ sở dữ liệu!");
+            return;
         }
+        for (SanPham sp : danhSachSP) {
+            updateTableRow(-1, sp, true);
+        }
+    }
+
+    private ImageIcon loadImageIcon(String urlHinhAnh) {
+        ImageIcon icon = null;
+        if (urlHinhAnh != null && !urlHinhAnh.isEmpty()) {
+            String mappedUrl = "/img/" + urlHinhAnh;
+            try {
+                URL imageUrl = getClass().getResource(mappedUrl);
+                if (imageUrl != null) {
+                    icon = new ImageIcon(imageUrl);
+                    Image image = icon.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+                    icon = new ImageIcon(image);
+                } else {
+                	System.out.println("Đường dẫn hình ảnh: " + mappedUrl + ", URL: " + imageUrl);
+                }
+            } catch (Exception ex) {
+                System.err.println("Lỗi tải hình ảnh " + mappedUrl + ": " + ex.getMessage());
+            }
+        }
+        if (icon == null) {
+            try {
+                URL defaultUrl = getClass().getResource("/img/default.jpg");
+                if (defaultUrl != null) {
+                    icon = new ImageIcon(defaultUrl);
+                    Image image = icon.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+                    icon = new ImageIcon(image);
+                } else {
+                    System.err.println("Không tìm thấy hình ảnh mặc định: /img/default.png");
+                }
+            } catch (Exception ex) {
+                System.err.println("Lỗi tải hình ảnh mặc định: " + ex.getMessage());
+            }
+        }
+        return icon;
     }
 
     public void xoaTextField() {
@@ -272,7 +309,26 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         txtSLThem.setText("");
         txtGiaNhap.setText("");
         txtGiaBan.setText("");
+        txtUrlHinhAnh.setText("");
         txtMa.setEditable(true);
+    }
+
+    private boolean isValidImageUrl(String urlHinhAnh) {
+        if (urlHinhAnh.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "URL hình ảnh không được để trống.");
+            return false;
+        }
+        if (!urlHinhAnh.matches(".*\\.(png|jpg|jpeg|gif)$")) {
+            JOptionPane.showMessageDialog(this, "URL hình ảnh phải là tệp .png, .jpg, .jpeg hoặc .gif.");
+            return false;
+        }
+        String mappedUrl = "/img/" + urlHinhAnh;
+        URL imageUrl = getClass().getResource(mappedUrl);
+        if (imageUrl == null) {
+            JOptionPane.showMessageDialog(this, "Hình ảnh " + urlHinhAnh + " không tồn tại trong thư mục /img/.");
+            return false;
+        }
+        return true;
     }
 
     private boolean validData() {
@@ -280,6 +336,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         String ten = txtTen.getText().trim();
         String slThem = txtSLThem.getText().trim();
         String giaNhap = txtGiaNhap.getText().trim();
+        String urlHinhAnh = txtUrlHinhAnh.getText().trim();
 
         // Check for empty fields
         if (ma.isEmpty()) {
@@ -298,7 +355,10 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             JOptionPane.showMessageDialog(this, "Giá nhập không được để trống.");
             return false;
         }
-        
+        if (!isValidImageUrl(urlHinhAnh)) {
+            return false;
+        }
+
         // Kiểm tra số lượng và giá nhập là số hợp lệ
         try {
             int sl = Integer.parseInt(slThem);
@@ -310,7 +370,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             JOptionPane.showMessageDialog(this, "Số lượng thêm phải là số nguyên.");
             return false;
         }
-        
+
         try {
             double gia = Double.parseDouble(giaNhap);
             if (gia <= 0) {
@@ -321,31 +381,63 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             JOptionPane.showMessageDialog(this, "Giá nhập phải là số thực.");
             return false;
         }
-        
+
         return true;
+    }
+
+    private String getMaLoaiSPFromTen(String tenLoaiSP) {
+        for (LoaiSanPham loaiSP : danhSachLoaiSP) {
+            if (loaiSP.getTenLoaiSP().equals(tenLoaiSP)) {
+                return loaiSP.getMaLoaiSP();
+            }
+        }
+        JOptionPane.showMessageDialog(this, "Không tìm thấy loại sản phẩm!");
+        return null;
+    }
+
+    private void updateTableRow(int row, SanPham sp, boolean isAdd) {
+        ImageIcon icon = loadImageIcon(sp.getUrlHinhAnh());
+        Object[] rowData = new Object[]{
+                icon,
+                sp.getMaSP(),
+                sp.getTenSP(),
+                sp.getLoaiSP().getTenLoaiSP(),
+                sp.getSlHienCo(),
+                sp.getGiaNhap(),
+                sp.getGiaBan()
+        };
+        if (isAdd) {
+            tableModel.addRow(rowData);
+        } else {
+            for (int i = 0; i < rowData.length; i++) {
+                tableModel.setValueAt(rowData[i], row, i);
+            }
+        }
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         int row = productTable.getSelectedRow();
         if (row >= 0) {
-            txtMa.setText(productTable.getValueAt(row, 0).toString());
-            txtTen.setText(productTable.getValueAt(row, 1).toString());
-            
-            // Tìm và chọn loại sản phẩm trong combobox
-            String tenLoai = productTable.getValueAt(row, 2).toString();
+            txtMa.setText(productTable.getValueAt(row, 1).toString()); // Mã sản phẩm
+            txtTen.setText(productTable.getValueAt(row, 2).toString()); // Tên sản phẩm
+            String tenLoai = productTable.getValueAt(row, 3).toString(); // Loại
             for (int i = 0; i < cbxLoai.getItemCount(); i++) {
                 if (cbxLoai.getItemAt(i).equals(tenLoai)) {
                     cbxLoai.setSelectedIndex(i);
                     break;
                 }
             }
-            
-            txtSLHienCo.setText(productTable.getValueAt(row, 3).toString());
+            txtSLHienCo.setText(productTable.getValueAt(row, 4).toString()); // Số lượng
             txtSLThem.setText("0");
-            txtGiaNhap.setText(productTable.getValueAt(row, 4).toString());
-            txtGiaBan.setText(productTable.getValueAt(row, 5).toString());
-            txtMa.setEditable(false); // Không cho phép sửa mã sản phẩm
+            txtGiaNhap.setText(productTable.getValueAt(row, 5).toString()); // Giá nhập
+            txtGiaBan.setText(productTable.getValueAt(row, 6).toString()); // Giá bán
+            txtMa.setEditable(false);
+
+            SanPham sp = sanPhamDAO.getSanPhamTheoMa(txtMa.getText().trim());
+            if (sp != null) {
+                txtUrlHinhAnh.setText(sp.getUrlHinhAnh()); // Đặt đúng URL
+            }
         }
     }
 
@@ -370,51 +462,27 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         Object o = e.getSource();
         if (o.equals(btnThem)) {
             if (!validData()) return;
-            
+
             String maSP = txtMa.getText().trim();
             String tenSP = txtTen.getText().trim();
             String tenLoaiSP = cbxLoai.getSelectedItem().toString();
             int soLuong = Integer.parseInt(txtSLThem.getText().trim());
             double giaNhap = Double.parseDouble(txtGiaNhap.getText().trim());
-            
-            // Tìm mã loại sản phẩm từ tên
-            String maLoaiSP = null;
-            for (LoaiSanPham loaiSP : danhSachLoaiSP) {
-                if (loaiSP.getTenLoaiSP().equals(tenLoaiSP)) {
-                    maLoaiSP = loaiSP.getMaLoaiSP();
-                    break;
-                }
-            }
-            
-            if (maLoaiSP == null) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy loại sản phẩm!");
-                return;
-            }
-            
-            // Kiểm tra sản phẩm đã tồn tại chưa
+            String urlHinhAnh = txtUrlHinhAnh.getText().trim();
+
+            String maLoaiSP = getMaLoaiSPFromTen(tenLoaiSP);
+            if (maLoaiSP == null) return;
+
             if (sanPhamDAO.getSanPhamTheoMa(maSP) != null) {
                 JOptionPane.showMessageDialog(this, "Mã sản phẩm đã tồn tại!");
                 return;
             }
-            
-            // Tạo đối tượng loại sản phẩm
+
             LoaiSanPham loaiSP = new LoaiSanPham(maLoaiSP, tenLoaiSP);
-            
-            // Tạo đối tượng sản phẩm
-            SanPham sp = new SanPham(maSP, tenSP, loaiSP, soLuong, giaNhap);
-            
-            // Thêm vào CSDL
+            SanPham sp = new SanPham(maSP, tenSP, loaiSP, soLuong, giaNhap, urlHinhAnh);
+
             if (sanPhamDAO.themSanPham(sp)) {
-                // Cập nhật bảng
-                tableModel.addRow(new Object[]{
-                        sp.getMaSP(),
-                        sp.getTenSP(),
-                        sp.getLoaiSP().getTenLoaiSP(),
-                        sp.getSlHienCo(),
-                        sp.getGiaNhap(),
-                        sp.getGiaBan()
-                });
-                
+                updateTableRow(-1, sp, true);
                 xoaTextField();
                 JOptionPane.showMessageDialog(this, "Thêm sản phẩm thành công!");
             } else {
@@ -423,7 +491,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         } else if (o.equals(btnXoa)) {
             int row = productTable.getSelectedRow();
             if (row >= 0) {
-                String maSP = tableModel.getValueAt(row, 0).toString();
+                String maSP = tableModel.getValueAt(row, 1).toString();
                 int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa sản phẩm này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     if (sanPhamDAO.xoaSanPham(maSP)) {
@@ -447,7 +515,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             }
         } else if (o.equals(btnLuu)) {
             if (!validData()) return;
-            
+
             int row = productTable.getSelectedRow();
             if (row >= 0) {
                 String maSP = txtMa.getText().trim();
@@ -457,36 +525,16 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 int slThem = Integer.parseInt(txtSLThem.getText().trim());
                 int slMoi = slHienCo + slThem;
                 double giaNhap = Double.parseDouble(txtGiaNhap.getText().trim());
-                
-                // Tìm mã loại sản phẩm từ tên
-                String maLoaiSP = null;
-                for (LoaiSanPham loaiSP : danhSachLoaiSP) {
-                    if (loaiSP.getTenLoaiSP().equals(tenLoaiSP)) {
-                        maLoaiSP = loaiSP.getMaLoaiSP();
-                        break;
-                    }
-                }
-                
-                if (maLoaiSP == null) {
-                    JOptionPane.showMessageDialog(this, "Không tìm thấy loại sản phẩm!");
-                    return;
-                }
-                
-                // Tạo đối tượng loại sản phẩm
+                String urlHinhAnh = txtUrlHinhAnh.getText().trim();
+
+                String maLoaiSP = getMaLoaiSPFromTen(tenLoaiSP);
+                if (maLoaiSP == null) return;
+
                 LoaiSanPham loaiSP = new LoaiSanPham(maLoaiSP, tenLoaiSP);
-                
-                // Tạo đối tượng sản phẩm
-                SanPham sp = new SanPham(maSP, tenSP, loaiSP, slMoi, giaNhap);
-                
-                // Cập nhật vào CSDL
+                SanPham sp = new SanPham(maSP, tenSP, loaiSP, slMoi, giaNhap, urlHinhAnh);
+
                 if (sanPhamDAO.capNhatSanPham(sp)) {
-                    // Cập nhật bảng
-                    tableModel.setValueAt(tenSP, row, 1);
-                    tableModel.setValueAt(tenLoaiSP, row, 2);
-                    tableModel.setValueAt(slMoi, row, 3);
-                    tableModel.setValueAt(giaNhap, row, 4);
-                    tableModel.setValueAt(sp.getGiaBan(), row, 5);
-                    
+                    updateTableRow(row, sp, false);
                     xoaTextField();
                     JOptionPane.showMessageDialog(this, "Cập nhật sản phẩm thành công!");
                 } else {
@@ -501,24 +549,14 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 loadSanPhamData();
                 return;
             }
-            
-            // Tìm kiếm sản phẩm
+
             List<SanPham> ketQuaTimKiem = sanPhamDAO.timKiemSanPham(tuKhoa);
-            
-            // Hiển thị kết quả
             tableModel.setRowCount(0);
             if (ketQuaTimKiem.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Không tìm thấy sản phẩm với từ khóa: " + tuKhoa);
             } else {
                 for (SanPham sp : ketQuaTimKiem) {
-                    tableModel.addRow(new Object[]{
-                            sp.getMaSP(),
-                            sp.getTenSP(),
-                            sp.getLoaiSP().getTenLoaiSP(),
-                            sp.getSlHienCo(),
-                            sp.getGiaNhap(),
-                            sp.getGiaBan()
-                    });
+                    updateTableRow(-1, sp, true);
                 }
             }
         } else if (o.equals(btnLoc)) {
@@ -527,38 +565,17 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 loadSanPhamData();
                 return;
             }
-            
-            // Tìm mã loại sản phẩm từ tên
-            String maLoaiSP = null;
-            for (LoaiSanPham loaiSP : danhSachLoaiSP) {
-                if (loaiSP.getTenLoaiSP().equals(tenLoaiSP)) {
-                    maLoaiSP = loaiSP.getMaLoaiSP();
-                    break;
-                }
-            }
-            
-            if (maLoaiSP == null) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy loại sản phẩm!");
-                return;
-            }
-            
-            // Lọc sản phẩm theo loại
+
+            String maLoaiSP = getMaLoaiSPFromTen(tenLoaiSP);
+            if (maLoaiSP == null) return;
+
             List<SanPham> ketQuaLoc = sanPhamDAO.getSanPhamTheoLoai(maLoaiSP);
-            
-            // Hiển thị kết quả
             tableModel.setRowCount(0);
             if (ketQuaLoc.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Không có sản phẩm thuộc loại: " + tenLoaiSP);
             } else {
                 for (SanPham sp : ketQuaLoc) {
-                    tableModel.addRow(new Object[]{
-                            sp.getMaSP(),
-                            sp.getTenSP(),
-                            sp.getLoaiSP().getTenLoaiSP(),
-                            sp.getSlHienCo(),
-                            sp.getGiaNhap(),
-                            sp.getGiaBan()
-                    });
+                    updateTableRow(-1, sp, true);
                 }
             }
         }

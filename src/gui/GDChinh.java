@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class DGChinh extends JFrame {
+public class GDChinh extends JFrame {
     private JPanel contentPanel;
     private JButton btnBanHang;
     private JButton btnQuanLiSP;
@@ -24,7 +24,7 @@ public class DGChinh extends JFrame {
     private JButton btnDangXuat;
     private String vaitro;
 
-    public DGChinh(String vaitro) {
+    public GDChinh(String vaitro) {
         this.vaitro = vaitro;
         setTitle("Cửa Hàng Tiện Lợi - Hệ Thống Quản Lý");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -98,6 +98,7 @@ public class DGChinh extends JFrame {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        btnBanHang.doClick();
     }
 
     private JButton createButton(String text) {

@@ -158,94 +158,99 @@ public class ThongKeDoanhThuPanel extends JPanel {
         }
     }
 
-   public void filterByDate() throws SQLException {
-    String fromDate = txtFrom.getText().trim();
-    String toDate = txtTo.getText().trim();
+    public void filterByDate() throws SQLException {
+        String fromDate = txtFrom.getText().trim();
+        String toDate = txtTo.getText().trim();
 
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    try {
-        sdf.setLenient(false);
-        sdf.parse(fromDate);
-        sdf.parse(toDate);
-    } catch (ParseException e) {
-        JOptionPane.showMessageDialog(this, "Định dạng ngày không hợp lệ! Vui lòng nhập ngày theo định dạng yyyy-MM-dd.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-
-    modelThongKe.setRowCount(0);
-
-    String sql = "SELECT hd.ngayLap, sp.tenSP, sp.loaiSP, SUM(cthd.soLuong) AS soLuong, SUM(cthd.soLuong * sp.gia) AS doanhThu " +
-                 "FROM HoaDon hd " +
-                 "JOIN ChiTietHoaDon cthd ON hd.idHoaDon = cthd.idHoaDon " +
-                 "JOIN SanPham sp ON cthd.idSanPham = sp.idSanPham " +
-                 "WHERE hd.ngayLap BETWEEN ? AND ? " +
-                 "GROUP BY hd.ngayLap, sp.tenSP, sp.loaiSP " +
-                 "ORDER BY hd.ngayLap ASC";
-
-    PreparedStatement ps = conn.prepareStatement(sql);
-    ps.setDate(1, java.sql.Date.valueOf(fromDate));
-    ps.setDate(2, java.sql.Date.valueOf(toDate));
-
-    ResultSet rs = ps.executeQuery();
-
-    double totalRevenue = 0;
-    boolean hasData = false;
-
-    while (rs.next()) {
-        hasData = true;
-        String ngay = rs.getString("ngayLap");
-        String tenSP = rs.getString("tenSP");
-        String loaiSP = rs.getString("loaiSP");
-        int soLuong = rs.getInt("soLuong");
-        double doanhThu = rs.getDouble("doanhThu");
-
-        modelThongKe.addRow(new Object[] {ngay, tenSP, loaiSP, soLuong, doanhThu});
-        totalRevenue += doanhThu;
-    }
-
-    if (!hasData) {
-        JOptionPane.showMessageDialog(this, "Không có dữ liệu cho khoảng thời gian đã chọn.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,.0f VNĐ", totalRevenue));
-}
-
-    private void sortByColumn(String columnName, boolean ascending) {
-        int colIndex = columnName.equals("Doanh thu") ? 4 : 3;
-        List<Object[]> dataList = new ArrayList<>();
-        for (int i = 0; i < modelThongKe.getRowCount(); i++) {
-            Object[] row = new Object[modelThongKe.getColumnCount()];
-            for (int j = 0; j < modelThongKe.getColumnCount(); j++) {
-                row[j] = modelThongKe.getValueAt(i, j);
-            }
-            dataList.add(row);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            sdf.setLenient(false);
+            sdf.parse(fromDate);
+            sdf.parse(toDate);
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Định dạng ngày không hợp lệ! Vui lòng nhập ngày theo định dạng yyyy-MM-dd.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-
-        dataList.sort((o1, o2) -> {
-            int val1, val2;
-            if (colIndex == 4) {
-                val1 = parseCurrency(o1[colIndex].toString());
-                val2 = parseCurrency(o2[colIndex].toString());
-            } else {
-                val1 = Integer.parseInt(o1[colIndex].toString());
-                val2 = Integer.parseInt(o2[colIndex].toString());
-            }
-            return ascending ? val1 - val2 : val2 - val1;
-        });
 
         modelThongKe.setRowCount(0);
-        for (Object[] row : dataList) {
-            modelThongKe.addRow(row);
+
+        String sql = "SELECT hd.ngayLap, sp.tenSP, lsp.tenLoaiSP, " +
+                "SUM(cthd.soLuong) AS soLuong, " +
+                "SUM(cthd.soLuong * cthd.donGia) AS doanhThu " +
+                "FROM HoaDon hd " +
+                "JOIN ChiTietHoaDon cthd ON hd.maHoaDon = cthd.maHoaDon " +
+                "JOIN SanPham sp ON cthd.maSP = sp.maSP " +
+                "JOIN LoaiSanPham lsp ON sp.maLoaiSP = lsp.maLoaiSP " +
+                "WHERE hd.ngayLap BETWEEN ? AND ? " +
+                "GROUP BY hd.ngayLap, sp.tenSP, lsp.tenLoaiSP " +
+                "ORDER BY hd.ngayLap ASC";
+
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setDate(1, java.sql.Date.valueOf(fromDate));
+        ps.setDate(2, java.sql.Date.valueOf(toDate));
+
+        ResultSet rs = ps.executeQuery();
+
+        double totalRevenue = 0;
+        boolean hasData = false;
+
+        while (rs.next()) {
+            hasData = true;
+            String ngay = rs.getString("ngayLap");
+            String tenSP = rs.getString("tenSP");
+            String loaiSP = rs.getString("tenLoaiSP");
+            int soLuong = rs.getInt("soLuong");
+            double doanhThu = rs.getDouble("doanhThu");
+
+            modelThongKe.addRow(new Object[] {ngay, tenSP, loaiSP, soLuong, doanhThu});
+            totalRevenue += doanhThu;
         }
+
+        if (!hasData) {
+            JOptionPane.showMessageDialog(this, "Không có dữ liệu cho khoảng thời gian đã chọn.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,.0f VNĐ", totalRevenue));
     }
 
-    private int parseCurrency(String string) {
-        try {
-            return Integer.parseInt(string.replaceAll("[^\\d]", ""));
-        } catch (NumberFormatException e) {
-            return 0;
+        private void sortByColumn(String columnName, boolean ascending) {
+            int colIndex = columnName.equals("Doanh thu") ? 4 : 3;
+            List<Object[]> dataList = new ArrayList<>();
+            for (int i = 0; i < modelThongKe.getRowCount(); i++) {
+                Object[] row = new Object[modelThongKe.getColumnCount()];
+                for (int j = 0; j < modelThongKe.getColumnCount(); j++) {
+                    row[j] = modelThongKe.getValueAt(i, j);
+                }
+                dataList.add(row);
+            }
+
+            dataList.sort((o1, o2) -> {
+                int val1, val2;
+                if (colIndex == 4) {
+                    val1 = parseCurrency(o1[colIndex].toString());
+                    val2 = parseCurrency(o2[colIndex].toString());
+                } else {
+                    val1 = Integer.parseInt(o1[colIndex].toString());
+                    val2 = Integer.parseInt(o2[colIndex].toString());
+                }
+                return ascending ? val1 - val2 : val2 - val1;
+            });
+
+            modelThongKe.setRowCount(0);
+            for (Object[] row : dataList) {
+                modelThongKe.addRow(row);
+            }
         }
-    }
+
+        private int parseCurrency(String string) {
+            try {
+                return Integer.parseInt(string.replaceAll("[^\\d]", ""));
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+
+
 
 
 

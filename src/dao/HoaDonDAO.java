@@ -23,6 +23,7 @@ public class HoaDonDAO {
     }
 
     public HoaDonDAO() {
+    	con = ConnectDB.getConnection();
 		// TODO Auto-generated constructor stub
 	}
 	// Phương thức lấy hóa đơn trong khoảng ngày
@@ -56,7 +57,7 @@ return null;
     
     
     public boolean themHoaDon(HoaDon hoaDon) {
-        String sql = "INSERT INTO HoaDon(maHoaDon, ngayLap, maNhanVien) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO HoaDon(maHoaDon, ngayLap, maNV) VALUES(?, ?, ?)";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, hoaDon.getMaHoaDon());
@@ -89,7 +90,7 @@ return null;
     }
 
     public boolean capNhatHoaDon(HoaDon hoaDon) {
-        String sql = "UPDATE HoaDon SET ngayLap = ?, maNhanVien = ? WHERE maHoaDon = ?";
+        String sql = "UPDATE HoaDon SET ngayLap = ?, maNV = ? WHERE maHoaDon = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setDate(1, new java.sql.Date(hoaDon.getNgayLap().getTime()));
@@ -112,7 +113,7 @@ return null;
                 HoaDon hoaDon = new HoaDon(
                         rs.getString("maHoaDon"),
                         rs.getDate("ngayLap"),
-                        rs.getString("maNhanVien"));
+                        rs.getString("maNV"));
                 return hoaDon;
             }
         } catch (SQLException e) {
@@ -131,7 +132,7 @@ return null;
                 HoaDon hoaDon = new HoaDon(
                         rs.getString("maHoaDon"),
                         rs.getDate("ngayLap"),
-                        rs.getString("maNhanVien"));
+                        rs.getString("maNV"));
                 danhSachHoaDon.add(hoaDon);
             }
         } catch (SQLException e) {
@@ -152,7 +153,7 @@ return null;
                 HoaDon hoaDon = new HoaDon(
                         rs.getString("maHoaDon"),
                         rs.getDate("ngayLap"),
-                        rs.getString("maNhanVien"));
+                        rs.getString("maNV"));
                 danhSachHoaDon.add(hoaDon);
             }
         } catch (SQLException e) {

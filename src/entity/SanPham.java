@@ -7,6 +7,7 @@ public class SanPham {
 	private int slHienCo;
 	private double giaNhap;
 	private double giaBan; 
+	private String urlHinhAnh;
 	
 	public String getMaSP() {
 		return maSP;
@@ -74,20 +75,40 @@ public class SanPham {
 		return giaBan;
 	}
 	
+	public String getUrlHinhAnh() {
+	    return urlHinhAnh;
+	}
 
-	public SanPham(String maSP, String tenSP, LoaiSanPham loaiSP, int slHienCo, double giaNhap) {
+	public void setUrlHinhAnh(String urlHinhAnh) {
+	    this.urlHinhAnh = urlHinhAnh;
+	}
+
+	public SanPham(String maSP, String tenSP, LoaiSanPham loaiSP, int slHienCo, double giaNhap, double giaBan,
+			String urlHinhAnh) {
+
 		setMaSP(maSP);
 		setTenSP(tenSP);
 		setLoaiSP(loaiSP);
 		setSlHienCo(slHienCo);
-		setGiaNhap(giaNhap); 
+		setGiaNhap(giaNhap);
+		this.giaBan = giaBan;
+		setUrlHinhAnh(urlHinhAnh);
 	}
+
+	public SanPham(String maSP, String tenSP, LoaiSanPham loaiSP, int slHienCo, double giaNhap, String urlHinhAnh) {
+		setMaSP(maSP);
+		setTenSP(tenSP);
+		setLoaiSP(loaiSP);
+		setSlHienCo(slHienCo);
+		setGiaNhap(giaNhap);
+		setUrlHinhAnh(urlHinhAnh);
+	}
+
 	public SanPham(String maSP, String tenSP,double giaNhap) {
 		setMaSP(maSP);
 		setTenSP(tenSP);
 		setGiaNhap(giaNhap); 
 	}
-
 
 	
 }

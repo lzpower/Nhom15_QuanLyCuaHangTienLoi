@@ -18,19 +18,21 @@ public class SanPhamDAO {
     }
 
     // Constructor overload for testing
+
     public SanPhamDAO(Connection conn) {
         this.con = conn;
         this.loaiSanPhamDAO = new LoaiSanPhamDAO();
     }
 
     public boolean themSanPham(SanPham sanPham) {
-        String sql = "INSERT INTO SanPham(maSP, tenSP, maLoaiSP, slHienCo, giaNhap) VALUES(?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO SanPham(maSP, tenSP, maLoaiSP, slHienCo, giaNhap, img) VALUES(?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
             stmt.setString(1, sanPham.getMaSP());
             stmt.setString(2, sanPham.getTenSP());
             stmt.setString(3, sanPham.getLoaiSP().getMaLoaiSP());
             stmt.setInt(4, sanPham.getSlHienCo());
             stmt.setDouble(5, sanPham.getGiaNhap());
+            stmt.setString(6, sanPham.getUrlHinhAnh());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -50,13 +52,14 @@ public class SanPhamDAO {
     }
 
     public boolean capNhatSanPham(SanPham sanPham) {
-        String sql = "UPDATE SanPham SET tenSP = ?, maLoaiSP = ?, slHienCo = ?, giaNhap = ? WHERE maSP = ?";
+        String sql = "UPDATE SanPham SET tenSP = ?, maLoaiSP = ?, slHienCo = ?, giaNhap = ?, img = ? WHERE maSP = ?";
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
             stmt.setString(1, sanPham.getTenSP());
             stmt.setString(2, sanPham.getLoaiSP().getMaLoaiSP());
             stmt.setInt(3, sanPham.getSlHienCo());
             stmt.setDouble(4, sanPham.getGiaNhap());
-            stmt.setString(5, sanPham.getMaSP());
+            stmt.setString(5, sanPham.getUrlHinhAnh()); // Đặt đúng img
+            stmt.setString(6, sanPham.getMaSP());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,7 +91,10 @@ public class SanPhamDAO {
                         rs.getString("tenSP"),
                         loaiSP,
                         rs.getInt("slHienCo"),
-                        rs.getDouble("giaNhap"));
+                        rs.getDouble("giaNhap"),
+                        rs.getString("img") // dùng đúng tên cột ảnh
+                );
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -108,7 +114,10 @@ public class SanPhamDAO {
                         rs.getString("tenSP"),
                         loaiSP,
                         rs.getInt("slHienCo"),
-                        rs.getDouble("giaNhap"));
+                        rs.getDouble("giaNhap"),
+                        rs.getString("img")
+                );
+                        rs.getDouble("giaNhap");
                 danhSachSanPham.add(sanPham);
             }
         } catch (SQLException e) {
@@ -130,7 +139,10 @@ public class SanPhamDAO {
                         rs.getString("tenSP"),
                         loaiSP,
                         rs.getInt("slHienCo"),
-                        rs.getDouble("giaNhap"));
+                        rs.getDouble("giaNhap"),
+                        rs.getString("img")
+                );
+                        rs.getDouble("giaNhap");
                 danhSachSanPham.add(sanPham);
             }
         } catch (SQLException e) {
@@ -153,7 +165,10 @@ public class SanPhamDAO {
                         rs.getString("tenSP"),
                         loaiSP,
                         rs.getInt("slHienCo"),
-                        rs.getDouble("giaNhap"));
+                        rs.getDouble("giaNhap"),
+                        rs.getString("img")
+                );
+                        rs.getDouble("giaNhap");
                 danhSachSanPham.add(sanPham);
             }
         } catch (SQLException e) {
@@ -164,7 +179,7 @@ public class SanPhamDAO {
 
     public String taoMaSanPhamMoi() {
         String maSP = "SP";
-        String sql = "SELECT maSP FROM SanPham ORDER BY maSP DESC LIMIT 1"; // ✅ Sửa TOP 1 → LIMIT 1
+        String sql = "SELECT maSP FROM SanPham ORDER BY maSP DESC LIMIT 1";
         try (Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {

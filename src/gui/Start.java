@@ -200,7 +200,7 @@ public class Start extends JFrame implements ActionListener {
         // Kiểm tra đăng nhập từ CSDL
         if (nhanVienDAO.kiemTraDangNhap(tk, mk)) {
             SwingUtilities.invokeLater(() -> {
-                new DGChinh(tk).setVisible(true);
+                new GDChinh(tk).setVisible(true);
                 dispose(); // Đóng form đăng nhập
             });
             JOptionPane.showMessageDialog(this, "Đăng nhập thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
@@ -211,11 +211,11 @@ public class Start extends JFrame implements ActionListener {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            try {
+//                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
             new Start().setVisible(true);
         });
     }

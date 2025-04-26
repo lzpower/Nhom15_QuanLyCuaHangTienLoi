@@ -21,7 +21,7 @@ public class ChiTietHoaDonDAO {
         this.con = conn;
     }
     public boolean themChiTietHoaDon(ChiTietHoaDon chiTiet) {
-        String sql = "INSERT INTO ChiTietHoaDon(maHoaDon, maSanPham, soLuong, donGia) VALUES(?, ?, ?, ?)";
+        String sql = "INSERT INTO ChiTietHoaDon(maHoaDon, maSP, soLuong, donGia) VALUES(?, ?, ?, ?)";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, chiTiet.getMaHoaDon());
@@ -35,12 +35,12 @@ public class ChiTietHoaDonDAO {
         }
     }
 
-    public boolean xoaChiTietHoaDon(String maHoaDon, String maSanPham) {
-        String sql = "DELETE FROM ChiTietHoaDon WHERE maHoaDon = ? AND maSanPham = ?";
+    public boolean xoaChiTietHoaDon(String maHoaDon, String maSP) {
+        String sql = "DELETE FROM ChiTietHoaDon WHERE maHoaDon = ? AND maSP = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, maHoaDon);
-            stmt.setString(2, maSanPham);
+            stmt.setString(2, maSP);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -49,7 +49,7 @@ public class ChiTietHoaDonDAO {
     }
 
     public boolean capNhatChiTietHoaDon(ChiTietHoaDon chiTiet) {
-        String sql = "UPDATE ChiTietHoaDon SET soLuong = ?, donGia = ? WHERE maHoaDon = ? AND maSanPham = ?";
+        String sql = "UPDATE ChiTietHoaDon SET soLuong = ?, donGia = ? WHERE maHoaDon = ? AND maSP = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setInt(1, chiTiet.getSoLuong());
@@ -73,7 +73,7 @@ public class ChiTietHoaDonDAO {
             while (rs.next()) {
                 ChiTietHoaDon chiTiet = new ChiTietHoaDon(
                         rs.getString("maHoaDon"),
-                        rs.getString("maSanPham"),
+                        rs.getString("maSP"),
                         rs.getInt("soLuong"),
                         rs.getDouble("donGia"));
                 danhSachChiTiet.add(chiTiet);
