@@ -11,58 +11,55 @@ import java.util.List;
 
 import connectDB.ConnectDB;
 import entity.HoaDon;
+import entity.KhachHang;
+import entity.KhuyenMai;
+import entity.NhanVien;
 
 public class HoaDonDAO {
     private Connection con;
-    //Xuyến 
-    public Connection getConnection() {
-        return ConnectDB.getConnection(); // Trả về kết nối từ lớp ConnectDB
-    }
-    public HoaDonDAO(Connection conn) {
-        this.con = conn;
-    }
+    private NhanVienDAO nhanVienDAO;
+    private KhachHangDAO khachHangDAO;
+    private KhuyenMaiDAO khuyenMaiDAO;
 
     public HoaDonDAO() {
-    	con = ConnectDB.getConnection();
-		// TODO Auto-generated constructor stub
-	}
-	// Phương thức lấy hóa đơn trong khoảng ngày
-    public ResultSet getHoaDonByDateRange(String fromDate, String toDate) throws SQLException {
-    	String query = "SELECT h.maHoaDon, h.ngayLap, sp.tenSP, lsp.tenLoaiSP, cthd.soLuong, (cthd.soLuong * cthd.donGia) AS doanhThu " +
-                "FROM HoaDon h " +
-                "JOIN ChiTietHoaDon cthd ON h.maHoaDon = cthd.maHoaDon " +
-                "JOIN SanPham sp ON cthd.maSP = sp.maSP " +
-                "JOIN LoaiSanPham lsp ON sp.maLoaiSP = lsp.maLoaiSP " +  // Thêm JOIN với bảng LoaiSanPham
-                "WHERE h.ngayLap BETWEEN ? AND ?";
- try (PreparedStatement ps = con.prepareStatement(query)) {
-     ps.setDate(1, java.sql.Date.valueOf(fromDate)); // Đảm bảo 'fromDate' ở dạng String đúng định dạng 'yyyy-mm-dd'
-     ps.setDate(2, java.sql.Date.valueOf(toDate));   // Đảm bảo 'toDate' ở dạng String đúng định dạng 'yyyy-mm-dd'
-
-     try (ResultSet rs = ps.executeQuery()) {
-         while (rs.next()) {
-             String maHoaDon = rs.getString("maHoaDon");
-             Date ngayLap = rs.getDate("ngayLap");
-             String tenSP = rs.getString("tenSP");
-             String loaiSP = rs.getString("loaiSP");
-             int soLuong = rs.getInt("soLuong");
-             double doanhThu = rs.getDouble("doanhThu");
-         }
-     }
- } catch (SQLException e) {
-     e.printStackTrace();
- }
-return null;
-
+        con = ConnectDB.getConnection();
+        nhanVienDAO = new NhanVienDAO();
+        khachHangDAO = new KhachHangDAO();
+        khuyenMaiDAO = new KhuyenMaiDAO();
     }
-    
-    
+
+    public HoaDonDAO(Connection conn) {
+        this.con = conn;
+        nhanVienDAO = new NhanVienDAO(conn);
+        khachHangDAO = new KhachHangDAO(conn);
+        khuyenMaiDAO = new KhuyenMaiDAO(conn);
+    }
+
+    public Connection getConnection() {
+        return ConnectDB.getConnection();
+    }
+
     public boolean themHoaDon(HoaDon hoaDon) {
-        String sql = "INSERT INTO HoaDon(maHoaDon, ngayLap, maNV) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO HoaDon(maHoaDon, ngayLap, maNhanVien, maKhachHang, maKhuyenMai, tongTien) VALUES(?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, hoaDon.getMaHoaDon());
             stmt.setDate(2, new java.sql.Date(hoaDon.getNgayLap().getTime()));
-            stmt.setString(3, hoaDon.getMaNhanVien());
+            stmt.setString(3, hoaDon.getNhanVien().getMaNhanVien());
+            
+            if (hoaDon.getKhachHang() != null) {
+                stmt.setString(4, hoaDon.getKhachHang().getMaKhachHang());
+            } else {
+                stmt.setNull(4, java.sql.Types.VARCHAR);
+            }
+            
+            if (hoaDon.getKhuyenMai() != null) {
+                stmt.setString(5, hoaDon.getKhuyenMai().getMaKhuyenMai());
+            } else {
+                stmt.setNull(5, java.sql.Types.VARCHAR);
+            }
+            
+            stmt.setDouble(6, hoaDon.getTongTien());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -90,12 +87,26 @@ return null;
     }
 
     public boolean capNhatHoaDon(HoaDon hoaDon) {
-        String sql = "UPDATE HoaDon SET ngayLap = ?, maNV = ? WHERE maHoaDon = ?";
+        String sql = "UPDATE HoaDon SET ngayLap = ?, maNhanVien = ?, maKhachHang = ?, maKhuyenMai = ?, tongTien = ? WHERE maHoaDon = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setDate(1, new java.sql.Date(hoaDon.getNgayLap().getTime()));
-            stmt.setString(2, hoaDon.getMaNhanVien());
-            stmt.setString(3, hoaDon.getMaHoaDon());
+            stmt.setString(2, hoaDon.getNhanVien().getMaNhanVien());
+            
+            if (hoaDon.getKhachHang() != null) {
+                stmt.setString(3, hoaDon.getKhachHang().getMaKhachHang());
+            } else {
+                stmt.setNull(3, java.sql.Types.VARCHAR);
+            }
+            
+            if (hoaDon.getKhuyenMai() != null) {
+                stmt.setString(4, hoaDon.getKhuyenMai().getMaKhuyenMai());
+            } else {
+                stmt.setNull(4, java.sql.Types.VARCHAR);
+            }
+            
+            stmt.setDouble(5, hoaDon.getTongTien());
+            stmt.setString(6, hoaDon.getMaHoaDon());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -110,10 +121,23 @@ return null;
             stmt.setString(1, maHoaDon);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
+                NhanVien nhanVien = nhanVienDAO.getNhanVienTheoMa(rs.getString("maNhanVien"));
+                KhachHang khachHang = null;
+                if (rs.getString("maKhachHang") != null) {
+                    khachHang = khachHangDAO.getKhachHangTheoMa(rs.getString("maKhachHang"));
+                }
+                
+                KhuyenMai khuyenMai = null;
+                if (rs.getString("maKhuyenMai") != null) {
+                    khuyenMai = khuyenMaiDAO.getKhuyenMaiTheoMa(rs.getString("maKhuyenMai"));
+                }
+                
                 HoaDon hoaDon = new HoaDon(
                         rs.getString("maHoaDon"),
                         rs.getDate("ngayLap"),
-                        rs.getString("maNV"));
+                        nhanVien,
+                        khachHang,
+                        khuyenMai);
                 return hoaDon;
             }
         } catch (SQLException e) {
@@ -129,10 +153,23 @@ return null;
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
+                NhanVien nhanVien = nhanVienDAO.getNhanVienTheoMa(rs.getString("maNhanVien"));
+                KhachHang khachHang = null;
+                if (rs.getString("maKhachHang") != null) {
+                    khachHang = khachHangDAO.getKhachHangTheoMa(rs.getString("maKhachHang"));
+                }
+                
+                KhuyenMai khuyenMai = null;
+                if (rs.getString("maKhuyenMai") != null) {
+                    khuyenMai = khuyenMaiDAO.getKhuyenMaiTheoMa(rs.getString("maKhuyenMai"));
+                }
+                
                 HoaDon hoaDon = new HoaDon(
                         rs.getString("maHoaDon"),
                         rs.getDate("ngayLap"),
-                        rs.getString("maNV"));
+                        nhanVien,
+                        khachHang,
+                        khuyenMai);
                 danhSachHoaDon.add(hoaDon);
             }
         } catch (SQLException e) {
@@ -150,16 +187,43 @@ return null;
             stmt.setDate(2, new java.sql.Date(denNgay.getTime()));
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
+                NhanVien nhanVien = nhanVienDAO.getNhanVienTheoMa(rs.getString("maNhanVien"));
+                KhachHang khachHang = null;
+                if (rs.getString("maKhachHang") != null) {
+                    khachHang = khachHangDAO.getKhachHangTheoMa(rs.getString("maKhachHang"));
+                }
+                
+                KhuyenMai khuyenMai = null;
+                if (rs.getString("maKhuyenMai") != null) {
+                    khuyenMai = khuyenMaiDAO.getKhuyenMaiTheoMa(rs.getString("maKhuyenMai"));
+                }
+                
                 HoaDon hoaDon = new HoaDon(
                         rs.getString("maHoaDon"),
                         rs.getDate("ngayLap"),
-                        rs.getString("maNV"));
+                        nhanVien,
+                        khachHang,
+                        khuyenMai);
                 danhSachHoaDon.add(hoaDon);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return danhSachHoaDon;
+    }
+
+    public ResultSet getHoaDonByDateRange(String fromDate, String toDate) throws SQLException {
+        String query = "SELECT h.maHoaDon, h.ngayLap, sp.tenSanPham, lsp.tenLoaiSanPham, cthd.soLuong, (cthd.soLuong * cthd.donGia) AS doanhThu " +
+                "FROM HoaDon h " +
+                "JOIN ChiTietHoaDon cthd ON h.maHoaDon = cthd.maHoaDon " +
+                "JOIN SanPham sp ON cthd.maSanPham = sp.maSanPham " +
+                "JOIN LoaiSanPham lsp ON sp.maLoaiSanPham = lsp.maLoaiSanPham " +
+                "WHERE h.ngayLap BETWEEN ? AND ?";
+        
+        PreparedStatement ps = con.prepareStatement(query);
+        ps.setDate(1, java.sql.Date.valueOf(fromDate));
+        ps.setDate(2, java.sql.Date.valueOf(toDate));
+        return ps.executeQuery();
     }
 
     public String taoMaHoaDonMoi() {

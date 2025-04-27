@@ -3,34 +3,32 @@ package gui;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
+import java.net.URL;
+import java.util.List;
 
 import dao.LoaiSanPhamDAO;
 import dao.SanPhamDAO;
 import entity.LoaiSanPham;
 import entity.SanPham;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.net.URL;
-import java.util.List;
-
 public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListener {
     private JTable productTable;
     private DefaultTableModel tableModel;
-    private JButton btnTaoHD;
-    private JButton btnCapNhat;
-    private JButton btnThongKe;
-    private JTextField txtTim;
     private JButton btnTim;
     private JButton btnLoc;
+    private JTextField txtTim;
     private JComboBox<String> cbxLoc;
     private JButton btnThem;
     private JButton btnXoa;
     private JButton btnSua;
     private JButton btnLuu;
+    private JButton btnChonAnh;
     private JTextField txtMa;
     private JTextField txtTen;
     private JComboBox<String> cbxLoai;
@@ -39,6 +37,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
     private JTextField txtGiaNhap;
     private JTextField txtGiaBan;
     private JTextField txtUrlHinhAnh;
+    private JLabel lblHinhAnh;
 
     private SanPhamDAO sanPhamDAO;
     private LoaiSanPhamDAO loaiSanPhamDAO;
@@ -55,10 +54,6 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         danhSachLoaiSP = loaiSanPhamDAO.getAllLoaiSanPham();
         if (danhSachLoaiSP.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Không có loại sản phẩm nào trong CSDL!");
-            // Lưu vào CSDL
-            for (LoaiSanPham loaiSP : danhSachLoaiSP) {
-                loaiSanPhamDAO.themLoaiSanPham(loaiSP);
-            }
         }
 
         JPanel pBorder = new JPanel(new BorderLayout());
@@ -68,6 +63,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         // Trung tâm: Tìm SP và Bảng SP
         JPanel pCenter = new JPanel();
         pCenter.setLayout(new BorderLayout());
+        
         // Tìm SP
         JPanel pTim = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pTim.setBorder(BorderFactory.createTitledBorder("Tìm sản phẩm"));
@@ -78,7 +74,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         String[] loaiSPArray = new String[danhSachLoaiSP.size() + 1];
         loaiSPArray[0] = "Tất cả";
         for (int i = 0; i < danhSachLoaiSP.size(); i++) {
-            loaiSPArray[i + 1] = danhSachLoaiSP.get(i).getTenLoaiSP();
+            loaiSPArray[i + 1] = danhSachLoaiSP.get(i).getTenLoaiSanPham();
         }
 
         cbxLoc = new JComboBox<>(loaiSPArray);
@@ -124,10 +120,35 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         // Nhập SP + các button
         JPanel pBottom = new JPanel();
         pBottom.setLayout(new BorderLayout());
+        
         // Nhập SP
         JPanel pNhap = new JPanel();
         pNhap.setLayout(new BoxLayout(pNhap, BoxLayout.Y_AXIS));
         pNhap.setBorder(new EmptyBorder(10, 10, 10, 10));
+        
+        // Panel hình ảnh (đưa lên đầu)
+        JPanel pHinhAnh = new JPanel(new BorderLayout());
+        JPanel pUrlHinhAnh = new JPanel(new BorderLayout());
+        JLabel lblUrlHinhAnh = new JLabel("URL hình ảnh:");
+        lblUrlHinhAnh.setPreferredSize(new Dimension(100, 20));
+        txtUrlHinhAnh = new JTextField();
+        btnChonAnh = new JButton("Chọn ảnh");
+        pUrlHinhAnh.add(lblUrlHinhAnh, BorderLayout.WEST);
+        pUrlHinhAnh.add(txtUrlHinhAnh, BorderLayout.CENTER);
+        pUrlHinhAnh.add(btnChonAnh, BorderLayout.EAST);
+        
+        // Panel hiển thị hình ảnh
+        JPanel pPreviewHinhAnh = new JPanel(new BorderLayout());
+        lblHinhAnh = new JLabel();
+        lblHinhAnh.setPreferredSize(new Dimension(150, 150));
+        lblHinhAnh.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        lblHinhAnh.setHorizontalAlignment(SwingConstants.CENTER);
+        pPreviewHinhAnh.add(lblHinhAnh, BorderLayout.CENTER);
+        
+        pHinhAnh.add(pUrlHinhAnh, BorderLayout.NORTH);
+        pHinhAnh.add(pPreviewHinhAnh, BorderLayout.CENTER);
+        pNhap.add(pHinhAnh);
+        pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
 
         // Mã SP
         JPanel pMa = new JPanel(new BorderLayout());
@@ -213,16 +234,6 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         pNhap.add(pGia);
         pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Hình ảnh
-        JPanel pHinhAnh = new JPanel(new BorderLayout());
-        JLabel lblHinhAnh = new JLabel("URL hình ảnh:");
-        lblHinhAnh.setPreferredSize(new Dimension(100, 20));
-        txtUrlHinhAnh = new JTextField();
-        pHinhAnh.add(lblHinhAnh, BorderLayout.WEST);
-        pHinhAnh.add(txtUrlHinhAnh, BorderLayout.CENTER);
-        pNhap.add(pHinhAnh);
-        pNhap.add(Box.createRigidArea(new Dimension(0, 10)));
-
         // Các button
         JPanel pNut = new JPanel(new GridLayout(4, 0, 10, 10));
         btnThem = new JButton("THÊM");
@@ -248,10 +259,30 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         btnXoa.addActionListener(this);
         btnSua.addActionListener(this);
         btnLuu.addActionListener(this);
+        btnChonAnh.addActionListener(this);
         productTable.addMouseListener(this);
+        
+        // Thêm sự kiện cho URL hình ảnh để hiển thị preview
+        txtUrlHinhAnh.addActionListener(e -> updateImagePreview());
 
         // Load dữ liệu sản phẩm từ CSDL
         loadSanPhamData();
+    }
+    
+    private void updateImagePreview() {
+        String urlHinhAnh = txtUrlHinhAnh.getText().trim();
+        if (!urlHinhAnh.isEmpty()) {
+            ImageIcon icon = loadImageIcon(urlHinhAnh);
+            if (icon != null) {
+                lblHinhAnh.setIcon(icon);
+            } else {
+                lblHinhAnh.setIcon(null);
+                lblHinhAnh.setText("Không tìm thấy hình ảnh");
+            }
+        } else {
+            lblHinhAnh.setIcon(null);
+            lblHinhAnh.setText("");
+        }
     }
 
     private void loadSanPhamData() {
@@ -275,10 +306,10 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 URL imageUrl = getClass().getResource(mappedUrl);
                 if (imageUrl != null) {
                     icon = new ImageIcon(imageUrl);
-                    Image image = icon.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+                    Image image = icon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                     icon = new ImageIcon(image);
                 } else {
-                	System.out.println("Đường dẫn hình ảnh: " + mappedUrl + ", URL: " + imageUrl);
+                    System.out.println("Đường dẫn hình ảnh: " + mappedUrl + ", URL: " + imageUrl);
                 }
             } catch (Exception ex) {
                 System.err.println("Lỗi tải hình ảnh " + mappedUrl + ": " + ex.getMessage());
@@ -289,7 +320,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 URL defaultUrl = getClass().getResource("/img/default.jpg");
                 if (defaultUrl != null) {
                     icon = new ImageIcon(defaultUrl);
-                    Image image = icon.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+                    Image image = icon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                     icon = new ImageIcon(image);
                 } else {
                     System.err.println("Không tìm thấy hình ảnh mặc định: /img/default.png");
@@ -310,6 +341,8 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         txtGiaNhap.setText("");
         txtGiaBan.setText("");
         txtUrlHinhAnh.setText("");
+        lblHinhAnh.setIcon(null);
+        lblHinhAnh.setText("");
         txtMa.setEditable(true);
     }
 
@@ -322,11 +355,15 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             JOptionPane.showMessageDialog(this, "URL hình ảnh phải là tệp .png, .jpg, .jpeg hoặc .gif.");
             return false;
         }
+        
+        // Kiểm tra xem có tồn tại trong thư mục /img/ không
         String mappedUrl = "/img/" + urlHinhAnh;
         URL imageUrl = getClass().getResource(mappedUrl);
         if (imageUrl == null) {
-            JOptionPane.showMessageDialog(this, "Hình ảnh " + urlHinhAnh + " không tồn tại trong thư mục /img/.");
-            return false;
+            int confirm = JOptionPane.showConfirmDialog(this, 
+                "Hình ảnh " + urlHinhAnh + " không tồn tại trong thư mục /img/.\nBạn có muốn tiếp tục?", 
+                "Xác nhận", JOptionPane.YES_NO_OPTION);
+            return confirm == JOptionPane.YES_OPTION;
         }
         return true;
     }
@@ -377,6 +414,10 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 JOptionPane.showMessageDialog(this, "Giá nhập phải lớn hơn 0.");
                 return false;
             }
+            
+            // Tự động tính giá bán = giá nhập * 1.5
+            double giaBan = gia * 1.5;
+            txtGiaBan.setText(String.valueOf(giaBan));
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Giá nhập phải là số thực.");
             return false;
@@ -387,8 +428,8 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
 
     private String getMaLoaiSPFromTen(String tenLoaiSP) {
         for (LoaiSanPham loaiSP : danhSachLoaiSP) {
-            if (loaiSP.getTenLoaiSP().equals(tenLoaiSP)) {
-                return loaiSP.getMaLoaiSP();
+            if (loaiSP.getTenLoaiSanPham().equals(tenLoaiSP)) {
+                return loaiSP.getMaLoaiSanPham();
             }
         }
         JOptionPane.showMessageDialog(this, "Không tìm thấy loại sản phẩm!");
@@ -399,10 +440,10 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
         ImageIcon icon = loadImageIcon(sp.getUrlHinhAnh());
         Object[] rowData = new Object[]{
                 icon,
-                sp.getMaSP(),
-                sp.getTenSP(),
-                sp.getLoaiSP().getTenLoaiSP(),
-                sp.getSlHienCo(),
+                sp.getMaSanPham(),
+                sp.getTenSanPham(),
+                sp.getLoaiSanPham().getTenLoaiSanPham(),
+                sp.getSoLuongHienCo(),
                 sp.getGiaNhap(),
                 sp.getGiaBan()
         };
@@ -437,6 +478,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             SanPham sp = sanPhamDAO.getSanPhamTheoMa(txtMa.getText().trim());
             if (sp != null) {
                 txtUrlHinhAnh.setText(sp.getUrlHinhAnh()); // Đặt đúng URL
+                updateImagePreview(); // Hiển thị hình ảnh khi click vào sản phẩm
             }
         }
     }
@@ -468,6 +510,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             String tenLoaiSP = cbxLoai.getSelectedItem().toString();
             int soLuong = Integer.parseInt(txtSLThem.getText().trim());
             double giaNhap = Double.parseDouble(txtGiaNhap.getText().trim());
+            double giaBan = Double.parseDouble(txtGiaBan.getText().trim());
             String urlHinhAnh = txtUrlHinhAnh.getText().trim();
 
             String maLoaiSP = getMaLoaiSPFromTen(tenLoaiSP);
@@ -479,7 +522,7 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             }
 
             LoaiSanPham loaiSP = new LoaiSanPham(maLoaiSP, tenLoaiSP);
-            SanPham sp = new SanPham(maSP, tenSP, loaiSP, soLuong, giaNhap, urlHinhAnh);
+            SanPham sp = new SanPham(maSP, tenSP, loaiSP, soLuong, giaNhap, giaBan, urlHinhAnh);
 
             if (sanPhamDAO.themSanPham(sp)) {
                 updateTableRow(-1, sp, true);
@@ -525,13 +568,14 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
                 int slThem = Integer.parseInt(txtSLThem.getText().trim());
                 int slMoi = slHienCo + slThem;
                 double giaNhap = Double.parseDouble(txtGiaNhap.getText().trim());
+                double giaBan = Double.parseDouble(txtGiaBan.getText().trim());
                 String urlHinhAnh = txtUrlHinhAnh.getText().trim();
 
                 String maLoaiSP = getMaLoaiSPFromTen(tenLoaiSP);
                 if (maLoaiSP == null) return;
 
                 LoaiSanPham loaiSP = new LoaiSanPham(maLoaiSP, tenLoaiSP);
-                SanPham sp = new SanPham(maSP, tenSP, loaiSP, slMoi, giaNhap, urlHinhAnh);
+                SanPham sp = new SanPham(maSP, tenSP, loaiSP, slMoi, giaNhap, giaBan, urlHinhAnh);
 
                 if (sanPhamDAO.capNhatSanPham(sp)) {
                     updateTableRow(row, sp, false);
@@ -576,6 +620,29 @@ public class QuanLiSPPanel extends JPanel implements ActionListener, MouseListen
             } else {
                 for (SanPham sp : ketQuaLoc) {
                     updateTableRow(-1, sp, true);
+                }
+            }
+        } else if (o.equals(btnChonAnh)) {
+            // Hiển thị dialog chọn ảnh
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Chọn hình ảnh");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                String fileName = selectedFile.getName();
+                
+                // Kiểm tra định dạng file
+                if (fileName.toLowerCase().endsWith(".jpg") || 
+                    fileName.toLowerCase().endsWith(".jpeg") || 
+                    fileName.toLowerCase().endsWith(".png") || 
+                    fileName.toLowerCase().endsWith(".gif")) {
+                    
+                    txtUrlHinhAnh.setText(fileName);
+                    updateImagePreview();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Vui lòng chọn file hình ảnh (jpg, jpeg, png, gif)");
                 }
             }
         }

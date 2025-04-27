@@ -144,9 +144,9 @@ public class KhuyenMaiPanel extends JPanel {
         // Display initial promotion list
         for (KhuyenMai km : danhSachKhuyenMai) {
             kmTableModel.addRow(new Object[]{
-                    km.getMaKM(),
-                    km.getTenKM(),
-                    km.getGiaTriKM()
+                    km.getMaKhuyenMai(),
+                    km.getTenKhuyenMai(),
+                    km.getGiaTriKhuyenMai()
             });
         }
 
@@ -160,9 +160,9 @@ public class KhuyenMaiPanel extends JPanel {
                     kmTableModel.setRowCount(0);
                     for (KhuyenMai km : danhSachKhuyenMai) {
                         kmTableModel.addRow(new Object[]{
-                                km.getMaKM(),
-                                km.getTenKM(),
-                                km.getGiaTriKM()
+                        		km.getMaKhuyenMai(),
+                                km.getTenKhuyenMai(),
+                                km.getGiaTriKhuyenMai()
                         });
                     }
                     return;
@@ -178,9 +178,9 @@ public class KhuyenMaiPanel extends JPanel {
                 } else {
                     for (KhuyenMai km : ketQuaTimKiem) {
                         kmTableModel.addRow(new Object[]{
-                                km.getMaKM(),
-                                km.getTenKM(),
-                                km.getGiaTriKM()
+                        		km.getMaKhuyenMai(),
+                                km.getTenKhuyenMai(),
+                                km.getGiaTriKhuyenMai()
                         });
                     }
                 }
@@ -219,9 +219,9 @@ public class KhuyenMaiPanel extends JPanel {
                     if (khuyenMaiDAO.themKhuyenMai(km)) {
                         danhSachKhuyenMai.add(km);
                         kmTableModel.addRow(new Object[]{
-                                km.getMaKM(),
-                                km.getTenKM(),
-                                km.getGiaTriKM()
+                        		km.getMaKhuyenMai(),
+                                km.getTenKhuyenMai(),
+                                km.getGiaTriKhuyenMai()
                         });
 
                         // Clear form
@@ -248,7 +248,7 @@ public class KhuyenMaiPanel extends JPanel {
                     int confirm = JOptionPane.showConfirmDialog(KhuyenMaiPanel.this, "Bạn có chắc muốn xóa khuyến mãi " + maKM + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         if (khuyenMaiDAO.xoaKhuyenMai(maKM)) {
-                            danhSachKhuyenMai.removeIf(km -> km.getMaKM().equals(maKM));
+                            danhSachKhuyenMai.removeIf(km -> km.getMaKhuyenMai().equals(maKM));
                             kmTableModel.removeRow(selectedRow);
                             JOptionPane.showMessageDialog(KhuyenMaiPanel.this, "Xóa khuyến mãi thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         } else {
@@ -305,7 +305,7 @@ public class KhuyenMaiPanel extends JPanel {
                         if (khuyenMaiDAO.capNhatKhuyenMai(km)) {
                             // Update in-memory list
                             for (int i = 0; i < danhSachKhuyenMai.size(); i++) {
-                                if (danhSachKhuyenMai.get(i).getMaKM().equals(maKM)) {
+                                if (danhSachKhuyenMai.get(i).getMaKhuyenMai().equals(maKM)) {
                                     danhSachKhuyenMai.set(i, km);
                                     break;
                                 }

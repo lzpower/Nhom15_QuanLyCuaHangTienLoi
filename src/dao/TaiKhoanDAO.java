@@ -9,13 +9,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import connectDB.ConnectDB;
+import entity.NhanVien;
 import entity.TaiKhoan;
 
 public class TaiKhoanDAO {
     private Connection con;
+    private NhanVienDAO nhanVienDAO;
 
     public TaiKhoanDAO() {
         con = ConnectDB.getConnection();
+        nhanVienDAO = new NhanVienDAO();
+    }
+    
+    public TaiKhoanDAO(Connection conn) {
+        this.con = conn;
+        nhanVienDAO = new NhanVienDAO(conn);
     }
 
     public boolean themTaiKhoan(TaiKhoan taiKhoan) {
@@ -25,7 +33,13 @@ public class TaiKhoanDAO {
             stmt.setString(1, taiKhoan.getTenDangNhap());
             stmt.setString(2, taiKhoan.getMatKhau());
             stmt.setString(3, taiKhoan.getVaiTro());
-            stmt.setString(4, taiKhoan.getMaNhanVien());
+            
+            if (taiKhoan.getNhanVien() != null) {
+                stmt.setString(4, taiKhoan.getNhanVien().getMaNhanVien());
+            } else {
+                stmt.setNull(4, java.sql.Types.VARCHAR);
+            }
+            
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -51,7 +65,13 @@ public class TaiKhoanDAO {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, taiKhoan.getMatKhau());
             stmt.setString(2, taiKhoan.getVaiTro());
-            stmt.setString(3, taiKhoan.getMaNhanVien());
+            
+            if (taiKhoan.getNhanVien() != null) {
+                stmt.setString(3, taiKhoan.getNhanVien().getMaNhanVien());
+            } else {
+                stmt.setNull(3, java.sql.Types.VARCHAR);
+            }
+            
             stmt.setString(4, taiKhoan.getTenDangNhap());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -67,11 +87,16 @@ public class TaiKhoanDAO {
             stmt.setString(1, tenDangNhap);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
+                NhanVien nhanVien = null;
+                if (rs.getString("maNhanVien") != null) {
+                    nhanVien = nhanVienDAO.getNhanVienTheoMa(rs.getString("maNhanVien"));
+                }
+                
                 TaiKhoan taiKhoan = new TaiKhoan(
                         rs.getString("tenDangNhap"),
                         rs.getString("matKhau"),
                         rs.getString("vaiTro"),
-                        rs.getString("maNhanVien"));
+                        nhanVien);
                 return taiKhoan;
             }
         } catch (SQLException e) {
@@ -87,11 +112,16 @@ public class TaiKhoanDAO {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
+                NhanVien nhanVien = null;
+                if (rs.getString("maNhanVien") != null) {
+                    nhanVien = nhanVienDAO.getNhanVienTheoMa(rs.getString("maNhanVien"));
+                }
+                
                 TaiKhoan taiKhoan = new TaiKhoan(
                         rs.getString("tenDangNhap"),
                         rs.getString("matKhau"),
                         rs.getString("vaiTro"),
-                        rs.getString("maNhanVien"));
+                        nhanVien);
                 danhSachTaiKhoan.add(taiKhoan);
             }
         } catch (SQLException e) {

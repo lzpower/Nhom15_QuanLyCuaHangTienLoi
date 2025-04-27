@@ -3,53 +3,52 @@ package entity;
 import java.util.Objects;
 
 public class KhachHang {
-    private String maKH;
-    private String tenKH;
-    private String soDT;
+    private String maKhachHang;
+    private String tenKhachHang;
+    private String soDienThoai;
     private int soDiem;
 
-    public KhachHang(String maKH, String tenKH, String soDT, int soDiem) {
-        super();
-        setMaKH(maKH);
-        setTenKH(tenKH);
-        setSoDT(soDT);
+    public KhachHang(String maKhachHang, String tenKhachHang, String soDienThoai, int soDiem) {
+        setMaKhachHang(maKhachHang);
+        setTenKhachHang(tenKhachHang);
+        setSoDienThoai(soDienThoai);
         setSoDiem(soDiem);
     }
 
-    public String getMaKH() {
-        return maKH;
+    public String getMaKhachHang() {
+        return maKhachHang;
     }
 
-    public void setMaKH(String maKH) {
-        if (maKH == null || maKH.trim().isEmpty()) {
+    public void setMaKhachHang(String maKhachHang) {
+        if (maKhachHang == null || maKhachHang.trim().isEmpty()) {
             throw new IllegalArgumentException("Mã khách hàng không được để trống");
         }
-        this.maKH = maKH;
+        this.maKhachHang = maKhachHang;
     }
 
-    public String getTenKH() {
-        return tenKH;
+    public String getTenKhachHang() {
+        return tenKhachHang;
     }
 
-    public void setTenKH(String tenKH) {
-        if (tenKH == null || tenKH.trim().isEmpty()) {
+    public void setTenKhachHang(String tenKhachHang) {
+        if (tenKhachHang == null || tenKhachHang.trim().isEmpty()) {
             throw new IllegalArgumentException("Tên khách hàng không được để trống");
         }
-        this.tenKH = tenKH;
+        this.tenKhachHang = tenKhachHang;
     }
 
-    public String getSoDT() {
-        return soDT;
+    public String getSoDienThoai() {
+        return soDienThoai;
     }
 
-    public void setSoDT(String soDT) {
-        if (soDT == null || soDT.trim().isEmpty()) {
+    public void setSoDienThoai(String soDienThoai) {
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
             throw new IllegalArgumentException("Số điện thoại không được để trống");
         }
-        if (!soDT.matches("\\d{10}")) {
+        if (!soDienThoai.matches("\\d{10}")) {
             throw new IllegalArgumentException("Số điện thoại phải là 10 chữ số");
         }
-        this.soDT = soDT;
+        this.soDienThoai = soDienThoai;
     }
 
     public int getSoDiem() {
@@ -65,12 +64,12 @@ public class KhachHang {
 
     @Override
     public String toString() {
-        return "KhachHang [maKH=" + maKH + ", tenKH=" + tenKH + ", soDT=" + soDT + ", soDiem=" + soDiem + "]";
+        return "KhachHang [maKhachHang=" + maKhachHang + ", tenKhachHang=" + tenKhachHang + ", soDienThoai=" + soDienThoai + ", soDiem=" + soDiem + "]";
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(maKH);
+        return Objects.hash(maKhachHang);
     }
 
     @Override
@@ -80,6 +79,6 @@ public class KhachHang {
         if (obj == null || getClass() != obj.getClass())
             return false;
         KhachHang other = (KhachHang) obj;
-        return Objects.equals(maKH, other.maKH);
+        return Objects.equals(maKhachHang, other.maKhachHang);
     }
 }

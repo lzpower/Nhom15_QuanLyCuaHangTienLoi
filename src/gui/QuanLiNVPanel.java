@@ -3,6 +3,7 @@ package gui;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,13 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dao.NhanVienDAO;
+import entity.ChucVu;
 import entity.NhanVien;
 
 public class QuanLiNVPanel extends JPanel implements MouseListener {
     private DefaultTableModel nvTableModel;
     private JTable nvTable;
     private JTextField txtTimNV, txtMaNV, txtTenNV, txtChucVu, txtSoDienThoai, txtTenDangNhap;
-    private JPasswordField txtMatKhau;
+    private JTextField txtMatKhau;
     private List<NhanVien> danhSachNhanVien;
     private NhanVienDAO nhanVienDAO;
 
@@ -30,19 +32,6 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
         
         // Lấy danh sách nhân viên từ CSDL
         danhSachNhanVien = nhanVienDAO.getAllNhanVien();
-        if (danhSachNhanVien.isEmpty()) {
-            // Nếu không có dữ liệu, thêm dữ liệu mẫu
-            danhSachNhanVien.add(new NhanVien("NV001", "Nguyễn Văn A", "Nhân viên bán hàng", "0901234567", "nva", "pass123"));
-            danhSachNhanVien.add(new NhanVien("NV002", "Trần Thị B", "Quản lý", "0912345678", "ttb", "pass456"));
-            danhSachNhanVien.add(new NhanVien("NV003", "Lê Văn C", "Nhân viên kho", "0923456789", "lvc", "pass789"));
-            danhSachNhanVien.add(new NhanVien("NV004", "Phạm Thị D", "Nhân viên bán hàng", "0934567890", "ptd", "pass101"));
-            
-            // Lưu dữ liệu mẫu vào CSDL
-            for (NhanVien nv : danhSachNhanVien) {
-                nhanVienDAO.themNhanVien(nv);
-            }
-        }
-
         // Tạo giao diện
         JPanel formQuanLiNV = createFormQuanLiNV();
         add(formQuanLiNV, BorderLayout.CENTER);
@@ -63,7 +52,7 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
 
         // Phần giữa: Bảng nhân viên
         JPanel pCenter = new JPanel(new BorderLayout());
-        String[] columnNames = {"Mã NV", "Tên NV", "Chức vụ", "Số điện thoại", "Tên đăng nhập", "Mật khẩu"};
+        String[] columnNames = {"Mã NV", "Tên NV", "Chức vụ", "Số điện thoại"};
         nvTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -135,7 +124,7 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
         JPanel pMatKhau = new JPanel(new BorderLayout());
         JLabel lblMatKhau = new JLabel("Mật khẩu:");
         lblMatKhau.setPreferredSize(new Dimension(120, 20));
-        txtMatKhau = new JPasswordField();
+        txtMatKhau = new JTextField();
         pMatKhau.add(lblMatKhau, BorderLayout.WEST);
         pMatKhau.add(txtMatKhau, BorderLayout.CENTER);
         pNhap.add(pMatKhau);
@@ -159,12 +148,10 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
         // Hiển thị danh sách nhân viên ban đầu
         for (NhanVien nv : danhSachNhanVien) {
             nvTableModel.addRow(new Object[]{
-                    nv.getMaNV(),
-                    nv.getTenNV(),
+                    nv.getMaNhanVien(),
+                    nv.getTenNhanVien(),
                     nv.getChucVu(),
-                    nv.getSoDT(),
-                    nv.getTenDangNhap(),
-                    nv.getMatKhau()
+                    nv.getSoDienThoai()
             });
         }
         //mouselistener
@@ -195,12 +182,10 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
                     nvTableModel.setRowCount(0);
                     for (NhanVien nv : danhSachNhanVien) {
                         nvTableModel.addRow(new Object[]{
-                                nv.getMaNV(),
-                                nv.getTenNV(),
+                        		nv.getMaNhanVien(),
+                                nv.getTenNhanVien(),
                                 nv.getChucVu(),
-                                nv.getSoDT(),
-                                nv.getTenDangNhap(),
-                                nv.getMatKhau()
+                                nv.getSoDienThoai()
                         });
                     }
                     JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Vui lòng nhập mã nhân viên!", "Thông báo", JOptionPane.WARNING_MESSAGE);
@@ -221,12 +206,10 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
                 	txtTimNV.setText("");
                     for (NhanVien nv : ketQuaTimKiem) {
                         nvTableModel.addRow(new Object[]{
-                                nv.getMaNV(),
-                                nv.getTenNV(),
-                                nv.getChucVu(),
-                                nv.getSoDT(),
-                                nv.getTenDangNhap(),
-                                nv.getMatKhau()
+                                nv.getMaNhanVien(),
+                                nv.getTenNhanVien(),
+                                nv.getChucVu().getTenChucVu(),
+                                nv.getSoDienThoai()
                         });
                     }
                 }
@@ -241,13 +224,11 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
                 String tenNV = txtTenNV.getText().trim();
                 String chucVu = txtChucVu.getText().trim();
                 String soDienThoai = txtSoDienThoai.getText().trim();
-                String tenDangNhap = txtTenDangNhap.getText().trim();
-                String matKhau = new String(txtMatKhau.getPassword()).trim();
 
                 // Kiểm tra dữ liệu
                 try {
                     // Kiểm tra trống (được xử lý trong setter của NhanVien)
-                    if (maNV.isEmpty() || tenNV.isEmpty() || chucVu.isEmpty() || soDienThoai.isEmpty() || tenDangNhap.isEmpty() || matKhau.isEmpty()) {
+                    if (maNV.isEmpty() || tenNV.isEmpty() || chucVu.isEmpty() || soDienThoai.isEmpty()) {
                         throw new IllegalArgumentException("Vui lòng nhập đầy đủ thông tin!");
                     }
 
@@ -261,22 +242,15 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
                         throw new IllegalArgumentException("Mã nhân viên đã tồn tại!");
                     }
 
-                    // Kiểm tra tên đăng nhập trùng
-                    if (nhanVienDAO.getNhanVienTheoTenDangNhap(tenDangNhap) != null) {
-                        throw new IllegalArgumentException("Tên đăng nhập đã tồn tại!");
-                    }
-
                     // Thêm nhân viên
-                    NhanVien nv = new NhanVien(maNV, tenNV, chucVu, soDienThoai, tenDangNhap, matKhau);
+                    NhanVien nv = new NhanVien(maNV, tenNV, new ChucVu(chucVu), soDienThoai);
                     if (nhanVienDAO.themNhanVien(nv)) {
                         danhSachNhanVien.add(nv);
                         nvTableModel.addRow(new Object[]{
-                                nv.getMaNV(),
-                                nv.getTenNV(),
+                        		nv.getMaNhanVien(),
+                                nv.getTenNhanVien(),
                                 nv.getChucVu(),
-                                nv.getSoDT(),
-                                nv.getTenDangNhap(),
-                                nv.getMatKhau()
+                                nv.getSoDienThoai()
                         });
 
                         // Xóa form
@@ -301,7 +275,7 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
                     int confirm = JOptionPane.showConfirmDialog(QuanLiNVPanel.this, "Bạn có chắc muốn xóa nhân viên " + maNV + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         if (nhanVienDAO.xoaNhanVien(maNV)) {
-                            danhSachNhanVien.removeIf(nv -> nv.getMaNV().equalsIgnoreCase(maNV));
+                            danhSachNhanVien.removeIf(nv -> nv.getMaNhanVien().equalsIgnoreCase(maNV));
                             nvTableModel.removeRow(selectedRow);
                             JOptionPane.showMessageDialog(QuanLiNVPanel.this, "Xóa nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         } else {
@@ -345,12 +319,10 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
                     String tenNV = txtTenNV.getText().trim();
                     String chucVu = txtChucVu.getText().trim();
                     String soDienThoai = txtSoDienThoai.getText().trim();
-                    String tenDangNhap = txtTenDangNhap.getText().trim();
-                    String matKhau = new String(txtMatKhau.getPassword()).trim();
 
                     // Kiểm tra dữ liệu
                     try {
-                        if (tenNV.isEmpty() || chucVu.isEmpty() || soDienThoai.isEmpty() || tenDangNhap.isEmpty() || matKhau.isEmpty()) {
+                        if (tenNV.isEmpty() || chucVu.isEmpty() || soDienThoai.isEmpty()) {
                             throw new IllegalArgumentException("Vui lòng nhập đầy đủ thông tin!");
                         }
 
@@ -360,11 +332,11 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
                         }
 
                         // Cập nhật nhân viên
-                        NhanVien nv = new NhanVien(maNV, tenNV, chucVu, soDienThoai, tenDangNhap, matKhau);
+                        NhanVien nv = new NhanVien(maNV, tenNV, new ChucVu(chucVu), soDienThoai);
                         if (nhanVienDAO.capNhatNhanVien(nv)) {
                             // Cập nhật danh sách trong bộ nhớ
                             for (int i = 0; i < danhSachNhanVien.size(); i++) {
-                                if (danhSachNhanVien.get(i).getMaNV().equals(maNV)) {
+                                if (danhSachNhanVien.get(i).getMaNhanVien().equals(maNV)) {
                                     danhSachNhanVien.set(i, nv);
                                     break;
                                 }
@@ -374,8 +346,6 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
                             nvTableModel.setValueAt(tenNV, selectedRow, 1);
                             nvTableModel.setValueAt(chucVu, selectedRow, 2);
                             nvTableModel.setValueAt(soDienThoai, selectedRow, 3);
-                            nvTableModel.setValueAt(tenDangNhap, selectedRow, 4);
-                            nvTableModel.setValueAt(matKhau, selectedRow, 5);
 
                             // Xóa form
                             clearForm();
@@ -413,12 +383,10 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
     	nvTableModel.setRowCount(0);
     	for (NhanVien nv : danhSachNhanVien) {
             nvTableModel.addRow(new Object[]{
-                    nv.getMaNV(),
-                    nv.getTenNV(),
-                    nv.getChucVu(),
-                    nv.getSoDT(),
-                    nv.getTenDangNhap(),
-                    nv.getMatKhau()
+            		nv.getMaNhanVien(),
+                    nv.getTenNhanVien(),
+                    nv.getChucVu().getTenChucVu(),
+                    nv.getSoDienThoai()
             });
         }
     }
@@ -430,8 +398,6 @@ public class QuanLiNVPanel extends JPanel implements MouseListener {
 		txtTenNV.setText(nvTable.getValueAt(row, 1).toString());
 		txtChucVu.setText(nvTable.getValueAt(row, 2).toString());
 		txtSoDienThoai.setText(nvTable.getValueAt(row, 3).toString());
-		txtTenDangNhap.setText(nvTable.getValueAt(row, 4).toString());
-		txtMatKhau.setText(nvTable.getValueAt(row, 5).toString());
 	}
 
 	@Override

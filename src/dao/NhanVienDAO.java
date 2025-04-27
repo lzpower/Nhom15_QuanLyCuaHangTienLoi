@@ -9,25 +9,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import connectDB.ConnectDB;
+import entity.ChucVu;
 import entity.NhanVien;
 
 public class NhanVienDAO {
     private Connection con;
+    private ChucVuDAO chucVuDAO;
 
     public NhanVienDAO() {
         con = ConnectDB.getConnection();
+        chucVuDAO = new ChucVuDAO();
+    }
+    
+    public NhanVienDAO(Connection conn) {
+        this.con = conn;
+        chucVuDAO = new ChucVuDAO(conn);
     }
 
     public boolean themNhanVien(NhanVien nhanVien) {
-        String sql = "INSERT INTO NhanVien(maNV, tenNV, chucVu, soDT, tenDangNhap, matKhau) VALUES(?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO NhanVien(maNhanVien, tenNhanVien, maChucVu, soDienThoai) VALUES(?, ?, ?, ?)";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, nhanVien.getMaNV());
-            stmt.setString(2, nhanVien.getTenNV());
-            stmt.setString(3, nhanVien.getChucVu());
-            stmt.setString(4, nhanVien.getSoDT());
-            stmt.setString(5, nhanVien.getTenDangNhap());
-            stmt.setString(6, nhanVien.getMatKhau());
+            stmt.setString(1, nhanVien.getMaNhanVien());
+            stmt.setString(2, nhanVien.getTenNhanVien());
+            stmt.setString(3, nhanVien.getChucVu().getMaChucVu());
+            stmt.setString(4, nhanVien.getSoDienThoai());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -35,11 +41,11 @@ public class NhanVienDAO {
         }
     }
 
-    public boolean xoaNhanVien(String maNV) {
-        String sql = "DELETE FROM NhanVien WHERE maNV = ?";
+    public boolean xoaNhanVien(String maNhanVien) {
+        String sql = "DELETE FROM NhanVien WHERE maNhanVien = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maNV);
+            stmt.setString(1, maNhanVien);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -48,15 +54,13 @@ public class NhanVienDAO {
     }
 
     public boolean capNhatNhanVien(NhanVien nhanVien) {
-        String sql = "UPDATE NhanVien SET tenNV = ?, chucVu = ?, soDT = ?, tenDangNhap = ?, matKhau = ? WHERE maNV = ?";
+        String sql = "UPDATE NhanVien SET tenNhanVien = ?, maChucVu = ?, soDienThoai = ? WHERE maNhanVien = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, nhanVien.getTenNV());
-            stmt.setString(2, nhanVien.getChucVu());
-            stmt.setString(3, nhanVien.getSoDT());
-            stmt.setString(4, nhanVien.getTenDangNhap());
-            stmt.setString(5, nhanVien.getMatKhau());
-            stmt.setString(6, nhanVien.getMaNV());
+            stmt.setString(1, nhanVien.getTenNhanVien());
+            stmt.setString(2, nhanVien.getChucVu().getMaChucVu());
+            stmt.setString(3, nhanVien.getSoDienThoai());
+            stmt.setString(4, nhanVien.getMaNhanVien());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -64,42 +68,19 @@ public class NhanVienDAO {
         }
     }
 
-    public NhanVien getNhanVienTheoMa(String maNV) {
-        String sql = "SELECT * FROM NhanVien WHERE maNV = ?";
+    public NhanVien getNhanVienTheoMa(String maNhanVien) {
+        String sql = "SELECT * FROM NhanVien WHERE maNhanVien = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maNV);
+            stmt.setString(1, maNhanVien);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
+                ChucVu chucVu = chucVuDAO.getChucVuTheoMa(rs.getString("maChucVu"));
                 NhanVien nhanVien = new NhanVien(
-                        rs.getString("maNV"),
-                        rs.getString("tenNV"),
-                        rs.getString("chucVu"),
-                        rs.getString("soDT"),
-                        rs.getString("tenDangNhap"),
-                        rs.getString("matKhau"));
-                return nhanVien;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public NhanVien getNhanVienTheoTenDangNhap(String tenDangNhap) {
-        String sql = "SELECT * FROM NhanVien WHERE tenDangNhap = ?";
-        try {
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, tenDangNhap);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                NhanVien nhanVien = new NhanVien(
-                        rs.getString("maNV"),
-                        rs.getString("tenNV"),
-                        rs.getString("chucVu"),
-                        rs.getString("soDT"),
-                        rs.getString("tenDangNhap"),
-                        rs.getString("matKhau"));
+                        rs.getString("maNhanVien"),
+                        rs.getString("tenNhanVien"),
+                        chucVu,
+                        rs.getString("soDienThoai"));
                 return nhanVien;
             }
         } catch (SQLException e) {
@@ -115,13 +96,12 @@ public class NhanVienDAO {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
+                ChucVu chucVu = chucVuDAO.getChucVuTheoMa(rs.getString("maChucVu"));
                 NhanVien nhanVien = new NhanVien(
-                        rs.getString("maNV"),
-                        rs.getString("tenNV"),
-                        rs.getString("chucVu"),
-                        rs.getString("soDT"),
-                        rs.getString("tenDangNhap"),
-                        rs.getString("matKhau"));
+                        rs.getString("maNhanVien"),
+                        rs.getString("tenNhanVien"),
+                        chucVu,
+                        rs.getString("soDienThoai"));
                 danhSachNhanVien.add(nhanVien);
             }
         } catch (SQLException e) {
@@ -132,7 +112,7 @@ public class NhanVienDAO {
 
     public List<NhanVien> timKiemNhanVien(String tuKhoa) {
         List<NhanVien> danhSachNhanVien = new ArrayList<>();
-        String sql = "SELECT * FROM NhanVien WHERE maNV LIKE ? OR tenNV LIKE ? OR soDT LIKE ?";
+        String sql = "SELECT * FROM NhanVien WHERE maNhanVien LIKE ? OR tenNhanVien LIKE ? OR soDienThoai LIKE ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, "%" + tuKhoa + "%");
@@ -140,13 +120,12 @@ public class NhanVienDAO {
             stmt.setString(3, "%" + tuKhoa + "%");
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
+                ChucVu chucVu = chucVuDAO.getChucVuTheoMa(rs.getString("maChucVu"));
                 NhanVien nhanVien = new NhanVien(
-                        rs.getString("maNV"),
-                        rs.getString("tenNV"),
-                        rs.getString("chucVu"),
-                        rs.getString("soDT"),
-                        rs.getString("tenDangNhap"),
-                        rs.getString("matKhau"));
+                        rs.getString("maNhanVien"),
+                        rs.getString("tenNhanVien"),
+                        chucVu,
+                        rs.getString("soDienThoai"));
                 danhSachNhanVien.add(nhanVien);
             }
         } catch (SQLException e) {
@@ -156,36 +135,22 @@ public class NhanVienDAO {
     }
 
     public String taoMaNhanVienMoi() {
-        String maNV = "NV";
-        String sql = "SELECT TOP 1 maNV FROM NhanVien ORDER BY maNV DESC";
+        String maNhanVien = "NV";
+        String sql = "SELECT TOP 1 maNhanVien FROM NhanVien ORDER BY maNhanVien DESC";
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()) {
-                String maCuoi = rs.getString("maNV");
+                String maCuoi = rs.getString("maNhanVien");
                 int so = Integer.parseInt(maCuoi.substring(2)) + 1;
-                maNV += String.format("%03d", so);
+                maNhanVien += String.format("%03d", so);
             } else {
-                maNV += "001";
+                maNhanVien += "001";
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            maNV += "001";
+            maNhanVien += "001";
         }
-        return maNV;
-    }
-
-    public boolean kiemTraDangNhap(String tenDangNhap, String matKhau) {
-        String sql = "SELECT * FROM NhanVien WHERE tenDangNhap = ? AND matKhau = ?";
-        try {
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, tenDangNhap);
-            stmt.setString(2, matKhau);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return maNhanVien;
     }
 }

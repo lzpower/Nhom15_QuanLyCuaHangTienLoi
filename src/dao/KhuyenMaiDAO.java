@@ -17,14 +17,18 @@ public class KhuyenMaiDAO {
     public KhuyenMaiDAO() {
         con = ConnectDB.getConnection();
     }
+    
+    public KhuyenMaiDAO(Connection conn) {
+        this.con = conn;
+    }
 
     public boolean themKhuyenMai(KhuyenMai khuyenMai) {
-        String sql = "INSERT INTO KhuyenMai(maKM, tenKM, giaTriKM) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO KhuyenMai(maKhuyenMai, tenKhuyenMai, giaTriKhuyenMai) VALUES(?, ?, ?)";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, khuyenMai.getMaKM());
-            stmt.setString(2, khuyenMai.getTenKM());
-            stmt.setDouble(3, khuyenMai.getGiaTriKM());
+            stmt.setString(1, khuyenMai.getMaKhuyenMai());
+            stmt.setString(2, khuyenMai.getTenKhuyenMai());
+            stmt.setDouble(3, khuyenMai.getGiaTriKhuyenMai());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -32,11 +36,11 @@ public class KhuyenMaiDAO {
         }
     }
 
-    public boolean xoaKhuyenMai(String maKM) {
-        String sql = "DELETE FROM KhuyenMai WHERE maKM = ?";
+    public boolean xoaKhuyenMai(String maKhuyenMai) {
+        String sql = "DELETE FROM KhuyenMai WHERE maKhuyenMai = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maKM);
+            stmt.setString(1, maKhuyenMai);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -45,12 +49,12 @@ public class KhuyenMaiDAO {
     }
 
     public boolean capNhatKhuyenMai(KhuyenMai khuyenMai) {
-        String sql = "UPDATE KhuyenMai SET tenKM = ?, giaTriKM = ? WHERE maKM = ?";
+        String sql = "UPDATE KhuyenMai SET tenKhuyenMai = ?, giaTriKhuyenMai = ? WHERE maKhuyenMai = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, khuyenMai.getTenKM());
-            stmt.setDouble(2, khuyenMai.getGiaTriKM());
-            stmt.setString(3, khuyenMai.getMaKM());
+            stmt.setString(1, khuyenMai.getTenKhuyenMai());
+            stmt.setDouble(2, khuyenMai.getGiaTriKhuyenMai());
+            stmt.setString(3, khuyenMai.getMaKhuyenMai());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -58,17 +62,17 @@ public class KhuyenMaiDAO {
         }
     }
 
-    public KhuyenMai getKhuyenMaiTheoMa(String maKM) {
-        String sql = "SELECT * FROM KhuyenMai WHERE maKM = ?";
+    public KhuyenMai getKhuyenMaiTheoMa(String maKhuyenMai) {
+        String sql = "SELECT * FROM KhuyenMai WHERE maKhuyenMai = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maKM);
+            stmt.setString(1, maKhuyenMai);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 KhuyenMai khuyenMai = new KhuyenMai(
-                        rs.getString("maKM"),
-                        rs.getString("tenKM"),
-                        rs.getDouble("giaTriKM"));
+                        rs.getString("maKhuyenMai"),
+                        rs.getString("tenKhuyenMai"),
+                        rs.getDouble("giaTriKhuyenMai"));
                 return khuyenMai;
             }
         } catch (SQLException e) {
@@ -85,9 +89,9 @@ public class KhuyenMaiDAO {
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 KhuyenMai khuyenMai = new KhuyenMai(
-                        rs.getString("maKM"),
-                        rs.getString("tenKM"),
-                        rs.getDouble("giaTriKM"));
+                        rs.getString("maKhuyenMai"),
+                        rs.getString("tenKhuyenMai"),
+                        rs.getDouble("giaTriKhuyenMai"));
                 danhSachKhuyenMai.add(khuyenMai);
             }
         } catch (SQLException e) {
@@ -98,7 +102,7 @@ public class KhuyenMaiDAO {
 
     public List<KhuyenMai> timKiemKhuyenMai(String tuKhoa) {
         List<KhuyenMai> danhSachKhuyenMai = new ArrayList<>();
-        String sql = "SELECT * FROM KhuyenMai WHERE maKM LIKE ? OR tenKM LIKE ?";
+        String sql = "SELECT * FROM KhuyenMai WHERE maKhuyenMai LIKE ? OR tenKhuyenMai LIKE ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, "%" + tuKhoa + "%");
@@ -106,9 +110,9 @@ public class KhuyenMaiDAO {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 KhuyenMai khuyenMai = new KhuyenMai(
-                        rs.getString("maKM"),
-                        rs.getString("tenKM"),
-                        rs.getDouble("giaTriKM"));
+                        rs.getString("maKhuyenMai"),
+                        rs.getString("tenKhuyenMai"),
+                        rs.getDouble("giaTriKhuyenMai"));
                 danhSachKhuyenMai.add(khuyenMai);
             }
         } catch (SQLException e) {
@@ -118,22 +122,22 @@ public class KhuyenMaiDAO {
     }
 
     public String taoMaKhuyenMaiMoi() {
-        String maKM = "KM";
-        String sql = "SELECT TOP 1 maKM FROM KhuyenMai ORDER BY maKM DESC";
+        String maKhuyenMai = "KM";
+        String sql = "SELECT TOP 1 maKhuyenMai FROM KhuyenMai ORDER BY maKhuyenMai DESC";
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()) {
-                String maCuoi = rs.getString("maKM");
+                String maCuoi = rs.getString("maKhuyenMai");
                 int so = Integer.parseInt(maCuoi.substring(2)) + 1;
-                maKM += String.format("%03d", so);
+                maKhuyenMai += String.format("%03d", so);
             } else {
-                maKM += "001";
+                maKhuyenMai += "001";
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            maKM += "001";
+            maKhuyenMai += "001";
         }
-        return maKM;
+        return maKhuyenMai;
     }
 }

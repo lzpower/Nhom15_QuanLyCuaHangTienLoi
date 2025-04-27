@@ -17,15 +17,17 @@ public class LoaiSanPhamDAO {
     public LoaiSanPhamDAO() {
         con = ConnectDB.getConnection();
     }
+    
     public LoaiSanPhamDAO(Connection conn) {
         this.con = conn;
     }
+    
     public boolean themLoaiSanPham(LoaiSanPham loaiSP) {
-        String sql = "INSERT INTO LoaiSanPham(maLoaiSP, tenLoaiSP) VALUES(?, ?)";
+        String sql = "INSERT INTO LoaiSanPham(maLoaiSanPham, tenLoaiSanPham) VALUES(?, ?)";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, loaiSP.getMaLoaiSP());
-            stmt.setString(2, loaiSP.getTenLoaiSP());
+            stmt.setString(1, loaiSP.getMaLoaiSanPham());
+            stmt.setString(2, loaiSP.getTenLoaiSanPham());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -34,7 +36,7 @@ public class LoaiSanPhamDAO {
     }
 
     public boolean xoaLoaiSanPham(String maLoaiSP) {
-        String sql = "DELETE FROM LoaiSanPham WHERE maLoaiSP = ?";
+        String sql = "DELETE FROM LoaiSanPham WHERE maLoaiSanPham = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, maLoaiSP);
@@ -46,11 +48,11 @@ public class LoaiSanPhamDAO {
     }
 
     public boolean capNhatLoaiSanPham(LoaiSanPham loaiSP) {
-        String sql = "UPDATE LoaiSanPham SET tenLoaiSP = ? WHERE maLoaiSP = ?";
+        String sql = "UPDATE LoaiSanPham SET tenLoaiSanPham = ? WHERE maLoaiSanPham = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, loaiSP.getTenLoaiSP());
-            stmt.setString(2, loaiSP.getMaLoaiSP());
+            stmt.setString(1, loaiSP.getTenLoaiSanPham());
+            stmt.setString(2, loaiSP.getMaLoaiSanPham());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,15 +61,15 @@ public class LoaiSanPhamDAO {
     }
 
     public LoaiSanPham getLoaiSanPhamTheoMa(String maLoaiSP) {
-        String sql = "SELECT * FROM LoaiSanPham WHERE maLoaiSP = ?";
+        String sql = "SELECT * FROM LoaiSanPham WHERE maLoaiSanPham = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, maLoaiSP);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 LoaiSanPham loaiSP = new LoaiSanPham(
-                        rs.getString("maLoaiSP"),
-                        rs.getString("tenLoaiSP"));
+                        rs.getString("maLoaiSanPham"),
+                        rs.getString("tenLoaiSanPham"));
                 return loaiSP;
             }
         } catch (SQLException e) {
@@ -84,8 +86,8 @@ public class LoaiSanPhamDAO {
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 LoaiSanPham loaiSP = new LoaiSanPham(
-                        rs.getString("maLoaiSP"),
-                        rs.getString("tenLoaiSP"));
+                        rs.getString("maLoaiSanPham"),
+                        rs.getString("tenLoaiSanPham"));
                 danhSachLoaiSP.add(loaiSP);
             }
         } catch (SQLException e) {
@@ -96,12 +98,12 @@ public class LoaiSanPhamDAO {
 
     public String taoMaLoaiSanPhamMoi() {
         String maLoaiSP = "LSP";
-        String sql = "SELECT TOP 1 maLoaiSP FROM LoaiSanPham ORDER BY maLoaiSP DESC";
+        String sql = "SELECT TOP 1 maLoaiSanPham FROM LoaiSanPham ORDER BY maLoaiSanPham DESC";
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()) {
-                String maCuoi = rs.getString("maLoaiSP");
+                String maCuoi = rs.getString("maLoaiSanPham");
                 int so = Integer.parseInt(maCuoi.substring(3)) + 1;
                 maLoaiSP += String.format("%03d", so);
             } else {

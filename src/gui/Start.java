@@ -24,15 +24,16 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import connectDB.ConnectDB;
-import dao.NhanVienDAO;
+import dao.TaiKhoanDAO;
+import entity.TaiKhoan;
 
 public class Start extends JFrame implements ActionListener {
     private JTextField txtTK;
     private JPasswordField txtMK;
     private JButton btnDN;
     private JButton btnTogglePassword;
-    private boolean check = false;
-    private NhanVienDAO nhanVienDAO;
+    private boolean passwordVisible = false;
+    private TaiKhoanDAO taiKhoanDAO;
 
     public Start() {
         super("Đăng Nhập");
@@ -51,7 +52,7 @@ public class Start extends JFrame implements ActionListener {
         // Kết nối CSDL
         try {
             ConnectDB.getInstance().connect();
-            nhanVienDAO = new NhanVienDAO();
+            taiKhoanDAO = new TaiKhoanDAO();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi kết nối CSDL: " + e.getMessage());
             e.printStackTrace();
@@ -166,11 +167,11 @@ public class Start extends JFrame implements ActionListener {
             if (txtMK.getEchoChar() == '*') {
                 txtMK.setEchoChar((char) 0);
                 btnTogglePassword.setText("Ẩn");
-                check = true;
+                passwordVisible = true;
             } else {
                 txtMK.setEchoChar('*');
                 btnTogglePassword.setText("Hiện");
-                check = false;
+                passwordVisible = false;
             }
         });
 
@@ -198,7 +199,8 @@ public class Start extends JFrame implements ActionListener {
         }
 
         // Kiểm tra đăng nhập từ CSDL
-        if (nhanVienDAO.kiemTraDangNhap(tk, mk)) {
+        TaiKhoan taiKhoan = taiKhoanDAO.getTaiKhoanTheoTenDangNhap(tk);
+        if (taiKhoan != null && taiKhoan.getMatKhau().equals(mk)) {
             SwingUtilities.invokeLater(() -> {
                 new GDChinh(tk).setVisible(true);
                 dispose(); // Đóng form đăng nhập
@@ -211,11 +213,11 @@ public class Start extends JFrame implements ActionListener {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-//            try {
-//                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             new Start().setVisible(true);
         });
     }

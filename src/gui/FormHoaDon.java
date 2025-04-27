@@ -78,13 +78,13 @@ public class FormHoaDon {
             double tongCong = 0;
             for (int i = 0; i < danhSachChiTiet.size(); i++) {
                 ChiTietHoaDon chiTiet = danhSachChiTiet.get(i);
-                SanPham sanPham = sanPhamDAO.getSanPhamTheoMa(chiTiet.getMaSanPham());
+                SanPham sanPham = sanPhamDAO.getSanPhamTheoMa(chiTiet.getSanPham().getMaSanPham());
                 double thanhTien = chiTiet.getSoLuong() * chiTiet.getDonGia();
                 tongCong += thanhTien;
 
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1))));
-                table.addCell(new Cell().add(new Paragraph(chiTiet.getMaSanPham())));
-                table.addCell(new Cell().add(new Paragraph(sanPham != null ? sanPham.getTenSP() : "Không xác định")));
+                table.addCell(new Cell().add(new Paragraph(chiTiet.getSanPham().getMaSanPham())));
+                table.addCell(new Cell().add(new Paragraph(sanPham != null ? sanPham.getTenSanPham() : "Không xác định")));
                 table.addCell(new Cell().add(new Paragraph(String.valueOf(chiTiet.getSoLuong()))));
                 table.addCell(new Cell().add(new Paragraph(df.format(thanhTien))));
             }

@@ -8,32 +8,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 import connectDB.ConnectDB;
-import entity.ChiTietHoaDon;
-import entity.HoaDon;
+import entity.ChiTietPhieuNhap;
+import entity.PhieuNhap;
 import entity.SanPham;
 
-public class ChiTietHoaDonDAO {
+public class ChiTietPhieuNhapDAO {
     private Connection con;
-    private HoaDonDAO hoaDonDAO;
+    private PhieuNhapDAO phieuNhapDAO;
     private SanPhamDAO sanPhamDAO;
 
-    public ChiTietHoaDonDAO() {
+    public ChiTietPhieuNhapDAO() {
         con = ConnectDB.getConnection();
-        hoaDonDAO = new HoaDonDAO();
+        phieuNhapDAO = new PhieuNhapDAO();
         sanPhamDAO = new SanPhamDAO();
     }
 
-    public ChiTietHoaDonDAO(Connection conn) {
+    public ChiTietPhieuNhapDAO(Connection conn) {
         this.con = conn;
-        hoaDonDAO = new HoaDonDAO(conn);
+        phieuNhapDAO = new PhieuNhapDAO(conn);
         sanPhamDAO = new SanPhamDAO(conn);
     }
 
-    public boolean themChiTietHoaDon(ChiTietHoaDon chiTiet) {
-        String sql = "INSERT INTO ChiTietHoaDon(maHoaDon, maSanPham, soLuong, donGia) VALUES(?, ?, ?, ?)";
+    public boolean themChiTietPhieuNhap(ChiTietPhieuNhap chiTiet) {
+        String sql = "INSERT INTO ChiTietPhieuNhap(maPhieuNhap, maSanPham, soLuong, donGia) VALUES(?, ?, ?, ?)";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, chiTiet.getHoaDon().getMaHoaDon());
+            stmt.setString(1, chiTiet.getPhieuNhap().getMaPhieuNhap());
             stmt.setString(2, chiTiet.getSanPham().getMaSanPham());
             stmt.setInt(3, chiTiet.getSoLuong());
             stmt.setDouble(4, chiTiet.getDonGia());
@@ -44,11 +44,11 @@ public class ChiTietHoaDonDAO {
         }
     }
 
-    public boolean xoaChiTietHoaDon(String maHoaDon, String maSanPham) {
-        String sql = "DELETE FROM ChiTietHoaDon WHERE maHoaDon = ? AND maSanPham = ?";
+    public boolean xoaChiTietPhieuNhap(String maPhieuNhap, String maSanPham) {
+        String sql = "DELETE FROM ChiTietPhieuNhap WHERE maPhieuNhap = ? AND maSanPham = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maHoaDon);
+            stmt.setString(1, maPhieuNhap);
             stmt.setString(2, maSanPham);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -57,13 +57,13 @@ public class ChiTietHoaDonDAO {
         }
     }
 
-    public boolean capNhatChiTietHoaDon(ChiTietHoaDon chiTiet) {
-        String sql = "UPDATE ChiTietHoaDon SET soLuong = ?, donGia = ? WHERE maHoaDon = ? AND maSanPham = ?";
+    public boolean capNhatChiTietPhieuNhap(ChiTietPhieuNhap chiTiet) {
+        String sql = "UPDATE ChiTietPhieuNhap SET soLuong = ?, donGia = ? WHERE maPhieuNhap = ? AND maSanPham = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setInt(1, chiTiet.getSoLuong());
             stmt.setDouble(2, chiTiet.getDonGia());
-            stmt.setString(3, chiTiet.getHoaDon().getMaHoaDon());
+            stmt.setString(3, chiTiet.getPhieuNhap().getMaPhieuNhap());
             stmt.setString(4, chiTiet.getSanPham().getMaSanPham());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -72,19 +72,19 @@ public class ChiTietHoaDonDAO {
         }
     }
 
-    public List<ChiTietHoaDon> getChiTietHoaDonTheoMaHD(String maHoaDon) {
-        List<ChiTietHoaDon> danhSachChiTiet = new ArrayList<>();
-        String sql = "SELECT * FROM ChiTietHoaDon WHERE maHoaDon = ?";
+    public List<ChiTietPhieuNhap> getChiTietPhieuNhapTheoMaPN(String maPhieuNhap) {
+        List<ChiTietPhieuNhap> danhSachChiTiet = new ArrayList<>();
+        String sql = "SELECT * FROM ChiTietPhieuNhap WHERE maPhieuNhap = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, maHoaDon);
+            stmt.setString(1, maPhieuNhap);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                HoaDon hoaDon = hoaDonDAO.getHoaDonTheoMa(rs.getString("maHoaDon"));
+                PhieuNhap phieuNhap = phieuNhapDAO.getPhieuNhapTheoMa(rs.getString("maPhieuNhap"));
                 SanPham sanPham = sanPhamDAO.getSanPhamTheoMa(rs.getString("maSanPham"));
                 
-                ChiTietHoaDon chiTiet = new ChiTietHoaDon(
-                        hoaDon,
+                ChiTietPhieuNhap chiTiet = new ChiTietPhieuNhap(
+                        phieuNhap,
                         sanPham,
                         rs.getInt("soLuong"),
                         rs.getDouble("donGia"));
@@ -94,5 +94,21 @@ public class ChiTietHoaDonDAO {
             e.printStackTrace();
         }
         return danhSachChiTiet;
+    }
+    
+    public double getTongTienPhieuNhap(String maPhieuNhap) {
+        double tongTien = 0;
+        String sql = "SELECT SUM(soLuong * donGia) AS tongTien FROM ChiTietPhieuNhap WHERE maPhieuNhap = ?";
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, maPhieuNhap);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                tongTien = rs.getDouble("tongTien");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tongTien;
     }
 }

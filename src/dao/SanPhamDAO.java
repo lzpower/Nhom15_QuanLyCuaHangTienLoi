@@ -1,6 +1,10 @@
 package dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,22 +21,22 @@ public class SanPhamDAO {
         loaiSanPhamDAO = new LoaiSanPhamDAO();
     }
 
-    // Constructor overload for testing
-
     public SanPhamDAO(Connection conn) {
         this.con = conn;
-        this.loaiSanPhamDAO = new LoaiSanPhamDAO();
+        this.loaiSanPhamDAO = new LoaiSanPhamDAO(conn);
     }
 
     public boolean themSanPham(SanPham sanPham) {
-        String sql = "INSERT INTO SanPham(maSP, tenSP, maLoaiSP, slHienCo, giaNhap, img) VALUES(?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = con.prepareStatement(sql)) {
-            stmt.setString(1, sanPham.getMaSP());
-            stmt.setString(2, sanPham.getTenSP());
-            stmt.setString(3, sanPham.getLoaiSP().getMaLoaiSP());
-            stmt.setInt(4, sanPham.getSlHienCo());
+        String sql = "INSERT INTO SanPham(maSanPham, tenSanPham, maLoaiSanPham, soLuongHienCo, giaNhap, giaBan, urlHinhAnh) VALUES(?, ?, ?, ?, ?, ?, ?)";
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, sanPham.getMaSanPham());
+            stmt.setString(2, sanPham.getTenSanPham());
+            stmt.setString(3, sanPham.getLoaiSanPham().getMaLoaiSanPham());
+            stmt.setInt(4, sanPham.getSoLuongHienCo());
             stmt.setDouble(5, sanPham.getGiaNhap());
-            stmt.setString(6, sanPham.getUrlHinhAnh());
+            stmt.setDouble(6, sanPham.getGiaBan());
+            stmt.setString(7, sanPham.getUrlHinhAnh());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -40,10 +44,11 @@ public class SanPhamDAO {
         }
     }
 
-    public boolean xoaSanPham(String maSP) {
-        String sql = "DELETE FROM SanPham WHERE maSP = ?";
-        try (PreparedStatement stmt = con.prepareStatement(sql)) {
-            stmt.setString(1, maSP);
+    public boolean xoaSanPham(String maSanPham) {
+        String sql = "DELETE FROM SanPham WHERE maSanPham = ?";
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, maSanPham);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -52,14 +57,16 @@ public class SanPhamDAO {
     }
 
     public boolean capNhatSanPham(SanPham sanPham) {
-        String sql = "UPDATE SanPham SET tenSP = ?, maLoaiSP = ?, slHienCo = ?, giaNhap = ?, img = ? WHERE maSP = ?";
-        try (PreparedStatement stmt = con.prepareStatement(sql)) {
-            stmt.setString(1, sanPham.getTenSP());
-            stmt.setString(2, sanPham.getLoaiSP().getMaLoaiSP());
-            stmt.setInt(3, sanPham.getSlHienCo());
+        String sql = "UPDATE SanPham SET tenSanPham = ?, maLoaiSanPham = ?, soLuongHienCo = ?, giaNhap = ?, giaBan = ?, urlHinhAnh = ? WHERE maSanPham = ?";
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, sanPham.getTenSanPham());
+            stmt.setString(2, sanPham.getLoaiSanPham().getMaLoaiSanPham());
+            stmt.setInt(3, sanPham.getSoLuongHienCo());
             stmt.setDouble(4, sanPham.getGiaNhap());
-            stmt.setString(5, sanPham.getUrlHinhAnh()); // Đặt đúng img
-            stmt.setString(6, sanPham.getMaSP());
+            stmt.setDouble(5, sanPham.getGiaBan());
+            stmt.setString(6, sanPham.getUrlHinhAnh());
+            stmt.setString(7, sanPham.getMaSanPham());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -67,11 +74,12 @@ public class SanPhamDAO {
         }
     }
 
-    public boolean capNhatSoLuongSanPham(String maSP, int soLuongMoi) {
-        String sql = "UPDATE SanPham SET slHienCo = ? WHERE maSP = ?";
-        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+    public boolean capNhatSoLuongSanPham(String maSanPham, int soLuongMoi) {
+        String sql = "UPDATE SanPham SET soLuongHienCo = ? WHERE maSanPham = ?";
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setInt(1, soLuongMoi);
-            stmt.setString(2, maSP);
+            stmt.setString(2, maSanPham);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -79,22 +87,30 @@ public class SanPhamDAO {
         }
     }
 
-    public SanPham getSanPhamTheoMa(String maSP) {
-        String sql = "SELECT * FROM SanPham WHERE maSP = ?";
-        try (PreparedStatement stmt = con.prepareStatement(sql)) {
-            stmt.setString(1, maSP);
+    public SanPham getSanPhamTheoMa(String maSanPham) {
+        String sql = "SELECT * FROM SanPham WHERE maSanPham = ?";
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, maSanPham);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                LoaiSanPham loaiSP = loaiSanPhamDAO.getLoaiSanPhamTheoMa(rs.getString("maLoaiSP"));
-                return new SanPham(
-                        rs.getString("maSP"),
-                        rs.getString("tenSP"),
+                LoaiSanPham loaiSP = loaiSanPhamDAO.getLoaiSanPhamTheoMa(rs.getString("maLoaiSanPham"));
+                double giaBan = rs.getDouble("giaNhap") * 1.5; // Mặc định nếu không có giá bán
+                try {
+                    giaBan = rs.getDouble("giaBan");
+                } catch (SQLException e) {
+                    // Không có cột giaBan, sử dụng giá mặc định
+                }
+                
+                SanPham sanPham = new SanPham(
+                        rs.getString("maSanPham"),
+                        rs.getString("tenSanPham"),
                         loaiSP,
-                        rs.getInt("slHienCo"),
+                        rs.getInt("soLuongHienCo"),
                         rs.getDouble("giaNhap"),
-                        rs.getString("img") // dùng đúng tên cột ảnh
-                );
-
+                        giaBan,
+                        rs.getString("urlHinhAnh"));
+                return sanPham;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -105,19 +121,26 @@ public class SanPhamDAO {
     public List<SanPham> getAllSanPham() {
         List<SanPham> danhSachSanPham = new ArrayList<>();
         String sql = "SELECT * FROM SanPham";
-        try (Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                LoaiSanPham loaiSP = loaiSanPhamDAO.getLoaiSanPhamTheoMa(rs.getString("maLoaiSP"));
+                LoaiSanPham loaiSP = loaiSanPhamDAO.getLoaiSanPhamTheoMa(rs.getString("maLoaiSanPham"));
+                double giaBan = rs.getDouble("giaNhap") * 1.5; // Mặc định nếu không có giá bán
+                try {
+                    giaBan = rs.getDouble("giaBan");
+                } catch (SQLException e) {
+                    // Không có cột giaBan, sử dụng giá mặc định
+                }
+                
                 SanPham sanPham = new SanPham(
-                        rs.getString("maSP"),
-                        rs.getString("tenSP"),
+                        rs.getString("maSanPham"),
+                        rs.getString("tenSanPham"),
                         loaiSP,
-                        rs.getInt("slHienCo"),
+                        rs.getInt("soLuongHienCo"),
                         rs.getDouble("giaNhap"),
-                        rs.getString("img")
-                );
-                        rs.getDouble("giaNhap");
+                        giaBan,
+                        rs.getString("urlHinhAnh"));
                 danhSachSanPham.add(sanPham);
             }
         } catch (SQLException e) {
@@ -126,23 +149,30 @@ public class SanPhamDAO {
         return danhSachSanPham;
     }
 
-    public List<SanPham> getSanPhamTheoLoai(String maLoaiSP) {
+    public List<SanPham> getSanPhamTheoLoai(String maLoaiSanPham) {
         List<SanPham> danhSachSanPham = new ArrayList<>();
-        String sql = "SELECT * FROM SanPham WHERE maLoaiSP = ?";
-        try (PreparedStatement stmt = con.prepareStatement(sql)) {
-            stmt.setString(1, maLoaiSP);
+        String sql = "SELECT * FROM SanPham WHERE maLoaiSanPham = ?";
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, maLoaiSanPham);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                LoaiSanPham loaiSP = loaiSanPhamDAO.getLoaiSanPhamTheoMa(rs.getString("maLoaiSP"));
+                LoaiSanPham loaiSP = loaiSanPhamDAO.getLoaiSanPhamTheoMa(rs.getString("maLoaiSanPham"));
+                double giaBan = rs.getDouble("giaNhap") * 1.5; // Mặc định nếu không có giá bán
+                try {
+                    giaBan = rs.getDouble("giaBan");
+                } catch (SQLException e) {
+                    // Không có cột giaBan, sử dụng giá mặc định
+                }
+                
                 SanPham sanPham = new SanPham(
-                        rs.getString("maSP"),
-                        rs.getString("tenSP"),
+                        rs.getString("maSanPham"),
+                        rs.getString("tenSanPham"),
                         loaiSP,
-                        rs.getInt("slHienCo"),
+                        rs.getInt("soLuongHienCo"),
                         rs.getDouble("giaNhap"),
-                        rs.getString("img")
-                );
-                        rs.getDouble("giaNhap");
+                        giaBan,
+                        rs.getString("urlHinhAnh"));
                 danhSachSanPham.add(sanPham);
             }
         } catch (SQLException e) {
@@ -153,22 +183,29 @@ public class SanPhamDAO {
 
     public List<SanPham> timKiemSanPham(String tuKhoa) {
         List<SanPham> danhSachSanPham = new ArrayList<>();
-        String sql = "SELECT * FROM SanPham WHERE maSP LIKE ? OR tenSP LIKE ?";
-        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+        String sql = "SELECT * FROM SanPham WHERE maSanPham LIKE ? OR tenSanPham LIKE ?";
+        try {
+            PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, "%" + tuKhoa + "%");
             stmt.setString(2, "%" + tuKhoa + "%");
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                LoaiSanPham loaiSP = loaiSanPhamDAO.getLoaiSanPhamTheoMa(rs.getString("maLoaiSP"));
+                LoaiSanPham loaiSP = loaiSanPhamDAO.getLoaiSanPhamTheoMa(rs.getString("maLoaiSanPham"));
+                double giaBan = rs.getDouble("giaNhap") * 1.5; // Mặc định nếu không có giá bán
+                try {
+                    giaBan = rs.getDouble("giaBan");
+                } catch (SQLException e) {
+                    // Không có cột giaBan, sử dụng giá mặc định
+                }
+                
                 SanPham sanPham = new SanPham(
-                        rs.getString("maSP"),
-                        rs.getString("tenSP"),
+                        rs.getString("maSanPham"),
+                        rs.getString("tenSanPham"),
                         loaiSP,
-                        rs.getInt("slHienCo"),
+                        rs.getInt("soLuongHienCo"),
                         rs.getDouble("giaNhap"),
-                        rs.getString("img")
-                );
-                        rs.getDouble("giaNhap");
+                        giaBan,
+                        rs.getString("urlHinhAnh"));
                 danhSachSanPham.add(sanPham);
             }
         } catch (SQLException e) {
@@ -178,21 +215,26 @@ public class SanPhamDAO {
     }
 
     public String taoMaSanPhamMoi() {
-        String maSP = "SP";
-        String sql = "SELECT maSP FROM SanPham ORDER BY maSP DESC LIMIT 1";
-        try (Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        String maSanPham = "";
+        // Sử dụng mã barcode 12 chữ số
+        String sql = "SELECT TOP 1 CAST(maSanPham AS BIGINT) as maSP FROM SanPham ORDER BY maSP DESC";
+        try {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()) {
-                String maCuoi = rs.getString("maSP");
-                int so = Integer.parseInt(maCuoi.substring(2)) + 1;
-                maSP += String.format("%03d", so);
+                long maCuoi = rs.getLong("maSP");
+                maSanPham = String.valueOf(maCuoi + 1);
+                // Đảm bảo đủ 12 chữ số
+                while (maSanPham.length() < 12) {
+                    maSanPham = "0" + maSanPham;
+                }
             } else {
-                maSP += "001";
+                maSanPham = "000000000001";
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            maSP += "001";
+            maSanPham = "000000000001";
         }
-        return maSP;
+        return maSanPham;
     }
 }

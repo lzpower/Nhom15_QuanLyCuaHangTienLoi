@@ -3,107 +3,88 @@ package entity;
 import java.util.Objects;
 
 public class NhanVien {
-	private String maNV;
-	private String tenNV;
-	private String chucVu;
-	private String soDT;
-	private String tenDangNhap;
-	private String matKhau;
+    private String maNhanVien;
+    private String tenNhanVien;
+    private ChucVu chucVu;
+    private String soDienThoai;
 
-	public NhanVien(String maNV, String tenNV, String chucVu, String soDT, String tenDangNhap, String matKhau) {
-		super();
-		setMaNV(maNV);
-		setTenNV(tenNV);
-		setChucVu(chucVu);
-		setSoDT(soDT);
-		setTenDangNhap(tenDangNhap);
-		setMatKhau(matKhau);
-	}
+    public NhanVien() {
+    }
 
-	public String getMaNV() {
-		return maNV;
-	}
+    public NhanVien(String maNhanVien, String tenNhanVien, ChucVu chucVu, String soDienThoai) {
+        setMaNhanVien(maNhanVien);
+        setTenNhanVien(tenNhanVien);
+        setChucVu(chucVu);
+        setSoDienThoai(soDienThoai);
+    }
 
-	public void setMaNV(String maNV) {
-		if (maNV == null || maNV.trim().isEmpty()) {
-			throw new IllegalArgumentException("Mã nhân viên không được để trống");
-		}
-		this.maNV = maNV;
-	}
+    public String getMaNhanVien() {
+        return maNhanVien;
+    }
 
-	public String getTenNV() {
-		return tenNV;
-	}
+    public void setMaNhanVien(String maNhanVien) {
+        if (maNhanVien == null || maNhanVien.trim().isEmpty()) {
+            throw new IllegalArgumentException("Mã nhân viên không được để trống");
+        }
+        this.maNhanVien = maNhanVien;
+    }
 
-	public void setTenNV(String tenNV) {
-		if (tenNV == null || tenNV.trim().isEmpty()) {
-			throw new IllegalArgumentException("Tên nhân viên không được để trống");
-		}
-		this.tenNV = tenNV;
-	}
+    public String getTenNhanVien() {
+        return tenNhanVien;
+    }
 
-	public String getChucVu() {
-		return chucVu;
-	}
+    public void setTenNhanVien(String tenNhanVien) {
+        if (tenNhanVien == null || tenNhanVien.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên nhân viên không được để trống");
+        }
+        this.tenNhanVien = tenNhanVien;
+    }
 
-	public void setChucVu(String chucVu) {
-		if (chucVu == null || chucVu.trim().isEmpty()) {
-			throw new IllegalArgumentException("Chức vụ không được để trống");
-		}
-		this.chucVu = chucVu;
-	}
+    public ChucVu getChucVu() {
+        return chucVu;
+    }
 
-	public String getSoDT() {
-		return soDT;
-	}
+    public void setChucVu(ChucVu chucVu) {
+        if (chucVu == null) {
+            throw new IllegalArgumentException("Chức vụ không được null");
+        }
+        this.chucVu = chucVu;
+    }
 
-	public void setSoDT(String soDT) {
-		if (soDT == null || soDT.trim().isEmpty()) {
-			throw new IllegalArgumentException("Số điện thoại không được để trống");
-		}
-		this.soDT = soDT;
-	}
+    public String getSoDienThoai() {
+        return soDienThoai;
+    }
 
-	public String getTenDangNhap() {
-		return tenDangNhap;
-	}
+    public void setSoDienThoai(String soDienThoai) {
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            throw new IllegalArgumentException("Số điện thoại không được để trống");
+        }
+        if (!soDienThoai.matches("\\d{10}")) {
+            throw new IllegalArgumentException("Số điện thoại phải là 10 chữ số");
+        }
+        this.soDienThoai = soDienThoai;
+    }
 
-	public void setTenDangNhap(String tenDangNhap) {
-		if (tenDangNhap == null || tenDangNhap.trim().isEmpty()) {
-			throw new IllegalArgumentException("Tên đăng nhập không được để trống");
-		}
-		this.tenDangNhap = tenDangNhap;
-	}
+    @Override
+    public String toString() {
+        return "NhanVien [maNhanVien=" + maNhanVien + ", tenNhanVien=" + tenNhanVien 
+                + ", chucVu=" + (chucVu != null ? chucVu.getTenChucVu() : "null") 
+                + ", soDienThoai=" + soDienThoai + "]";
+    }
 
-	public String getMatKhau() {
-		return matKhau;
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(maNhanVien);
+    }
 
-	public void setMatKhau(String matKhau) {
-		if (matKhau == null || matKhau.trim().isEmpty()) {
-			throw new IllegalArgumentException("Mật khẩu không được để trống");
-		}
-		this.matKhau = matKhau;
-	}
-
-	@Override
-	public String toString() {
-		return "NhanVien [maNV=" + maNV + ", tenNV=" + tenNV + ", chucVu=" + chucVu + ", soDT=" + soDT
-				+ ", tenDangNhap=" + tenDangNhap + ", matKhau=" + matKhau + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(maNV);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null || getClass() != obj.getClass())
-			return false;
-		NhanVien other = (NhanVien) obj;
-		return Objects.equals(maNV, other.maNV);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        NhanVien other = (NhanVien) obj;
+        return Objects.equals(maNhanVien, other.maNhanVien);
+    }
+    
 }
