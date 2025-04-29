@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class GDChinh extends JFrame {
+public class GDChinh extends JFrame implements ActionListener{
 	private JPanel contentPanel;
 	private JButton btnBanHang;
 	private JButton btnQuanLiSP;
@@ -57,8 +57,30 @@ public class GDChinh extends JFrame {
 		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
 		leftPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		leftPanel.setPreferredSize(new Dimension(200, getHeight()));
-		leftPanel.setBackground(new Color(240, 240, 240));
+		leftPanel.setBackground(new Color(99, 166, 148));
 
+		// Tạo panel logo không dùng FlowLayout
+		JPanel logoPanel = new JPanel();
+		logoPanel.setLayout(new BoxLayout(logoPanel, BoxLayout.Y_AXIS));
+		logoPanel.setBackground(new Color(99, 166, 148)); // Cùng màu với leftPanel
+		logoPanel.setMaximumSize(new Dimension(200, 72)); // Giới hạn chiều cao chính xác bằng logo
+
+		// Tải logo với kích thước chính xác
+		ImageIcon originalIcon = new ImageIcon("src/img/circlek.png");
+		Image img = originalIcon.getImage();
+		Image resizedImg = img.getScaledInstance(186, 72, Image.SCALE_SMOOTH);
+		ImageIcon resizedIcon = new ImageIcon(resizedImg);
+
+		// Tạo label và căn giữa
+		JLabel lblimg = new JLabel(resizedIcon);
+		lblimg.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+		// Thêm label vào panel logo
+		logoPanel.add(lblimg);
+
+		// Thêm vào panel chính
+		leftPanel.add(logoPanel);
+		leftPanel.add(Box.createVerticalStrut(10)); // Khoảng cách với các button
 		// Initialize buttons
 		btnBanHang = createButton("Bán Hàng");
 		btnQuanLiSP = createButton("Quản Lý Sản Phẩm");
@@ -67,7 +89,7 @@ public class GDChinh extends JFrame {
 		btnQuanLiNV = createButton("Quản Lý Nhân Viên");
 		btnQuanLiKH = createButton("Quản Lý Khách Hàng");
 		btnNhapHang = createButton("Nhập Hàng"); // New button
-		btnQuanLyNhaCungCap = createButton("Quản Lý Nhà Cung Cấp"); // New
+		btnQuanLyNhaCungCap = createButton("Nhà Cung Cấp"); // New
 																	// button
 		btnQuanLyPhieuNhap = createButton("Quản Lý Phiếu Nhập"); // New button
 		btnDangXuat = createButton("Đăng Xuất");
@@ -95,16 +117,19 @@ public class GDChinh extends JFrame {
 		leftPanel.add(Box.createVerticalStrut(15));
 
 		leftPanel.add(Box.createVerticalGlue());
-
+		leftPanel.setBackground((new Color(99, 166, 148)));
 		// Add in4 panel at the bottom
 		JPanel in4 = new JPanel();
+		
 		JLabel timeLabel = new JLabel();
 		timeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
 		in4.add(timeLabel);
 
 		// Update time every second
 		JLabel lbTenNV = new JLabel("Tên nhân viên: " + tenDangNhap);
+		JLabel lbChucVu=new JLabel("Chức vụ: jijk");
 		in4.add(lbTenNV);
+		in4.add(lbChucVu);
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		Timer timer = new Timer(1000, e -> timeLabel.setText(sdf
 				.format(new Date())));
@@ -121,80 +146,107 @@ public class GDChinh extends JFrame {
 		add(contentPanel, BorderLayout.CENTER);
 
 		// Add action listeners
-		addButtonListeners(tenDangNhap);
+		btnBanHang.addActionListener(this);
+        btnQuanLiSP.addActionListener(this);
+        btnThongKeDoanhThu.addActionListener(this);
+        btnKhuyenMai.addActionListener(this);
+        btnQuanLiNV.addActionListener(this);
+        btnQuanLiKH.addActionListener(this);
+        btnNhapHang.addActionListener(this);
+        btnQuanLyNhaCungCap.addActionListener(this);
+        btnQuanLyPhieuNhap.addActionListener(this);
+        btnDangXuat.addActionListener(this);
 		btnBanHang.doClick();
 	}
 
 	private JButton createButton(String text) {
-		JButton button = new JButton(text);
-		button.setMaximumSize(new Dimension(210, 100));
-		button.setAlignmentX(Component.CENTER_ALIGNMENT);
-		button.setFont(new Font("Arial", Font.PLAIN, 16));
-		return button;
+	    JButton button = new JButton(text);
+	    
+	    // Set button appearance to match the image
+	    button.setPreferredSize(new Dimension(200, 40));
+	    button.setMaximumSize(new Dimension(200, 40));
+	    button.setMinimumSize(new Dimension(200, 40));
+	    
+	    // Set background color to teal/dark green
+	    button.setBackground(new Color(30, 89, 57));
+	    button.setForeground(Color.WHITE); // White text
+	    
+	    // Left-align text
+	    button.setHorizontalAlignment(SwingConstants.LEFT);
+	    button.setHorizontalTextPosition(SwingConstants.RIGHT);
+	    
+	    // Add some padding on the left
+	    button.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+	    
+	    // Remove button border and focus painting
+	    button.setFocusPainted(false);
+	    button.setBorderPainted(false);
+	    
+	    button.setFont(new Font("Arial", Font.BOLD, 14));
+	    button.setAlignmentX(Component.CENTER_ALIGNMENT);
+	    
+	    return button;
 	}
-
-	private void addButtonListeners(String tenDangNhap) {
-		btnBanHang.addActionListener(e -> {
-			try {
-				showPanel(new BanHangPanel());
-			} catch (SQLException ex) {
-				JOptionPane.showMessageDialog(this,
-						"Lỗi kết nối CSDL: " + ex.getMessage());
-				ex.printStackTrace();
-			}
-		});
-
-		btnQuanLiSP.addActionListener(e -> showPanel(new QuanLiSPPanel()));
-
-		btnThongKeDoanhThu.addActionListener(e -> {
-			Connection conn = ConnectDB.getInstance().getConnection(); // Lấy
-																		// kết
-																		// nối
-																		// từ
-																		// ConnectDB
-				showPanel(new ThongKeDoanhThuPanel(conn)); // Truyền kết nối vào
-															// panel
-			});
-
-		btnKhuyenMai.addActionListener(e -> showPanel(new KhuyenMaiPanel()));
-
-		btnQuanLiNV.addActionListener(e -> {
-			if (vaitro.equalsIgnoreCase("admin")) {
-				showPanel(new QuanLiNVPanel());
-			} else {
-				JOptionPane.showMessageDialog(this,
-						"Vui lòng đăng nhập dưới quyền admin");
-			}
-		});
-
-		btnQuanLiKH.addActionListener(e -> showPanel(new QuanLiKHPanel()));
-
-		// Add listeners for the new buttons
-		btnNhapHang.addActionListener(e -> showPanel(new NhapHangPanel()));
-
-		btnQuanLyNhaCungCap
-				.addActionListener(e -> showPanel(new QuanLyNhaCungCapPanel()));
-
-		btnQuanLyPhieuNhap
-				.addActionListener(e -> showPanel(new QuanLyPhieuNhapPanel()));
-
-		btnDangXuat.addActionListener(e -> {
-			int confirm = JOptionPane.showConfirmDialog(this,
-					"Bạn có muốn đăng xuất?", "Xác nhận",
-					JOptionPane.YES_NO_OPTION);
-			if (confirm == JOptionPane.YES_OPTION) {
-				SwingUtilities.invokeLater(() -> {
-					new Start().setVisible(true);
-					dispose(); // Đóng MainFrame
-					});
-			}
-		});
-	}
-
 	private void showPanel(JPanel panel) {
 		contentPanel.removeAll();
 		contentPanel.add(panel, BorderLayout.CENTER);
 		contentPanel.revalidate();
 		contentPanel.repaint();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+	    Object o = e.getSource();
+	    
+	    try {
+	        if (o == btnBanHang) {
+	            showPanel(new BanHangPanel());
+	        } 
+	        else if (o == btnQuanLiSP) {
+	            showPanel(new QuanLiSPPanel());
+	        } 
+	        else if (o == btnThongKeDoanhThu) {
+	            Connection conn = ConnectDB.getInstance().getConnection();
+	            showPanel(new ThongKeDoanhThuPanel(conn));
+	        } 
+	        else if (o == btnKhuyenMai) {
+	            showPanel(new KhuyenMaiPanel());
+	        } 
+	        else if (o == btnQuanLiNV) {
+	            if (vaitro.equalsIgnoreCase("admin")) {
+	                showPanel(new QuanLiNVPanel());
+	            } else {
+	                JOptionPane.showMessageDialog(this, "Vui lòng đăng nhập dưới quyền admin");
+	            }
+	        } 
+	        else if (o == btnQuanLiKH) {
+	            showPanel(new QuanLiKHPanel());
+	        } 
+	        else if (o == btnNhapHang) {
+	            showPanel(new NhapHangPanel());
+	        } 
+	        else if (o == btnQuanLyNhaCungCap) {
+	            showPanel(new QuanLyNhaCungCapPanel());
+	        } 
+	        else if (o == btnQuanLyPhieuNhap) {
+	            showPanel(new QuanLyPhieuNhapPanel());
+	        } 
+	        else if (o == btnDangXuat) {
+	            int confirm = JOptionPane.showConfirmDialog(
+	                this, 
+	                "Bạn có muốn đăng xuất?", 
+	                "Xác nhận", 
+	                JOptionPane.YES_NO_OPTION
+	            );
+	            
+	            if (confirm == JOptionPane.YES_OPTION) {
+	                new Start().setVisible(true);
+	                dispose();
+	            }
+	        }
+	    } catch (SQLException ex) {
+	        JOptionPane.showMessageDialog(this, "Lỗi kết nối CSDL: " + ex.getMessage());
+	        ex.printStackTrace();
+	    }
 	}
 }
