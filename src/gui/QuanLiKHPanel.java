@@ -15,8 +15,8 @@ import java.awt.event.MouseListener;
 import java.util.List;
 
 public class QuanLiKHPanel extends JPanel implements MouseListener {
-    private DefaultTableModel khTableModel;
-    private JTable khTable;
+    private DefaultTableModel tableModel;
+    private JTable table;
     private JTextField txtTimKH, txtMaKH, txtTenKH, txtSoDienThoai, txtSoDiem;
     private List<KhachHang> danhSachKhachHang;
     private KhachHangDAO khachHangDAO;
@@ -29,19 +29,10 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         
         // Lấy danh sách khách hàng từ CSDL
         danhSachKhachHang = khachHangDAO.getAllKhachHang();
-        if (danhSachKhachHang.isEmpty()) {
-            // Nếu không có dữ liệu, thêm dữ liệu mẫu
-            danhSachKhachHang.add(new KhachHang("KH001", "Nguyễn Thị X", "0901234567", 100));
-            danhSachKhachHang.add(new KhachHang("KH002", "Trần Văn Y", "0912345678", 50));
-            danhSachKhachHang.add(new KhachHang("KH003", "Lê Thị Z", "0923456789", 200));
-            danhSachKhachHang.add(new KhachHang("KH004", "Phạm Văn T", "0934567890", 0));
-            
-            // Lưu dữ liệu mẫu vào CSDL
-            for (KhachHang kh : danhSachKhachHang) {
-                khachHangDAO.themKhachHang(kh);
-            }
-        }
-
+        UIManager.put("Label.font", new Font("Tahoma", Font.PLAIN, 17));
+		UIManager.put("TextField.font", new Font("Tahoma", Font.BOLD,
+				17));
+		UIManager.put("Button.font", new Font("Tahoma", Font.BOLD, 13));
         // Tạo giao diện
         JPanel formQuanLiKH = createFormQuanLiKH();
         add(formQuanLiKH, BorderLayout.CENTER);
@@ -55,22 +46,30 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         JPanel pTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pTop.setBorder(BorderFactory.createTitledBorder("Tìm khách hàng"));
         txtTimKH = new JTextField(20);
-        JButton btnTimKH = new JButton("Tìm kiếm");
+        JButton btnTim = new JButton("Tìm kiếm");
         pTop.add(txtTimKH);
-        pTop.add(btnTimKH);
+        pTop.add(btnTim);
         pBorder.add(pTop, BorderLayout.NORTH);
 
         // Phần giữa: Bảng khách hàng
         JPanel pCenter = new JPanel(new BorderLayout());
         String[] columnNames = {"Mã KH", "Tên KH", "Số điện thoại", "Số điểm"};
-        khTableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
-        khTable = new JTable(khTableModel);
-        JScrollPane scrollPane = new JScrollPane(khTable);
+        table = new JTable(tableModel);
+		table.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 17));
+		table.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		table.setRowHeight(30);
+        JScrollPane scrollPane = new JScrollPane(table);
         pCenter.add(scrollPane, BorderLayout.CENTER);
         pBorder.add(pCenter, BorderLayout.CENTER);
 
@@ -83,7 +82,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         // Mã KH
         JPanel pMaKH = new JPanel(new BorderLayout());
         JLabel lblMaKH = new JLabel("Mã khách hàng:");
-        lblMaKH.setPreferredSize(new Dimension(120, 20));
+        lblMaKH.setPreferredSize(new Dimension(140, 20));
         txtMaKH = new JTextField();
         pMaKH.add(lblMaKH, BorderLayout.WEST);
         pMaKH.add(txtMaKH, BorderLayout.CENTER);
@@ -93,7 +92,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         // Tên KH
         JPanel pTenKH = new JPanel(new BorderLayout());
         JLabel lblTenKH = new JLabel("Tên khách hàng:");
-        lblTenKH.setPreferredSize(new Dimension(120, 20));
+        lblTenKH.setPreferredSize(new Dimension(140, 20));
         txtTenKH = new JTextField();
         pTenKH.add(lblTenKH, BorderLayout.WEST);
         pTenKH.add(txtTenKH, BorderLayout.CENTER);
@@ -103,7 +102,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         // Số điện thoại
         JPanel pSoDienThoai = new JPanel(new BorderLayout());
         JLabel lblSoDienThoai = new JLabel("Số điện thoại:");
-        lblSoDienThoai.setPreferredSize(new Dimension(120, 20));
+        lblSoDienThoai.setPreferredSize(new Dimension(140, 20));
         txtSoDienThoai = new JTextField();
         pSoDienThoai.add(lblSoDienThoai, BorderLayout.WEST);
         pSoDienThoai.add(txtSoDienThoai, BorderLayout.CENTER);
@@ -113,7 +112,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         // Số điểm
         JPanel pSoDiem = new JPanel(new BorderLayout());
         JLabel lblSoDiem = new JLabel("Số điểm:");
-        lblSoDiem.setPreferredSize(new Dimension(120, 20));
+        lblSoDiem.setPreferredSize(new Dimension(140, 20));
         txtSoDiem = new JTextField();
         pSoDiem.add(lblSoDiem, BorderLayout.WEST);
         pSoDiem.add(txtSoDiem, BorderLayout.CENTER);
@@ -122,14 +121,20 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
 
         // Các nút
         JPanel pBtn = new JPanel();
-        JButton btnThemKH = new JButton("Thêm");
-        JButton btnXoaKH = new JButton("Xóa");
+        JButton btnThem = new JButton("Thêm");
+        JButton btnXoa = new JButton("Xóa");
         JButton btnXoaTrang = new JButton("Xoá trắng");
-        JButton btnSuaKH = new JButton("Sửa");
-        pBtn.add(btnThemKH);
-        pBtn.add(btnXoaKH);
+        JButton btnSua = new JButton("Sửa");
+        
+        styleButton(btnThem, new Color(46, 204, 113));
+        styleButton(btnXoa, new Color(231, 76, 60));
+        styleButton(btnXoaTrang, new Color(52, 152, 219));
+        styleButton(btnSua, new Color(41, 128, 185));
+        styleButton(btnTim, new Color(41, 128, 185));
+        pBtn.add(btnThem);
+        pBtn.add(btnXoa);
         pBtn.add(btnXoaTrang);
-        pBtn.add(btnSuaKH);
+        pBtn.add(btnSua);
 
         pBottom.add(pNhap, BorderLayout.CENTER);
         pBottom.add(pBtn, BorderLayout.SOUTH);
@@ -137,7 +142,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
 
         // Hiển thị danh sách khách hàng ban đầu
         for (KhachHang kh : danhSachKhachHang) {
-            khTableModel.addRow(new Object[]{
+            tableModel.addRow(new Object[]{
                     kh.getMaKhachHang(),
                     kh.getTenKhachHang(),
                     kh.getSoDienThoai(),
@@ -147,20 +152,20 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         txtTimKH.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                btnTimKH.doClick();
+                btnTim.doClick();
             }
         });
         
         // Sự kiện tìm kiếm
-        btnTimKH.addActionListener(new ActionListener() {
+        btnTim.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String keyword = txtTimKH.getText().trim().toLowerCase();
                 if (keyword.isEmpty()) {
                     // Hiển thị tất cả khách hàng
-                    khTableModel.setRowCount(0);
+                    tableModel.setRowCount(0);
                     for (KhachHang kh : danhSachKhachHang) {
-                        khTableModel.addRow(new Object[]{
+                        tableModel.addRow(new Object[]{
                                 kh.getMaKhachHang(),
                                 kh.getTenKhachHang(),
                                 kh.getSoDienThoai(),
@@ -176,7 +181,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
                 List<KhachHang> ketQuaTimKiem = khachHangDAO.timKiemKhachHang(keyword);
                 
                 // Hiển thị kết quả tìm kiếm
-                khTableModel.setRowCount(0);
+                tableModel.setRowCount(0);
                 if (ketQuaTimKiem.isEmpty()) {
                     JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Không tìm thấy khách hàng với từ khóa: " + keyword, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                     txtTimKH.setText("");
@@ -184,7 +189,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
                 } else {
                     txtTimKH.setText("");
                     for (KhachHang kh : ketQuaTimKiem) {
-                        khTableModel.addRow(new Object[]{
+                        tableModel.addRow(new Object[]{
                                 kh.getMaKhachHang(),
                                 kh.getTenKhachHang(),
                                 kh.getSoDienThoai(),
@@ -196,7 +201,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         });
         
         // mouselistener
-        khTable.addMouseListener(this);
+        table.addMouseListener(this);
         
         // Sự kiện xóa trắng
         btnXoaTrang.addActionListener(new ActionListener() {
@@ -207,7 +212,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         });
         
         // Sự kiện thêm khách hàng
-        btnThemKH.addActionListener(new ActionListener() {
+        btnThem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String maKH = txtMaKH.getText().trim();
@@ -238,7 +243,7 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
                     KhachHang kh = new KhachHang(maKH, tenKH, soDienThoai, soDiem);
                     if (khachHangDAO.themKhachHang(kh)) {
                         danhSachKhachHang.add(kh);
-                        khTableModel.addRow(new Object[]{
+                        tableModel.addRow(new Object[]{
                                 kh.getMaKhachHang(),
                                 kh.getTenKhachHang(),
                                 kh.getSoDienThoai(),
@@ -258,17 +263,17 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         });
 
         // Sự kiện xóa khách hàng
-        btnXoaKH.addActionListener(new ActionListener() {
+        btnXoa.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int selectedRow = khTable.getSelectedRow();
+                int selectedRow = table.getSelectedRow();
                 if (selectedRow >= 0) {
-                    String maKH = (String) khTableModel.getValueAt(selectedRow, 0);
+                    String maKH = (String) tableModel.getValueAt(selectedRow, 0);
                     int confirm = JOptionPane.showConfirmDialog(QuanLiKHPanel.this, "Bạn có chắc muốn xóa khách hàng " + maKH + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         if (khachHangDAO.xoaKhachHang(maKH)) {
                             danhSachKhachHang.removeIf(kh -> kh.getMaKhachHang().equals(maKH));
-                            khTableModel.removeRow(selectedRow);
+                            tableModel.removeRow(selectedRow);
                             JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Xóa khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         } else {
                             JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Khách hàng đã có hoá đơn không thể xoá!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -281,10 +286,10 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         });
 
         // Sự kiện sửa khách hàng
-        btnSuaKH.addActionListener(new ActionListener() {
+        btnSua.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int selectedRow = khTable.getSelectedRow();
+                int selectedRow = table.getSelectedRow();
                 if (selectedRow >= 0) {
                     String maKH = txtMaKH.getText().trim();
                     String tenKH = txtTenKH.getText().trim();
@@ -317,9 +322,9 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
                             }
                             
                             // Cập nhật bảng
-                            khTableModel.setValueAt(tenKH, selectedRow, 1);
-                            khTableModel.setValueAt(soDienThoai, selectedRow, 2);
-                            khTableModel.setValueAt(soDiem, selectedRow, 3);
+                            tableModel.setValueAt(tenKH, selectedRow, 1);
+                            tableModel.setValueAt(soDienThoai, selectedRow, 2);
+                            tableModel.setValueAt(soDiem, selectedRow, 3);
 
                             // Xóa form
                             clearForm();
@@ -340,20 +345,26 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
         return pBorder;
     }
 
+    public void styleButton(JButton button, Color bgColor) {
+		button.setContentAreaFilled(false);
+		button.setOpaque(true);
+		button.setBackground(bgColor);
+		button.setForeground(Color.white);
+	}
     private void clearForm() {
         txtTimKH.setText("");
         txtMaKH.setText("");
         txtTenKH.setText("");
         txtSoDienThoai.setText("");
         txtSoDiem.setText("");
-        khTable.clearSelection();
+        table.clearSelection();
         txtMaKH.setEditable(true);
     }
     
     public void dienvaoTable() {
-        khTableModel.setRowCount(0);
+        tableModel.setRowCount(0);
         for (KhachHang kh : danhSachKhachHang) {
-            khTableModel.addRow(new Object[]{
+            tableModel.addRow(new Object[]{
                     kh.getMaKhachHang(),
                     kh.getTenKhachHang(),
                     kh.getSoDienThoai(),
@@ -364,11 +375,11 @@ public class QuanLiKHPanel extends JPanel implements MouseListener {
     
     @Override
     public void mouseClicked(MouseEvent e) {
-        int row = khTable.getSelectedRow();
-        txtMaKH.setText(khTable.getValueAt(row, 0).toString());
-        txtTenKH.setText(khTable.getValueAt(row, 1).toString());
-        txtSoDienThoai.setText(khTable.getValueAt(row, 2).toString());
-        txtSoDiem.setText(khTable.getValueAt(row, 3).toString());
+        int row = table.getSelectedRow();
+        txtMaKH.setText(table.getValueAt(row, 0).toString());
+        txtTenKH.setText(table.getValueAt(row, 1).toString());
+        txtSoDienThoai.setText(table.getValueAt(row, 2).toString());
+        txtSoDiem.setText(table.getValueAt(row, 3).toString());
     }
 
     @Override

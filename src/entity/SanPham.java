@@ -8,7 +8,6 @@ public class SanPham {
     private LoaiSanPham loaiSanPham;
     private int soLuongHienCo;
     private double giaNhap;
-    private double giaBan; 
     private String urlHinhAnh;
     
     public SanPham() {
@@ -18,32 +17,21 @@ public class SanPham {
         setMaSanPham(maSanPham);
     }
     
-    public SanPham(String maSanPham, String tenSanPham, LoaiSanPham loaiSanPham, int soLuongHienCo, double giaNhap, double giaBan,
+    public SanPham(String maSanPham, String tenSanPham, LoaiSanPham loaiSanPham, int soLuongHienCo, double giaNhap, 
             String urlHinhAnh) {
         setMaSanPham(maSanPham);
         setTenSanPham(tenSanPham);
         setLoaiSanPham(loaiSanPham);
         setSoLuongHienCo(soLuongHienCo);
         setGiaNhap(giaNhap);
-        setGiaBan(giaBan);
         setUrlHinhAnh(urlHinhAnh);
     }
 
-    public SanPham(String maSanPham, String tenSanPham, LoaiSanPham loaiSanPham, int soLuongHienCo, double giaNhap, String urlHinhAnh) {
-        setMaSanPham(maSanPham);
-        setTenSanPham(tenSanPham);
-        setLoaiSanPham(loaiSanPham);
-        setSoLuongHienCo(soLuongHienCo);
-        setGiaNhap(giaNhap);
-        setGiaBan(giaNhap * 1.5); // Mặc định giá bán = giá nhập * 1.5
-        setUrlHinhAnh(urlHinhAnh);
-    }
 
     public SanPham(String maSanPham, String tenSanPham, double giaNhap) {
         setMaSanPham(maSanPham);
         setTenSanPham(tenSanPham);
         setGiaNhap(giaNhap);
-        setGiaBan(giaNhap * 1.5); // Mặc định giá bán = giá nhập * 1.5
     }
     
     public String getMaSanPham() {
@@ -102,17 +90,7 @@ public class SanPham {
     }
     
     public double getGiaBan() {
-        return giaBan;
-    }
-    
-    public void setGiaBan(double giaBan) throws IllegalArgumentException {
-        if (giaBan < 0) {
-            throw new IllegalArgumentException("Giá bán không được âm");
-        }
-        if (giaBan < giaNhap) {
-            throw new IllegalArgumentException("Giá bán không được nhỏ hơn giá nhập");
-        }
-        this.giaBan = giaBan;
+        return giaNhap*1.5;
     }
     
     public String getUrlHinhAnh() {
@@ -128,7 +106,7 @@ public class SanPham {
         return "SanPham [maSanPham=" + maSanPham + ", tenSanPham=" + tenSanPham 
                 + ", loaiSanPham=" + (loaiSanPham != null ? loaiSanPham.getTenLoaiSanPham() : "null") 
                 + ", soLuongHienCo=" + soLuongHienCo + ", giaNhap=" + giaNhap 
-                + ", giaBan=" + giaBan + ", urlHinhAnh=" + urlHinhAnh + "]";
+                + ", giaBan=" + getGiaBan() + ", urlHinhAnh=" + urlHinhAnh + "]";
     }
     
     @Override

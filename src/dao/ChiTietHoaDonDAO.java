@@ -22,12 +22,12 @@ public class ChiTietHoaDonDAO {
         hoaDonDAO = new HoaDonDAO();
         sanPhamDAO = new SanPhamDAO();
     }
-
-    public ChiTietHoaDonDAO(Connection conn) {
-        this.con = conn;
-        hoaDonDAO = new HoaDonDAO(conn);
-        sanPhamDAO = new SanPhamDAO(conn);
-    }
+//
+//    public ChiTietHoaDonDAO(Connection conn) {
+//        this.con = conn;
+//        hoaDonDAO = new HoaDonDAO(conn);
+//        sanPhamDAO = new SanPhamDAO(conn);
+//    }
 
     public boolean themChiTietHoaDon(ChiTietHoaDon chiTiet) {
         String sql = "INSERT INTO ChiTietHoaDon(maHoaDon, maSanPham, soLuong, donGia) VALUES(?, ?, ?, ?)";

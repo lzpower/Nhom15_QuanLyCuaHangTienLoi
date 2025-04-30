@@ -14,16 +14,13 @@ import entity.NhanVien;
 
 public class NhanVienDAO {
     private Connection con;
-    private ChucVuDAO chucVuDAO;
 
     public NhanVienDAO() {
         con = ConnectDB.getConnection();
-        chucVuDAO = new ChucVuDAO();
     }
     
     public NhanVienDAO(Connection conn) {
         this.con = conn;
-        chucVuDAO = new ChucVuDAO(conn);
     }
 
     public boolean themNhanVien(NhanVien nhanVien) {
@@ -69,13 +66,13 @@ public class NhanVienDAO {
     }
 
     public NhanVien getNhanVienTheoMa(String maNhanVien) {
-        String sql = "SELECT * FROM NhanVien WHERE maNhanVien = ?";
+        String sql = "SELECT * FROM NhanVien nv join ChucVu cv on nv.maChucVu=cv.maChucVu WHERE maNhanVien = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, maNhanVien);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                ChucVu chucVu = chucVuDAO.getChucVuTheoMa(rs.getString("maChucVu"));
+            	ChucVu chucVu = new ChucVu(rs.getString("maChucVu"),rs.getString("tenChucVu"));
                 NhanVien nhanVien = new NhanVien(
                         rs.getString("maNhanVien"),
                         rs.getString("tenNhanVien"),
@@ -91,12 +88,12 @@ public class NhanVienDAO {
 
     public List<NhanVien> getAllNhanVien() {
         List<NhanVien> danhSachNhanVien = new ArrayList<>();
-        String sql = "SELECT * FROM NhanVien";
+        String sql = "SELECT * FROM NhanVien nv join ChucVu cv on nv.maChucVu=cv.maChucVu";
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                ChucVu chucVu = chucVuDAO.getChucVuTheoMa(rs.getString("maChucVu"));
+                ChucVu chucVu = new ChucVu(rs.getString("maChucVu"),rs.getString("tenChucVu"));
                 NhanVien nhanVien = new NhanVien(
                         rs.getString("maNhanVien"),
                         rs.getString("tenNhanVien"),
@@ -112,7 +109,7 @@ public class NhanVienDAO {
 
     public List<NhanVien> timKiemNhanVien(String tuKhoa) {
         List<NhanVien> danhSachNhanVien = new ArrayList<>();
-        String sql = "SELECT * FROM NhanVien WHERE maNhanVien LIKE ? OR tenNhanVien LIKE ? OR soDienThoai LIKE ?";
+        String sql = "SELECT * FROM NhanVien nv join ChucVu cv on nv.maChucVu=cv.maChucVu WHERE maNhanVien LIKE ? OR tenNhanVien LIKE ? OR soDienThoai LIKE ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, "%" + tuKhoa + "%");
@@ -120,7 +117,7 @@ public class NhanVienDAO {
             stmt.setString(3, "%" + tuKhoa + "%");
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                ChucVu chucVu = chucVuDAO.getChucVuTheoMa(rs.getString("maChucVu"));
+            	ChucVu chucVu = new ChucVu(rs.getString("maChucVu"),rs.getString("tenChucVu"));
                 NhanVien nhanVien = new NhanVien(
                         rs.getString("maNhanVien"),
                         rs.getString("tenNhanVien"),

@@ -2,8 +2,10 @@ package gui;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,6 +32,8 @@ public class ThongKeDoanhThuPanel extends JPanel {
 
     private HoaDonDAO hoaDonDAO;
     private Connection conn;
+    private String sortState = "Không sắp xếp"; // Trạng thái sắp xếp cột Doanh thu
+    private String selectedLoaiSanPham = "Tất cả"; // Loại sản phẩm được chọn
 
     public ThongKeDoanhThuPanel(Connection conn) {
         setLayout(new BorderLayout());
@@ -40,8 +44,8 @@ public class ThongKeDoanhThuPanel extends JPanel {
         
         try {
             loadAllData();
-            loadBestSellingProducts();
-            loadPoorSellingProducts();
+            loadBestSellingProducts("all", "Tất cả");
+            loadPoorSellingProducts("all", "Tất cả");
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Lỗi khi tải dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -52,7 +56,7 @@ public class ThongKeDoanhThuPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Tạo tab panel để chứa các bảng thống kê khác nhau
+        // Tạo tab panel
         JTabbedPane tabbedPane = new JTabbedPane();
         
         // Tab thống kê doanh thu
@@ -70,6 +74,7 @@ public class ThongKeDoanhThuPanel extends JPanel {
         txtFrom = new JTextField(10);
         JLabel lblTo = new JLabel("Đến ngày (yyyy-MM-dd):");
         txtTo = new JTextField(10);
+        
         JButton btnFilter = new JButton("Lọc");
         
         pFilter.add(lblFilterType);
@@ -101,27 +106,37 @@ public class ThongKeDoanhThuPanel extends JPanel {
             }
         };
         tableThongKe = new JTable(modelThongKe);
+        
+        // Tùy chỉnh renderer cho tiêu đề cột để thêm mũi tên
+        tableThongKe.getTableHeader().setDefaultRenderer(new HeaderRenderer(tableThongKe.getTableHeader()));
+        
         JScrollPane scrollPane = new JScrollPane(tableThongKe);
         pDoanhThu.add(scrollPane, BorderLayout.CENTER);
+
+        // Thêm sự kiện nhấp vào tiêu đề cột
+        JTableHeader header = tableThongKe.getTableHeader();
+        header.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                TableColumnModel columnModel = tableThongKe.getColumnModel();
+                int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+                int column = tableThongKe.convertColumnIndexToModel(viewColumn);
+                
+                try {
+                    if (column == 4) { // Cột "Doanh thu" (index 4)
+                        showDoanhThuSortMenu(e.getPoint());
+                    } else if (column == 2) { // Cột "Loại sản phẩm" (index 2)
+                        showLoaiSanPhamFilter(e.getPoint());
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(ThongKeDoanhThuPanel.this, "Lỗi khi lọc/sắp xếp: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
 
         lblTotalRevenueValue = new JLabel("Tổng doanh thu: 0 VNĐ");
 
         JPanel pSort = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnRevenueAsc = new JButton("Doanh thu tăng");
-        JButton btnRevenueDesc = new JButton("Doanh thu giảm");
-        JButton btnQuantityAsc = new JButton("Số lượng tăng");
-        JButton btnQuantityDesc = new JButton("Số lượng giảm");
-
-        btnRevenueAsc.addActionListener(e -> sortByColumn("Doanh thu", true));
-        btnRevenueDesc.addActionListener(e -> sortByColumn("Doanh thu", false));
-        btnQuantityAsc.addActionListener(e -> sortByColumn("Số lượng bán", true));
-        btnQuantityDesc.addActionListener(e -> sortByColumn("Số lượng bán", false));
-
-        pSort.add(btnRevenueAsc);
-        pSort.add(btnRevenueDesc);
-        pSort.add(btnQuantityAsc);
-        pSort.add(btnQuantityDesc);
-
         pSort.add(Box.createHorizontalStrut(50));
         pSort.add(lblTotalRevenueValue);
 
@@ -143,10 +158,28 @@ public class ThongKeDoanhThuPanel extends JPanel {
         pSanPhamBanChay.add(scrollPaneBanChay, BorderLayout.CENTER);
         
         JPanel pFilterBanChay = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel lblLoaiSanPhamBanChay = new JLabel("Loại sản phẩm:");
+        JComboBox<String> cbxLoaiSanPhamBanChay = new JComboBox<>();
+        cbxLoaiSanPhamBanChay.addItem("Tất cả");
+        try {
+            String sql = "SELECT tenLoaiSanPham FROM LoaiSanPham";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                cbxLoaiSanPhamBanChay.addItem(rs.getString("tenLoaiSanPham"));
+            }
+            cbxLoaiSanPhamBanChay.setSelectedItem("Tất cả");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải loại sản phẩm: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+
         JButton btnFilterBanChayToday = new JButton("Hôm nay");
         JButton btnFilterBanChayMonth = new JButton("Tháng này");
         JButton btnFilterBanChayAll = new JButton("Tất cả");
         
+        pFilterBanChay.add(lblLoaiSanPhamBanChay);
+        pFilterBanChay.add(cbxLoaiSanPhamBanChay);
         pFilterBanChay.add(btnFilterBanChayToday);
         pFilterBanChay.add(btnFilterBanChayMonth);
         pFilterBanChay.add(btnFilterBanChayAll);
@@ -168,10 +201,28 @@ public class ThongKeDoanhThuPanel extends JPanel {
         pSanPhamKhoBan.add(scrollPaneKhoBan, BorderLayout.CENTER);
         
         JPanel pFilterKhoBan = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel lblLoaiSanPhamKhoBan = new JLabel("Loại sản phẩm:");
+        JComboBox<String> cbxLoaiSanPhamKhoBan = new JComboBox<>();
+        cbxLoaiSanPhamKhoBan.addItem("Tất cả");
+        try {
+            String sql = "SELECT tenLoaiSanPham FROM LoaiSanPham";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                cbxLoaiSanPhamKhoBan.addItem(rs.getString("tenLoaiSanPham"));
+            }
+            cbxLoaiSanPhamKhoBan.setSelectedItem("Tất cả");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải loại sản phẩm: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+
         JButton btnFilterKhoBanToday = new JButton("Hôm nay");
         JButton btnFilterKhoBanMonth = new JButton("Tháng này");
         JButton btnFilterKhoBanAll = new JButton("Tất cả");
         
+        pFilterKhoBan.add(lblLoaiSanPhamKhoBan);
+        pFilterKhoBan.add(cbxLoaiSanPhamKhoBan);
         pFilterKhoBan.add(btnFilterKhoBanToday);
         pFilterKhoBan.add(btnFilterKhoBanMonth);
         pFilterKhoBan.add(btnFilterKhoBanAll);
@@ -230,54 +281,164 @@ public class ThongKeDoanhThuPanel extends JPanel {
         // Sự kiện cho các nút lọc sản phẩm bán chạy
         btnFilterBanChayToday.addActionListener(e -> {
             try {
-                loadBestSellingProducts("day");
+                String loaiSanPham = cbxLoaiSanPhamBanChay.getSelectedItem() != null ? cbxLoaiSanPhamBanChay.getSelectedItem().toString() : "Tất cả";
+                loadBestSellingProducts("day", loaiSanPham);
             } catch (SQLException e1) {
                 e1.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Lỗi khi lọc sản phẩm bán chạy: " + e1.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
         
         btnFilterBanChayMonth.addActionListener(e -> {
             try {
-                loadBestSellingProducts("month");
+                String loaiSanPham = cbxLoaiSanPhamBanChay.getSelectedItem() != null ? cbxLoaiSanPhamBanChay.getSelectedItem().toString() : "Tất cả";
+                loadBestSellingProducts("month", loaiSanPham);
             } catch (SQLException e1) {
                 e1.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Lỗi khi lọc sản phẩm bán chạy: " + e1.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
         
         btnFilterBanChayAll.addActionListener(e -> {
             try {
-                loadBestSellingProducts();
+                String loaiSanPham = cbxLoaiSanPhamBanChay.getSelectedItem() != null ? cbxLoaiSanPhamBanChay.getSelectedItem().toString() : "Tất cả";
+                loadBestSellingProducts("all", loaiSanPham);
             } catch (SQLException e1) {
                 e1.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Lỗi khi lọc sản phẩm bán chạy: " + e1.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
         
         // Sự kiện cho các nút lọc sản phẩm khó bán
         btnFilterKhoBanToday.addActionListener(e -> {
             try {
-                loadPoorSellingProducts("day");
+                String loaiSanPham = cbxLoaiSanPhamKhoBan.getSelectedItem() != null ? cbxLoaiSanPhamKhoBan.getSelectedItem().toString() : "Tất cả";
+                loadPoorSellingProducts("day", loaiSanPham);
             } catch (SQLException e1) {
                 e1.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Lỗi khi lọc sản phẩm khó bán: " + e1.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
         
         btnFilterKhoBanMonth.addActionListener(e -> {
             try {
-                loadPoorSellingProducts("month");
+                String loaiSanPham = cbxLoaiSanPhamKhoBan.getSelectedItem() != null ? cbxLoaiSanPhamKhoBan.getSelectedItem().toString() : "Tất cả";
+                loadPoorSellingProducts("month", loaiSanPham);
             } catch (SQLException e1) {
                 e1.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Lỗi khi lọc sản phẩm khó bán: " + e1.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
         
         btnFilterKhoBanAll.addActionListener(e -> {
             try {
-                loadPoorSellingProducts();
+                String loaiSanPham = cbxLoaiSanPhamKhoBan.getSelectedItem() != null ? cbxLoaiSanPhamKhoBan.getSelectedItem().toString() : "Tất cả";
+                loadPoorSellingProducts("all", loaiSanPham);
             } catch (SQLException e1) {
                 e1.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Lỗi khi lọc sản phẩm khó bán: " + e1.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
 
         add(panel, BorderLayout.CENTER);
+    }
+
+    // Renderer tùy chỉnh cho tiêu đề cột để thêm mũi tên
+    private class HeaderRenderer implements TableCellRenderer {
+        private final TableCellRenderer delegate;
+
+        public HeaderRenderer(JTableHeader header) {
+            this.delegate = header.getDefaultRenderer();
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            if (c instanceof JLabel) {
+                JLabel label = (JLabel) c;
+                label.setHorizontalAlignment(SwingConstants.LEFT);
+                if (column == 4 || column == 2) { // Cột "Doanh thu" hoặc "Loại sản phẩm"
+                    label.setText(value + " ▼"); // Thêm mũi tên xuống
+                }
+            }
+            return c;
+        }
+    }
+
+    // Hiển thị menu sắp xếp cho cột Doanh thu
+    private void showDoanhThuSortMenu(Point point) throws SQLException {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem noSortItem = new JMenuItem("Không sắp xếp");
+        JMenuItem ascItem = new JMenuItem("Tăng dần");
+        JMenuItem descItem = new JMenuItem("Giảm dần");
+
+        popupMenu.add(noSortItem);
+        popupMenu.add(ascItem);
+        popupMenu.add(descItem);
+
+        noSortItem.addActionListener(e -> {
+            sortState = "Không sắp xếp";
+            try {
+                filterByDate();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi khi sắp xếp: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        ascItem.addActionListener(e -> {
+            sortState = "Tăng dần";
+            try {
+                filterByDate();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi khi sắp xếp: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        descItem.addActionListener(e -> {
+            sortState = "Giảm dần";
+            try {
+                filterByDate();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi khi sắp xếp: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        popupMenu.show(tableThongKe.getTableHeader(), point.x, point.y);
+    }
+
+    // Hiển thị menu lọc loại sản phẩm
+    private void showLoaiSanPhamFilter(Point point) throws SQLException {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem allItem = new JMenuItem("Tất cả");
+        popupMenu.add(allItem);
+        
+        String sql = "SELECT tenLoaiSanPham FROM LoaiSanPham";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            String loai = rs.getString("tenLoaiSanPham");
+            JMenuItem item = new JMenuItem(loai);
+            popupMenu.add(item);
+            item.addActionListener(e -> {
+                selectedLoaiSanPham = loai;
+                try {
+                    filterByDate();
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(this, "Lỗi khi lọc loại sản phẩm: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+        }
+
+        allItem.addActionListener(e -> {
+            selectedLoaiSanPham = "Tất cả";
+            try {
+                filterByDate();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi khi lọc loại sản phẩm: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        popupMenu.show(tableThongKe.getTableHeader(), point.x, point.y);
     }
 
     private void loadAllData() throws SQLException {
@@ -305,7 +466,7 @@ public class ThongKeDoanhThuPanel extends JPanel {
             int soLuong = rs.getInt("soLuong");
             double doanhThu = rs.getDouble("doanhThu");
 
-            Object[] row = new Object[]{ngay, tenSP, loaiSP, soLuong, doanhThu};
+            Object[] row = new Object[]{ngay, tenSP, loaiSP, soLuong, String.format("%,.0f VNĐ", doanhThu)};
             modelThongKe.addRow(row);
             originalData.add(row);
             totalRevenue += doanhThu;
@@ -313,12 +474,8 @@ public class ThongKeDoanhThuPanel extends JPanel {
 
         lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,.0f VNĐ", totalRevenue));
     }
-    
-    private void loadBestSellingProducts() throws SQLException {
-        loadBestSellingProducts("all");
-    }
-    
-    private void loadBestSellingProducts(String timeFilter) throws SQLException {
+
+    private void loadBestSellingProducts(String timeFilter, String loaiSanPham) throws SQLException {
         modelSanPhamBanChay.setRowCount(0);
         
         StringBuilder sql = new StringBuilder(
@@ -331,17 +488,29 @@ public class ThongKeDoanhThuPanel extends JPanel {
             "JOIN LoaiSanPham lsp ON sp.maLoaiSanPham = lsp.maLoaiSanPham "
         );
         
-        // Thêm điều kiện lọc theo thời gian
+        List<String> conditions = new ArrayList<>();
         if (timeFilter.equals("day")) {
-            sql.append("WHERE CONVERT(date, hd.ngayLap) = CONVERT(date, GETDATE()) ");
+            conditions.add("CONVERT(date, hd.ngayLap) = CONVERT(date, GETDATE())");
         } else if (timeFilter.equals("month")) {
-            sql.append("WHERE MONTH(hd.ngayLap) = MONTH(GETDATE()) AND YEAR(hd.ngayLap) = YEAR(GETDATE()) ");
+            conditions.add("MONTH(hd.ngayLap) = MONTH(GETDATE()) AND YEAR(hd.ngayLap) = YEAR(GETDATE())");
         }
         
-        sql.append("GROUP BY sp.maSanPham, sp.tenSanPham, lsp.tenLoaiSanPham " +
-                  "ORDER BY tongSoLuong DESC");
+        if (loaiSanPham != null && !loaiSanPham.equals("Tất cả")) {
+            conditions.add("lsp.tenLoaiSanPham = ?");
+        }
+
+        if (!conditions.isEmpty()) {
+            sql.append("WHERE ").append(String.join(" AND ", conditions));
+        }
+        
+        sql.append(" GROUP BY sp.maSanPham, sp.tenSanPham, lsp.tenLoaiSanPham " +
+                  " ORDER BY tongSoLuong DESC");
         
         PreparedStatement ps = conn.prepareStatement(sql.toString());
+        if (loaiSanPham != null && !loaiSanPham.equals("Tất cả")) {
+            ps.setString(1, loaiSanPham);
+        }
+        
         ResultSet rs = ps.executeQuery();
         
         while (rs.next()) {
@@ -352,16 +521,12 @@ public class ThongKeDoanhThuPanel extends JPanel {
             double tongDoanhThu = rs.getDouble("tongDoanhThu");
             
             modelSanPhamBanChay.addRow(new Object[]{
-                maSP, tenSP, loaiSP, tongSoLuong, String.format("%,.0f", tongDoanhThu)
+                maSP, tenSP, loaiSP, tongSoLuong, String.format("%,.0f VNĐ", tongDoanhThu)
             });
         }
     }
-    
-    private void loadPoorSellingProducts() throws SQLException {
-        loadPoorSellingProducts("all");
-    }
-    
-    private void loadPoorSellingProducts(String timeFilter) throws SQLException {
+
+    private void loadPoorSellingProducts(String timeFilter, String loaiSanPham) throws SQLException {
         modelSanPhamKhoBan.setRowCount(0);
         
         StringBuilder sql = new StringBuilder(
@@ -374,17 +539,29 @@ public class ThongKeDoanhThuPanel extends JPanel {
             "LEFT JOIN HoaDon hd ON cthd.maHoaDon = hd.maHoaDon "
         );
         
-        // Thêm điều kiện lọc theo thời gian
+        List<String> conditions = new ArrayList<>();
         if (timeFilter.equals("day")) {
-            sql.append("AND CONVERT(date, hd.ngayLap) = CONVERT(date, GETDATE()) ");
+            conditions.add("CONVERT(date, hd.ngayLap) = CONVERT(date, GETDATE())");
         } else if (timeFilter.equals("month")) {
-            sql.append("AND MONTH(hd.ngayLap) = MONTH(GETDATE()) AND YEAR(hd.ngayLap) = YEAR(GETDATE()) ");
+            conditions.add("MONTH(hd.ngayLap) = MONTH(GETDATE()) AND YEAR(hd.ngayLap) = YEAR(GETDATE())");
         }
         
-        sql.append("GROUP BY sp.maSanPham, sp.tenSanPham, lsp.tenLoaiSanPham " +
-                  "ORDER BY tongSoLuong ASC");
+        if (loaiSanPham != null && !loaiSanPham.equals("Tất cả")) {
+            conditions.add("lsp.tenLoaiSanPham = ?");
+        }
+
+        if (!conditions.isEmpty()) {
+            sql.append("WHERE ").append(String.join(" AND ", conditions));
+        }
+        
+        sql.append(" GROUP BY sp.maSanPham, sp.tenSanPham, lsp.tenLoaiSanPham " +
+                  " ORDER BY tongSoLuong ASC");
         
         PreparedStatement ps = conn.prepareStatement(sql.toString());
+        if (loaiSanPham != null && !loaiSanPham.equals("Tất cả")) {
+            ps.setString(1, loaiSanPham);
+        }
+        
         ResultSet rs = ps.executeQuery();
         
         while (rs.next()) {
@@ -395,25 +572,27 @@ public class ThongKeDoanhThuPanel extends JPanel {
             double tongDoanhThu = rs.getDouble("tongDoanhThu");
             
             modelSanPhamKhoBan.addRow(new Object[]{
-                maSP, tenSP, loaiSP, tongSoLuong, String.format("%,.0f", tongDoanhThu)
+                maSP, tenSP, loaiSP, tongSoLuong, String.format("%,.0f VNĐ", tongDoanhThu)
             });
         }
     }
-    
+
     private void refreshTable() {
         try {
             loadAllData();
-            loadBestSellingProducts();
-            loadPoorSellingProducts();
+            loadBestSellingProducts("all", "Tất cả");
+            loadPoorSellingProducts("all", "Tất cả");
             txtFrom.setText("");
             txtTo.setText("");
+            sortState = "Không sắp xếp";
+            selectedLoaiSanPham = "Tất cả";
             JOptionPane.showMessageDialog(this, "Dữ liệu đã được làm mới!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Lỗi khi làm mới dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public void filterByDate() throws SQLException {
+    private void filterByDate() throws SQLException {
         String fromDate = txtFrom.getText().trim();
         String toDate = txtTo.getText().trim();
         String filterType = cbxFilterType.getSelectedItem().toString();
@@ -439,31 +618,49 @@ public class ThongKeDoanhThuPanel extends JPanel {
             "JOIN SanPham sp ON cthd.maSanPham = sp.maSanPham " +
             "JOIN LoaiSanPham lsp ON sp.maLoaiSanPham = lsp.maLoaiSanPham "
         );
-        
-        // Thêm điều kiện lọc
+
+        List<String> conditions = new ArrayList<>();
         if (!fromDate.isEmpty() && !toDate.isEmpty()) {
             if (filterType.equals("Ngày")) {
-                sqlBuilder.append("WHERE hd.ngayLap BETWEEN ? AND ? ");
-            } else { // Tháng
-                sqlBuilder.append("WHERE YEAR(hd.ngayLap) * 100 + MONTH(hd.ngayLap) BETWEEN YEAR(?) * 100 + MONTH(?) AND YEAR(?) * 100 + MONTH(?) ");
+                conditions.add("hd.ngayLap BETWEEN ? AND ?");
+            } else {
+                conditions.add("YEAR(hd.ngayLap) * 100 + MONTH(hd.ngayLap) BETWEEN YEAR(?) * 100 + MONTH(?) AND YEAR(?) * 100 + MONTH(?)");
             }
         }
-        
-        sqlBuilder.append("GROUP BY hd.ngayLap, sp.tenSanPham, lsp.tenLoaiSanPham " +
-                         "ORDER BY hd.ngayLap DESC");
+
+        if (selectedLoaiSanPham != null && !selectedLoaiSanPham.equals("Tất cả")) {
+            conditions.add("lsp.tenLoaiSanPham = ?");
+        }
+
+        if (!conditions.isEmpty()) {
+            sqlBuilder.append("WHERE ").append(String.join(" AND ", conditions));
+        }
+
+        sqlBuilder.append(" GROUP BY hd.ngayLap, sp.tenSanPham, lsp.tenLoaiSanPham");
+
+        if (sortState.equals("Không sắp xếp")) {
+            sqlBuilder.append(" ORDER BY hd.ngayLap DESC");
+        } else {
+            sqlBuilder.append(" ORDER BY doanhThu ").append(sortState.equals("Tăng dần") ? "ASC" : "DESC");
+        }
 
         PreparedStatement ps = conn.prepareStatement(sqlBuilder.toString());
-        
+
+        int paramIndex = 1;
         if (!fromDate.isEmpty() && !toDate.isEmpty()) {
             if (filterType.equals("Ngày")) {
-                ps.setDate(1, java.sql.Date.valueOf(fromDate));
-                ps.setDate(2, java.sql.Date.valueOf(toDate));
-            } else { // Tháng
-                ps.setDate(1, java.sql.Date.valueOf(fromDate));
-                ps.setDate(2, java.sql.Date.valueOf(fromDate));
-                ps.setDate(3, java.sql.Date.valueOf(toDate));
-                ps.setDate(4, java.sql.Date.valueOf(toDate));
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(fromDate));
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(toDate));
+            } else {
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(fromDate));
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(fromDate));
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(toDate));
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(toDate));
             }
+        }
+
+        if (selectedLoaiSanPham != null && !selectedLoaiSanPham.equals("Tất cả")) {
+            ps.setString(paramIndex++, selectedLoaiSanPham);
         }
 
         ResultSet rs = ps.executeQuery();
@@ -479,59 +676,14 @@ public class ThongKeDoanhThuPanel extends JPanel {
             int soLuong = rs.getInt("soLuong");
             double doanhThu = rs.getDouble("doanhThu");
 
-            modelThongKe.addRow(new Object[] {ngay, tenSP, loaiSP, soLuong, doanhThu});
+            modelThongKe.addRow(new Object[] {ngay, tenSP, loaiSP, soLuong, String.format("%,.0f VNĐ", doanhThu)});
             totalRevenue += doanhThu;
         }
 
         if (!hasData) {
-            JOptionPane.showMessageDialog(this, "Không có dữ liệu cho khoảng thời gian đã chọn.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Không có dữ liệu cho khoảng thời gian hoặc loại sản phẩm đã chọn.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
         }
 
         lblTotalRevenueValue.setText("Tổng doanh thu: " + String.format("%,.0f VNĐ", totalRevenue));
-    }
-
-    private void sortByColumn(String columnName, boolean ascending) {
-        int colIndex = columnName.equals("Doanh thu") ? 4 : 3;
-        List<Object[]> dataList = new ArrayList<>();
-        for (int i = 0; i < modelThongKe.getRowCount(); i++) {
-            Object[] row = new Object[modelThongKe.getColumnCount()];
-            for (int j = 0; j < modelThongKe.getColumnCount(); j++) {
-                row[j] = modelThongKe.getValueAt(i, j);
-            }
-            dataList.add(row);
-        }
-
-        dataList.sort((o1, o2) -> {
-            double val1, val2;
-            if (colIndex == 4) {
-                val1 = o1[colIndex] instanceof String ? 
-                       Double.parseDouble(((String)o1[colIndex]).replaceAll("[^\\d.]", "")) : 
-                       (double)o1[colIndex];
-                val2 = o2[colIndex] instanceof String ? 
-                       Double.parseDouble(((String)o2[colIndex]).replaceAll("[^\\d.]", "")) : 
-                       (double)o2[colIndex];
-            } else {
-                val1 = o1[colIndex] instanceof String ? 
-                       Integer.parseInt(((String)o1[colIndex]).replaceAll("[^\\d]", "")) : 
-                       (int)o1[colIndex];
-                val2 = o2[colIndex] instanceof String ? 
-                       Integer.parseInt(((String)o2[colIndex]).replaceAll("[^\\d]", "")) : 
-                       (int)o2[colIndex];
-            }
-            return ascending ? Double.compare(val1, val2) : Double.compare(val2, val1);
-        });
-
-        modelThongKe.setRowCount(0);
-        for (Object[] row : dataList) {
-            modelThongKe.addRow(row);
-        }
-    }
-
-    private int parseCurrency(String string) {
-        try {
-            return Integer.parseInt(string.replaceAll("[^\\d]", ""));
-        } catch (NumberFormatException e) {
-            return 0;
-        }
     }
 }

@@ -1,9 +1,13 @@
 package entity;
 
+import java.util.Date;
+
 public class KhuyenMai {
     private String maKhuyenMai;
     private String tenKhuyenMai;
     private double giaTriKhuyenMai;
+    private Date ngayBatDau;
+    private Date ngayKetThuc;
 
     public KhuyenMai(String maKhuyenMai, String tenKhuyenMai, double giaTriKhuyenMai) {
         setMaKhuyenMai(maKhuyenMai);
@@ -44,7 +48,24 @@ public class KhuyenMai {
         this.giaTriKhuyenMai = giaTriKhuyenMai;
     }
 
-    @Override
+    
+    public Date getNgayBatDau() {
+		return ngayBatDau;
+	}
+
+	public void setNgayBatDau(Date ngayBatDau) {
+		this.ngayBatDau = ngayBatDau;
+	}
+
+	public Date getNgayKetThuc() {
+		return ngayKetThuc;
+	}
+
+	public void setNgayKetThuc(Date ngayKetThuc) {
+		this.ngayKetThuc = ngayKetThuc;
+	}
+
+	@Override
     public String toString() {
         return tenKhuyenMai + " (" + maKhuyenMai + ")";
     }

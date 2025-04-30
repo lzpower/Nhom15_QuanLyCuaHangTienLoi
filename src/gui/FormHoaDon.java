@@ -1,15 +1,23 @@
 package gui;
 
+import com.itextpdf.io.font.FontProgram;
+import com.itextpdf.io.font.FontProgramFactory;
+import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.font.PdfFontFactory.EmbeddingStrategy;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 
@@ -20,93 +28,189 @@ import dao.ChiTietHoaDonDAO;
 import dao.HoaDonDAO;
 import dao.SanPhamDAO;
 
+import java.io.IOException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class FormHoaDon {
-    private final String maHoaDon;
-    private final HoaDonDAO hoaDonDAO = new HoaDonDAO();
-    private final ChiTietHoaDonDAO chiTietHoaDonDAO = new ChiTietHoaDonDAO();
-    private final SanPhamDAO sanPhamDAO = new SanPhamDAO();
+	private final String maHoaDon;
+	private final HoaDonDAO hoaDonDAO = new HoaDonDAO();
+	private final ChiTietHoaDonDAO chiTietHoaDonDAO = new ChiTietHoaDonDAO();
+	private final SanPhamDAO sanPhamDAO = new SanPhamDAO();
 
-    public FormHoaDon(String maHoaDon) {
-        this.maHoaDon = maHoaDon;
-    }
+	public FormHoaDon(String maHoaDon) {
+		this.maHoaDon = maHoaDon;
+	}
 
-    public boolean xuatHoaDonPDF(String filePath, double giamGia, double tongTien) {
-        try {
-            HoaDon hoaDon = hoaDonDAO.getHoaDonTheoMa(maHoaDon);
-            System.out.println("Kiểm tra hoaDon: " + hoaDon);
+	public boolean xuatHoaDonPDF(String filePath, double giamGia, double tongTien) {
+		try {
+			HoaDon hoaDon = hoaDonDAO.getHoaDonTheoMa(maHoaDon);
+			if (hoaDon == null)
+				return false;
 
-            if (hoaDon == null) return false;
+			List<ChiTietHoaDon> danhSachChiTiet = chiTietHoaDonDAO.getChiTietHoaDonTheoMaHD(maHoaDon);
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+			DecimalFormat df = new DecimalFormat("#,##0");
 
-            List<ChiTietHoaDon> danhSachChiTiet = chiTietHoaDonDAO.getChiTietHoaDonTheoMaHD(maHoaDon);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            DecimalFormat df = new DecimalFormat("#,##0.00");
+			PdfWriter writer = new PdfWriter(filePath);
+			PdfDocument pdfDoc = new PdfDocument(writer);
+			PageSize receiptPageSize = new PageSize(226.77f, 1000f);
+			Document document = new Document(pdfDoc, receiptPageSize);
 
-            PdfWriter writer = new PdfWriter(filePath);
-            PdfDocument pdfDoc = new PdfDocument(writer);
-            Document document = new Document(pdfDoc);
+			PdfFont fontNormal = null;
+			PdfFont fontBold = null;
 
-            // Font thường và đậm
-            PdfFont fontNormal = PdfFontFactory.createFont(StandardFonts.HELVETICA);
-            PdfFont fontBold = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+			try {
+				// Tạo font từ file trong thư mục fonts
+				fontNormal = PdfFontFactory.createFont("font/NotoSans-Regular.ttf", PdfEncodings.IDENTITY_H,
+						EmbeddingStrategy.PREFER_EMBEDDED, pdfDoc);
+				fontBold = PdfFontFactory.createFont("font/NotoSans-Bold.ttf", PdfEncodings.IDENTITY_H,
+						EmbeddingStrategy.PREFER_EMBEDDED, pdfDoc);
+			} catch (IOException e) {
+				// Nếu không tìm thấy font, sử dụng font mặc định
+				fontNormal = PdfFontFactory.createRegisteredFont("Helvetica", PdfEncodings.IDENTITY_H);
+				fontBold = PdfFontFactory.createRegisteredFont("Helvetica-Bold", PdfEncodings.IDENTITY_H);
+			}
 
-            document.setFont(fontNormal);
+			document.setFont(fontNormal);
 
-            // Tiêu đề
-            Paragraph title = new Paragraph("HÓA ĐƠN BÁN HÀNG")
-                    .setFont(fontBold)
-                    .setFontSize(16)
-                    .setTextAlignment(TextAlignment.CENTER);
-            document.add(title);
+			// Thêm logo CircleK
+			try {
+				URL logoUrl = getClass().getResource("/img/circlek.png");
+				if (logoUrl != null) {
+					Image logo = new Image(ImageDataFactory.create(logoUrl));
+					logo.setWidth(150);
+					logo.setHorizontalAlignment(HorizontalAlignment.CENTER);
+					document.add(logo);
+				}
+			} catch (Exception e) {
+				System.err.println("Không thể tải logo: " + e.getMessage());
+			}
 
-            // Thông tin hóa đơn
-            document.add(new Paragraph("Mã hóa đơn: " + maHoaDon));
-            document.add(new Paragraph("Ngày lập: " + dateFormat.format(hoaDon.getNgayLap())));
+			// Thêm thông tin cửa hàng
+			Paragraph storeName = new Paragraph("CỬA HÀNG TIỆN LỢI CIRCLE K").setFont(fontBold).setFontSize(8)
+					.setTextAlignment(TextAlignment.CENTER);
 
-            // Bảng chi tiết hóa đơn
-            Table table = new Table(UnitValue.createPercentArray(new float[]{10, 25, 35, 15, 15}))
-                    .useAllAvailableWidth();
-            String[] headers = {"STT", "Mã SP", "Tên sản phẩm", "Số lượng", "Thành tiền"};
-            for (String header : headers) {
-                table.addHeaderCell(new Cell().add(new Paragraph(header).setFont(fontBold))
-                        .setBackgroundColor(ColorConstants.LIGHT_GRAY));
-            }
+			document.add(storeName);
 
-            double tongCong = 0;
-            for (int i = 0; i < danhSachChiTiet.size(); i++) {
-                ChiTietHoaDon chiTiet = danhSachChiTiet.get(i);
-                SanPham sanPham = sanPhamDAO.getSanPhamTheoMa(chiTiet.getSanPham().getMaSanPham());
-                double thanhTien = chiTiet.getSoLuong() * chiTiet.getDonGia();
-                tongCong += thanhTien;
+			Paragraph storeAddress = new Paragraph("12 Nguyễn Văn Bảo, P4, Gò Vấp, TP Hồ Chí Minh").setFont(fontNormal)
+					.setFontSize(8).setTextAlignment(TextAlignment.CENTER);
+			document.add(storeAddress);
 
-                table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1))));
-                table.addCell(new Cell().add(new Paragraph(chiTiet.getSanPham().getMaSanPham())));
-                table.addCell(new Cell().add(new Paragraph(sanPham != null ? sanPham.getTenSanPham() : "Không xác định")));
-                table.addCell(new Cell().add(new Paragraph(String.valueOf(chiTiet.getSoLuong()))));
-                table.addCell(new Cell().add(new Paragraph(df.format(thanhTien))));
-            }
+			// Thêm đường gạch ngang
+			document.add(
+					new Paragraph("----------------------------------------").setTextAlignment(TextAlignment.CENTER));
 
-            document.add(table);
-            System.out.println("Danh sách chi tiết hóa đơn: " + danhSachChiTiet);
+			// Thông tin hóa đơn
+			document.add(new Paragraph("Mã hóa đơn: " + maHoaDon).setFont(fontBold).setFontSize(10));
+			document.add(new Paragraph("Ngày lập: " + dateFormat.format(hoaDon.getNgayLap())).setFontSize(10));
+			document.add(new Paragraph(
+					"Nhân viên: " + (hoaDon.getNhanVien() != null ? hoaDon.getNhanVien().getTenNhanVien() : ""))
+					.setFontSize(10));
 
-            // Tổng kết
-            document.add(new Paragraph("Tổng cộng: " + df.format(tongCong) + " VNĐ"));
-            document.add(new Paragraph("Giảm giá: " + df.format(giamGia) + " VNĐ"));
-            document.add(new Paragraph("Tổng tiền thanh toán: " + df.format(tongTien) + " VNĐ")
-                    .setFont(fontBold));
+			// Thêm thông tin khách hàng nếu có
+			if (hoaDon.getKhachHang() != null) {
+				document.add(new Paragraph("Khách hàng: " + hoaDon.getKhachHang().getTenKhachHang()).setFontSize(10));
+				document.add(new Paragraph("SĐT: " + hoaDon.getKhachHang().getSoDienThoai()).setFontSize(10));
+				document.add(new Paragraph("Điểm tích lũy: " + hoaDon.getKhachHang().getSoDiem()).setFontSize(10));
+			}
 
-            // Cảm ơn
-            document.add(new Paragraph("Xin cảm ơn quý khách đã mua hàng!")
-                    .setTextAlignment(TextAlignment.CENTER));
+			// Thêm đường gạch ngang
+			document.add(
+					new Paragraph("----------------------------------------").setTextAlignment(TextAlignment.CENTER));
 
-            document.close();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+			// Tiêu đề chi tiết hóa đơn
+			document.add(new Paragraph("CHI TIẾT HÓA ĐƠN").setFont(fontBold).setFontSize(9)
+					.setTextAlignment(TextAlignment.CENTER));
+
+			// Bảng chi tiết hóa đơn
+			Table table = new Table(UnitValue.createPercentArray(new float[] { 5, 40, 15, 20, 20 }))
+					.useAllAvailableWidth();
+
+			// Thêm header cho bảng
+			table.addCell(new Cell().add(new Paragraph("STT").setFont(fontBold).setFontSize(8)).setBorder(null));
+			table.addCell(
+					new Cell().add(new Paragraph("Tên sản phẩm").setFont(fontBold).setFontSize(8)).setBorder(null));
+			table.addCell(new Cell().add(new Paragraph("SL").setFont(fontBold).setFontSize(8)).setBorder(null));
+			table.addCell(new Cell().add(new Paragraph("Đơn giá").setFont(fontBold).setFontSize(8)).setBorder(null));
+			table.addCell(new Cell().add(new Paragraph("Thành tiền").setFont(fontBold).setFontSize(8)).setBorder(null));
+
+			// Thêm dữ liệu vào bảng
+			double tongCong = 0;
+			for (int i = 0; i < danhSachChiTiet.size(); i++) {
+				ChiTietHoaDon chiTiet = danhSachChiTiet.get(i);
+				SanPham sanPham = sanPhamDAO.getSanPhamTheoMa(chiTiet.getSanPham().getMaSanPham());
+				double thanhTien = chiTiet.getSoLuong() * chiTiet.getDonGia();
+				tongCong += thanhTien;
+
+				table.addCell(new Cell().add(new Paragraph(String.valueOf(i + 1)).setFontSize(8)).setBorder(null));
+				table.addCell(
+						new Cell().add(new Paragraph(sanPham != null ? sanPham.getTenSanPham() : "").setFontSize(8))
+								.setBorder(null));
+				table.addCell(new Cell().add(new Paragraph(String.valueOf(chiTiet.getSoLuong())).setFontSize(8))
+						.setBorder(null));
+				table.addCell(new Cell().add(new Paragraph(df.format(chiTiet.getDonGia()) + " đ").setFontSize(8))
+						.setBorder(null));
+				table.addCell(
+						new Cell().add(new Paragraph(df.format(thanhTien) + " đ").setFontSize(8)).setBorder(null));
+
+			}
+
+			document.add(table);
+
+			// Thêm đường gạch ngang
+			document.add(
+					new Paragraph("----------------------------------------").setTextAlignment(TextAlignment.CENTER));
+
+			// Thông tin thanh toán
+			Table paymentTable = new Table(UnitValue.createPercentArray(new float[] { 70, 30 })).useAllAvailableWidth();
+
+			paymentTable.addCell(
+					new Cell().add(new Paragraph("Tổng cộng:").setFont(fontBold).setFontSize(8)).setBorder(null));
+			paymentTable.addCell(new Cell()
+					.add(new Paragraph(df.format(tongCong) + " đ").setFont(fontBold).setFontSize(8)).setBorder(null));
+
+			// Thêm thông tin giảm giá nếu có
+			if (giamGia > 0) {
+				paymentTable.addCell(new Cell().add(new Paragraph("Giảm giá:").setFontSize(8)).setBorder(null));
+				paymentTable.addCell(
+						new Cell().add(new Paragraph(df.format(giamGia) + " đ").setFontSize(8)).setBorder(null));
+			}
+
+			// Thêm thông tin điểm sử dụng nếu có
+			double diemSuDung = tongCong - giamGia - tongTien;
+			if (diemSuDung > 0) {
+				paymentTable.addCell(new Cell().add(new Paragraph("Điểm sử dụng:").setFontSize(8)).setBorder(null));
+				paymentTable.addCell(
+						new Cell().add(new Paragraph(df.format(diemSuDung) + " đ").setFontSize(8)).setBorder(null));
+			}
+
+			// Tổng tiền thanh toán
+			paymentTable.addCell(new Cell()
+					.add(new Paragraph("Tổng tiền thanh toán:").setFont(fontBold).setFontSize(9)).setBorder(null));
+			paymentTable.addCell(new Cell()
+					.add(new Paragraph(df.format(tongTien) + " đ").setFont(fontBold).setFontSize(9)).setBorder(null));
+
+			document.add(paymentTable);
+
+			// Thêm đường gạch ngang
+			document.add(new Paragraph("------------------------------------------------")
+					.setTextAlignment(TextAlignment.CENTER));
+
+			// Thêm lời cảm ơn
+			document.add(new Paragraph("Xin cảm ơn quý khách đã mua hàng!").setTextAlignment(TextAlignment.CENTER)
+					.setFontSize(8));
+
+			document.add(new Paragraph("Hẹn gặp lại quý khách lần sau!").setTextAlignment(TextAlignment.CENTER)
+					.setFontSize(8));
+
+			document.close();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }
