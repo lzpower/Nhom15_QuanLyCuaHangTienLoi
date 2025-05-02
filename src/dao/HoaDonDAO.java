@@ -27,18 +27,6 @@ public class HoaDonDAO {
         khachHangDAO = new KhachHangDAO();
         khuyenMaiDAO = new KhuyenMaiDAO();
     }
-
-    public HoaDonDAO(Connection conn) {
-        this.con = conn;
-        nhanVienDAO = new NhanVienDAO(conn);
-        khachHangDAO = new KhachHangDAO(conn);
-        khuyenMaiDAO = new KhuyenMaiDAO(conn);
-    }
-
-    public Connection getConnection() {
-        return ConnectDB.getConnection();
-    }
-
     public boolean themHoaDon(HoaDon hoaDon) {
         String sql = "INSERT INTO HoaDon(maHoaDon, ngayLap, maNhanVien, maKhachHang, maKhuyenMai, tongTien) VALUES(?, ?, ?, ?, ?, ?)";
         try {

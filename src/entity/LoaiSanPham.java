@@ -9,10 +9,6 @@ public class LoaiSanPham {
         setTenLoaiSanPham(tenLoaiSanPham);
     }
     
-    public LoaiSanPham(String maLoaiSanPham) {
-        setMaLoaiSanPham(maLoaiSanPham);
-    }
-    
     public String getMaLoaiSanPham() {
         return maLoaiSanPham;
     }

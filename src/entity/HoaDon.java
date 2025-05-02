@@ -17,7 +17,13 @@ public class HoaDon {
         this.danhSachChiTiet = new ArrayList<>();
     }
 
-    public HoaDon(String maHoaDon, Date ngayLap, NhanVien nhanVien) {
+    
+    public HoaDon(String maHoaDon) {
+		this.maHoaDon = maHoaDon;
+	}
+
+
+	public HoaDon(String maHoaDon, Date ngayLap, NhanVien nhanVien) {
         this.maHoaDon = maHoaDon;
         this.ngayLap = ngayLap;
         this.nhanVien = nhanVien;

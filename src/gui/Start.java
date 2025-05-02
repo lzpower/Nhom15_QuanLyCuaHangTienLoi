@@ -20,7 +20,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import connectDB.ConnectDB;
@@ -41,13 +40,6 @@ public class Start extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
-        
-        try {
-            // Set system look and feel
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         // Kết nối CSDL
         try {
@@ -69,24 +61,22 @@ public class Start extends JFrame implements ActionListener {
 
         // Tiêu đề
         JLabel lblTD = new JLabel("ĐĂNG NHẬP TÀI KHOẢN", SwingConstants.CENTER);
-        lblTD.setForeground(new Color(0, 153, 255)); // Bright blue color
+        lblTD.setForeground(new Color(0, 153, 255));
         lblTD.setFont(new Font("Arial", Font.BOLD, 22));
 
         // Nhãn và trường nhập
         JLabel lblTK = new JLabel("Tài khoản:", SwingConstants.RIGHT);
         lblTK.setFont(new Font("Arial", Font.PLAIN, 14));
-        
+
         JLabel lblMK = new JLabel("Mật khẩu:", SwingConstants.RIGHT);
         lblMK.setFont(new Font("Arial", Font.PLAIN, 14));
 
         // Text fields with border
         txtTK = new JTextField(20);
         txtTK.setPreferredSize(new Dimension(200, 30));
-        txtTK.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        
-        txtMK = new JPasswordField(20);
-        txtMK.setPreferredSize(new Dimension(200, 30));
-        txtMK.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+
+        txtMK = new JPasswordField();
+        txtMK.setPreferredSize(new Dimension(130, 30)); // Giảm độ rộng để nhường chỗ cho nút
         txtMK.setEchoChar('*');
 
         // Buttons with modern styling
@@ -105,9 +95,9 @@ public class Start extends JFrame implements ActionListener {
         // Add title
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 3;
+        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(0, 0, 30, 0);
+        gbc.insets = new Insets(0, 0, 20, 0);
         mainPanel.add(lblTD, gbc);
 
         // Add username label
@@ -122,7 +112,7 @@ public class Start extends JFrame implements ActionListener {
         // Add username field
         gbc.gridx = 1;
         gbc.gridy = 1;
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 0, 5, 0);
         mainPanel.add(txtTK, gbc);
@@ -136,30 +126,41 @@ public class Start extends JFrame implements ActionListener {
         gbc.insets = new Insets(5, 0, 5, 10);
         mainPanel.add(lblMK, gbc);
 
-        // Add password field
+        // Tạo panel chứa txtMK và btnTogglePassword
+        JPanel passwordPanel = new JPanel();
+        passwordPanel.setLayout(new GridBagLayout());
+        GridBagConstraints passwordGbc = new GridBagConstraints();
+
+        // Add txtMK to passwordPanel
+        passwordGbc.gridx = 0;
+        passwordGbc.gridy = 0;
+        passwordGbc.weightx = 1.0;
+        passwordGbc.fill = GridBagConstraints.HORIZONTAL;
+        passwordPanel.add(txtMK, passwordGbc);
+
+        // Add btnTogglePassword to passwordPanel
+        passwordGbc.gridx = 1;
+        passwordGbc.gridy = 0;
+        passwordGbc.weightx = 0;
+        passwordGbc.fill = GridBagConstraints.NONE;
+        passwordGbc.insets = new Insets(0, 5, 0, 0); // Thêm khoảng cách bên trái
+        passwordPanel.add(btnTogglePassword, passwordGbc);
+
+        // Add passwordPanel to mainPanel
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 0, 5, 10);
-        mainPanel.add(txtMK, gbc);
-
-        // Add toggle password button
-        gbc.gridx = 2;
-        gbc.gridy = 2;
-        gbc.gridwidth = 1;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 0, 5, 0);
-        mainPanel.add(btnTogglePassword, gbc);
+        mainPanel.add(passwordPanel, gbc);
 
         // Add login button (centered)
         gbc.gridx = 0;
         gbc.gridy = 3;
-        gbc.gridwidth = 3;
+        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(25, 0, 0, 0);
+        gbc.insets = new Insets(20, 0, 0, 0);
         mainPanel.add(btnDN, gbc);
 
         // Sự kiện toggle mật khẩu
@@ -179,7 +180,7 @@ public class Start extends JFrame implements ActionListener {
         btnDN.addActionListener(this);
         txtTK.addActionListener(e -> txtMK.requestFocus());
         txtMK.addActionListener(e -> btnDN.doClick());
-        
+
         // Try to set window icon if available
         try {
             setIconImage(new ImageIcon(getClass().getResource("/img/logo.png")).getImage());
@@ -212,13 +213,6 @@ public class Start extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            new Start().setVisible(true);
-        });
+        new Start().setVisible(true);
     }
 }

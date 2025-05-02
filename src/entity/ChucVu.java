@@ -33,8 +33,7 @@ public class ChucVu {
 	}
 	@Override
 	public String toString() {
-		return tenChucVu
-				;
+		return tenChucVu;
 	}
 	@Override
 	public int hashCode() {

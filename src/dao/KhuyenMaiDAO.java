@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import connectDB.ConnectDB;
@@ -23,12 +24,28 @@ public class KhuyenMaiDAO {
     }
 
     public boolean themKhuyenMai(KhuyenMai khuyenMai) {
-        String sql = "INSERT INTO KhuyenMai(maKhuyenMai, tenKhuyenMai, giaTriKhuyenMai) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO KhuyenMai(maKhuyenMai, tenKhuyenMai, giaTriKhuyenMai, ngayBatDau, ngayKetThuc) VALUES(?, ?, ?, ?, ?)";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, khuyenMai.getMaKhuyenMai());
             stmt.setString(2, khuyenMai.getTenKhuyenMai());
             stmt.setDouble(3, khuyenMai.getGiaTriKhuyenMai());
+            
+            if (khuyenMai.getNgayBatDau() != null) {
+                stmt.setDate(4, new java.sql.Date(khuyenMai.getNgayBatDau().getTime()));
+            } else {
+                stmt.setDate(4, new java.sql.Date(new Date().getTime())); // Default to current date
+            }
+            
+            if (khuyenMai.getNgayKetThuc() != null) {
+                stmt.setDate(5, new java.sql.Date(khuyenMai.getNgayKetThuc().getTime()));
+            } else {
+                // Default to 30 days from now
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.add(java.util.Calendar.DATE, 30);
+                stmt.setDate(5, new java.sql.Date(cal.getTimeInMillis()));
+            }
+            
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -49,12 +66,27 @@ public class KhuyenMaiDAO {
     }
 
     public boolean capNhatKhuyenMai(KhuyenMai khuyenMai) {
-        String sql = "UPDATE KhuyenMai SET tenKhuyenMai = ?, giaTriKhuyenMai = ? WHERE maKhuyenMai = ?";
+        String sql = "UPDATE KhuyenMai SET tenKhuyenMai = ?, giaTriKhuyenMai = ?, ngayBatDau = ?, ngayKetThuc = ? WHERE maKhuyenMai = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, khuyenMai.getTenKhuyenMai());
             stmt.setDouble(2, khuyenMai.getGiaTriKhuyenMai());
-            stmt.setString(3, khuyenMai.getMaKhuyenMai());
+            
+            if (khuyenMai.getNgayBatDau() != null) {
+                stmt.setDate(3, new java.sql.Date(khuyenMai.getNgayBatDau().getTime()));
+            } else {
+                stmt.setDate(3, new java.sql.Date(new Date().getTime()));
+            }
+            
+            if (khuyenMai.getNgayKetThuc() != null) {
+                stmt.setDate(4, new java.sql.Date(khuyenMai.getNgayKetThuc().getTime()));
+            } else {
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.add(java.util.Calendar.DATE, 30);
+                stmt.setDate(4, new java.sql.Date(cal.getTimeInMillis()));
+            }
+            
+            stmt.setString(5, khuyenMai.getMaKhuyenMai());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -73,6 +105,8 @@ public class KhuyenMaiDAO {
                         rs.getString("maKhuyenMai"),
                         rs.getString("tenKhuyenMai"),
                         rs.getDouble("giaTriKhuyenMai"));
+                khuyenMai.setNgayBatDau(rs.getDate("ngayBatDau"));
+                khuyenMai.setNgayKetThuc(rs.getDate("ngayKetThuc"));
                 return khuyenMai;
             }
         } catch (SQLException e) {
@@ -92,6 +126,8 @@ public class KhuyenMaiDAO {
                         rs.getString("maKhuyenMai"),
                         rs.getString("tenKhuyenMai"),
                         rs.getDouble("giaTriKhuyenMai"));
+                khuyenMai.setNgayBatDau(rs.getDate("ngayBatDau"));
+                khuyenMai.setNgayKetThuc(rs.getDate("ngayKetThuc"));
                 danhSachKhuyenMai.add(khuyenMai);
             }
         } catch (SQLException e) {
@@ -113,6 +149,8 @@ public class KhuyenMaiDAO {
                         rs.getString("maKhuyenMai"),
                         rs.getString("tenKhuyenMai"),
                         rs.getDouble("giaTriKhuyenMai"));
+                khuyenMai.setNgayBatDau(rs.getDate("ngayBatDau"));
+                khuyenMai.setNgayKetThuc(rs.getDate("ngayKetThuc"));
                 danhSachKhuyenMai.add(khuyenMai);
             }
         } catch (SQLException e) {
