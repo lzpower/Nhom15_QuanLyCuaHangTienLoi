@@ -153,7 +153,7 @@ public class ThongKeDoanhThuPanel extends JPanel {
         btnHomNay.setBorderPainted(false);
         JButton btnThangNay = new JButton("Tháng này");
         btnThangNay.setFont(BUTTON_FONT); // Đặt font trực tiếp
-        btnThangNay.setPreferredSize(new Dimension(100, 30));
+        btnThangNay.setPreferredSize(new Dimension(120, 30));
         btnThangNay.setBackground(new Color(0, 120, 215));
         btnThangNay.setForeground(Color.WHITE);
         btnThangNay.setFocusPainted(false);
@@ -271,7 +271,7 @@ public class ThongKeDoanhThuPanel extends JPanel {
         btnLocBanChayHomNay.setBorderPainted(false);
         JButton btnLocBanChayThang = new JButton("Tháng này");
         btnLocBanChayThang.setFont(BUTTON_FONT); // Đặt font trực tiếp
-        btnLocBanChayThang.setPreferredSize(new Dimension(100, 30));
+        btnLocBanChayThang.setPreferredSize(new Dimension(120, 30));
         btnLocBanChayThang.setBackground(new Color(0, 120, 215));
         btnLocBanChayThang.setForeground(Color.WHITE);
         btnLocBanChayThang.setFocusPainted(false);
@@ -340,7 +340,7 @@ public class ThongKeDoanhThuPanel extends JPanel {
         btnLocKhoBanHomNay.setBorderPainted(false);
         JButton btnLocKhoBanThang = new JButton("Tháng này");
         btnLocKhoBanThang.setFont(BUTTON_FONT); // Đặt font trực tiếp
-        btnLocKhoBanThang.setPreferredSize(new Dimension(100, 30));
+        btnLocKhoBanThang.setPreferredSize(new Dimension(120, 30));
         btnLocKhoBanThang.setBackground(new Color(0, 120, 215));
         btnLocKhoBanThang.setForeground(Color.WHITE);
         btnLocKhoBanThang.setFocusPainted(false);

@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class GDChinh extends JFrame implements ActionListener{
+public class GiaoDienChinh extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPanel;
 	private JButton btnBanHang;
@@ -32,7 +32,7 @@ public class GDChinh extends JFrame implements ActionListener{
 	private String vaitro;
 	private String tenNhanVien; // Added to store employee name
 	private String maNhanVien;
-	public GDChinh(String tenDangNhap) {
+	public GiaoDienChinh(String tenDangNhap) {
 		this.vaitro = "admin"; // Default role
 		this.tenNhanVien = ""; // Default empty name
 		
@@ -68,6 +68,7 @@ public class GDChinh extends JFrame implements ActionListener{
 		setLocationRelativeTo(null);
 		setLayout(new BorderLayout());
 		setMinimumSize(new Dimension(800, 500));
+		setResizable(false);
 
 		// Left panel for buttons
 		JPanel leftPanel = new JPanel();
@@ -106,7 +107,7 @@ public class GDChinh extends JFrame implements ActionListener{
 		btnQuanLiNV = createButton("Quản Lý Nhân Viên","src/img/QuanLyNhanVien.png");
 		btnQuanLiKH = createButton("Quản Lý Khách Hàng","src/img/QuanLyKhachHang.png");
 		btnDangXuat = createButton("Đăng Xuất","src/img/DangXuat.png");
-		btnQuanLiTK = createButton("Quản Lý Tài khoản","src/img/DangXuat.png");
+		btnQuanLiTK = createButton("Quản Lý Tài khoản","src/img/QLTK.png");
 
 		// Add buttons to left panel
 		leftPanel.add(btnBanHang);
@@ -225,7 +226,7 @@ public class GDChinh extends JFrame implements ActionListener{
 	        } 
 	        else if (o.equals(btnQuanLiSP)) {
 	        	doiMauNutHienTai(btnQuanLiSP);
-	            showPanel(new QuanLiSPPanel());
+	            showPanel(new QuanLiSanPhamPanel());
 	        } 
 	        else if (o.equals(btnThongKeDoanhThu)) {
 	        	doiMauNutHienTai(btnThongKeDoanhThu);
@@ -237,21 +238,21 @@ public class GDChinh extends JFrame implements ActionListener{
 	        } else if (o == btnQuanLiTK) {
 	            if (vaitro.equalsIgnoreCase("Quản lý")) {
 	                doiMauNutHienTai(btnQuanLiTK);
-	                showPanel(new QuanLiTKPanel());
+	                showPanel(new QuanLiTaiKhoanPanel());
 	            } else {
 	                JOptionPane.showMessageDialog(this, "Vui lòng đăng nhập dưới quyền quản lý");
 	            }
 	        }else if (o.equals(btnQuanLiNV)) {
 	            if (vaitro.equalsIgnoreCase("Quản lý")) {
 	            	doiMauNutHienTai(btnQuanLiNV);
-	                showPanel(new QuanLiNVPanel());
+	                showPanel(new QuanLiNhanVienPanel());
 	            } else {
 	                JOptionPane.showMessageDialog(this, "Vui lòng đăng nhập dưới quyền quản lý");
 	            }
 	        } 
 	        else if (o.equals(btnQuanLiKH)) {
 	        	doiMauNutHienTai(btnQuanLiKH);
-	            showPanel(new QuanLiKHPanel());
+	            showPanel(new QuanLiKhachHangPanel());
 	        }
 	        else if (o.equals(btnDangXuat)) {
 	        	doiMauNutHienTai(btnDangXuat);

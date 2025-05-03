@@ -203,7 +203,7 @@ public class Start extends JFrame implements ActionListener {
         TaiKhoan taiKhoan = taiKhoanDAO.getTaiKhoanTheoTenDangNhap(tk);
         if (taiKhoan != null && taiKhoan.getMatKhau().equals(mk)) {
             SwingUtilities.invokeLater(() -> {
-                new GDChinh(tk).setVisible(true);
+                new GiaoDienChinh(tk).setVisible(true);
                 dispose(); // Đóng form đăng nhập
             });
             JOptionPane.showMessageDialog(this, "Đăng nhập thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);

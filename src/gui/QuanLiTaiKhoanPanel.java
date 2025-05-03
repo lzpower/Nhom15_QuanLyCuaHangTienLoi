@@ -17,7 +17,7 @@ import dao.TaiKhoanDAO;
 import entity.NhanVien;
 import entity.TaiKhoan;
 
-public class QuanLiTKPanel extends JPanel implements ActionListener {
+public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
     private static final long serialVersionUID = 1L;
     private DefaultTableModel tableModel;
     private JTable table;
@@ -32,8 +32,9 @@ public class QuanLiTKPanel extends JPanel implements ActionListener {
     private JButton btnThem;
     private JButton btnXoa;
     private JButton btnSua;
+	private JTextField txtNhanVien;
 
-    public QuanLiTKPanel() {
+    public QuanLiTaiKhoanPanel() {
         setLayout(new BorderLayout());
 
         try {
@@ -118,30 +119,14 @@ public class QuanLiTKPanel extends JPanel implements ActionListener {
         pFields.add(lblNhanVien, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        
-        // Tạo danh sách nhân viên cho combobox
-        String[] nhanVienOptions = new String[danhSachNhanVien.size() + 1];
-        nhanVienOptions[0] = "-- Chọn nhân viên --";
-        for (int i = 0; i < danhSachNhanVien.size(); i++) {
-            NhanVien nv = danhSachNhanVien.get(i);
-            nhanVienOptions[i + 1] = nv.getMaNhanVien() + " - " + nv.getTenNhanVien();
-        }
-        cbxNhanVien = new JComboBox<>(nhanVienOptions);
-        cbxNhanVien.setPreferredSize(new Dimension(400, 25));
-        pFields.add(cbxNhanVien, gbc);
+        txtNhanVien =new JTextField(30);
+        txtNhanVien.setPreferredSize(new Dimension(400, 25));
+        pFields.add(txtNhanVien, gbc);
 
         //panel button
         JPanel pButtons = new JPanel();
         pButtons.setLayout(new BoxLayout(pButtons, BoxLayout.Y_AXIS));
         pButtons.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-
-        btnThem = new JButton("Thêm");
-        styleButton(btnThem, new Color(46, 204, 113));
-        btnThem.setPreferredSize(new Dimension(120, 25));
-        btnThem.setMaximumSize(new Dimension(120, 40));
-        btnThem.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pButtons.add(btnThem);
-        pButtons.add(Box.createRigidArea(new Dimension(0, 10)));
 
         btnXoa = new JButton("Xóa");
         styleButton(btnXoa, new Color(231, 76, 60));
@@ -222,13 +207,14 @@ public class QuanLiTKPanel extends JPanel implements ActionListener {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
+                	String tenNhanVien="";
                     int row = table.getSelectedRow();
                     if (row >= 0) {
                         String tenDangNhap = tableModel.getValueAt(row, 0).toString();
                         String matKhau = tableModel.getValueAt(row, 1).toString();
                         String vaiTro = tableModel.getValueAt(row, 2).toString();
                         String maNhanVien = tableModel.getValueAt(row, 3).toString();
-                        
+                        tenNhanVien =tableModel.getValueAt(row, 4).toString();
                         txtTenDangNhap.setText(tenDangNhap);
                         txtMatKhau.setText(matKhau);
                         
@@ -239,21 +225,7 @@ public class QuanLiTKPanel extends JPanel implements ActionListener {
                                 break;
                             }
                         }
-                        
-                        // Set nhân viên
-                        if (!maNhanVien.isEmpty()) {
-                            for (int i = 0; i < cbxNhanVien.getItemCount(); i++) {
-                                String item = cbxNhanVien.getItemAt(i);
-                                if (item.startsWith(maNhanVien + " - ")) {
-                                    cbxNhanVien.setSelectedIndex(i);
-                                    break;
-                                }
-                            }
-                        } else {
-                            cbxNhanVien.setSelectedIndex(0);
-                        }
-                        
-                        // Không cho phép sửa tên đăng nhập
+                        txtNhanVien.setText(maNhanVien+" - "+tenNhanVien);
                         txtTenDangNhap.setEditable(false);
                     }
                 }
@@ -269,7 +241,7 @@ public class QuanLiTKPanel extends JPanel implements ActionListener {
         
         btnXoaTrang.addActionListener(this);
         btnTim.addActionListener(this);
-        btnThem.addActionListener(this);
+        //btnThem.addActionListener(this);
         btnXoa.addActionListener(this);
         btnSua.addActionListener(this);
         
@@ -300,8 +272,8 @@ public class QuanLiTKPanel extends JPanel implements ActionListener {
             loadTableData();
         } else if (o.equals(btnTim)) {
             timKiemTaiKhoan();
-        } else if (o.equals(btnThem)) {
-            themTaiKhoan();
+//        } else if (o.equals(btnThem)) {
+//            themTaiKhoan();
         } else if (o.equals(btnXoa)) {
             xoaTaiKhoan();
         } else if (o.equals(btnSua)) {
@@ -352,10 +324,11 @@ public class QuanLiTKPanel extends JPanel implements ActionListener {
     private void clearForm() {
         txtTenDangNhap.setText("");
         txtMatKhau.setText("");
-        cbxVaiTro.setSelectedIndex(0);
-        cbxNhanVien.setSelectedIndex(0);
+        cbxVaiTro.setSelectedItem(null);
         txtTenDangNhap.setEditable(true);
+        txtNhanVien.setText("");
         table.clearSelection();
+        loadTableData();
     }
     
     private boolean validateInput() {
@@ -383,69 +356,7 @@ public class QuanLiTKPanel extends JPanel implements ActionListener {
         return true;
     }
     
-    private void themTaiKhoan() {
-        if (!validateInput()) {
-            return;
-        }
-        
-        String tenDangNhap = txtTenDangNhap.getText().trim();
-        String matKhau = txtMatKhau.getText().trim();
-        String vaiTro = cbxVaiTro.getSelectedItem().toString();
-        String selectedNhanVien = cbxNhanVien.getSelectedItem().toString();
-        
-        // Kiểm tra xem đã chọn nhân viên chưa
-        if (selectedNhanVien.equals("-- Chọn nhân viên --")) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
-        String maNhanVien = selectedNhanVien.split(" - ")[0];
-        
-        // Kiểm tra tên đăng nhập đã tồn tại chưa
-        for (TaiKhoan tk : danhSachTaiKhoan) {
-            if (tk.getTenDangNhap().equals(tenDangNhap)) {
-                JOptionPane.showMessageDialog(this, "Tên đăng nhập đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-        
-        // Lấy nhân viên từ mã
-        NhanVien nhanVien = nhanVienDAO.getNhanVienTheoMa(maNhanVien);
-        if (nhanVien == null) {
-            JOptionPane.showMessageDialog(this, "Không tìm thấy nhân viên với mã: " + maNhanVien, "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
-        // Kiểm tra nhân viên đã có tài khoản chưa
-        for (TaiKhoan tk : danhSachTaiKhoan) {
-            if (tk.getNhanVien() != null && tk.getNhanVien().getMaNhanVien().equals(maNhanVien)) {
-                JOptionPane.showMessageDialog(this, "Nhân viên này đã có tài khoản!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-        
-        // Tạo tài khoản mới
-        TaiKhoan taiKhoanMoi = new TaiKhoan(tenDangNhap, matKhau, vaiTro, nhanVien);
-        
-        // Thêm vào CSDL
-        boolean success = taiKhoanDAO.themTaiKhoan(taiKhoanMoi);
-        if (success) {
-            // Cập nhật danh sách và bảng
-            danhSachTaiKhoan.add(taiKhoanMoi);
-            tableModel.addRow(new Object[]{
-                    taiKhoanMoi.getTenDangNhap(),
-                    taiKhoanMoi.getMatKhau(),
-                    taiKhoanMoi.getVaiTro(),
-                    nhanVien.getMaNhanVien(),
-                    nhanVien.getTenNhanVien()
-            });
-            
-            JOptionPane.showMessageDialog(this, "Thêm tài khoản thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            clearForm();
-        } else {
-            JOptionPane.showMessageDialog(this, "Thêm tài khoản thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
-    }
+
     
     private void xoaTaiKhoan() {
         int selectedRow = table.getSelectedRow();

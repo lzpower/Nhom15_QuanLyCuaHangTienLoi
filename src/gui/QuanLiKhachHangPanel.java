@@ -16,7 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public class QuanLiKHPanel extends JPanel implements ActionListener {
+public class QuanLiKhachHangPanel extends JPanel implements ActionListener {
     private DefaultTableModel tableModel;
     private JTable table;
     private JTextField txtTimKH, txtMaKH, txtTenKH, txtSoDienThoai, txtSoDiem;
@@ -28,7 +28,7 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
     private JButton btnXoa;
     private JButton btnSua;
 
-    public QuanLiKHPanel() {
+    public QuanLiKhachHangPanel() {
         setLayout(new BorderLayout());
 
         // Khởi tạo DAO
@@ -229,7 +229,7 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
                         
                         // Validate the data
                         if (column == 1 && !tenKH.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
-                            JOptionPane.showMessageDialog(QuanLiKHPanel.this, 
+                            JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, 
                                 "Tên khách hàng chỉ được chứa chữ cái và khoảng trắng!", 
                                 "Lỗi", JOptionPane.ERROR_MESSAGE);
                             dienvaoTable(); // Reset table data
@@ -237,7 +237,7 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
                         }
                         
                         if (column == 2 && !soDienThoai.matches("\\d{10}")) {
-                            JOptionPane.showMessageDialog(QuanLiKHPanel.this, 
+                            JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, 
                                 "Số điện thoại phải là 10 chữ số!", 
                                 "Lỗi", JOptionPane.ERROR_MESSAGE);
                             dienvaoTable(); // Reset table data
@@ -245,7 +245,7 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
                         }
                         
                         if (column == 2 && khachHangDAO.kiemTraSoDienThoaiTonTai(soDienThoai, maKH)) {
-                            JOptionPane.showMessageDialog(QuanLiKHPanel.this, 
+                            JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, 
                                 "Số điện thoại này đã tồn tại cho khách hàng khác!", 
                                 "Lỗi", JOptionPane.ERROR_MESSAGE);
                             dienvaoTable(); // Reset table data
@@ -255,14 +255,14 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
                         if (column == 3) {
                             try {
                                 if (soDiem < 0) {
-                                    JOptionPane.showMessageDialog(QuanLiKHPanel.this, 
+                                    JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, 
                                         "Số điểm phải lớn hơn hoặc bằng 0!", 
                                         "Lỗi", JOptionPane.ERROR_MESSAGE);
                                     dienvaoTable(); // Reset table data
                                     return;
                                 }
                             } catch (NumberFormatException ex) {
-                                JOptionPane.showMessageDialog(QuanLiKHPanel.this, 
+                                JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, 
                                     "Số điểm phải là số nguyên!", 
                                     "Lỗi", JOptionPane.ERROR_MESSAGE);
                                 dienvaoTable(); // Reset table data
@@ -281,7 +281,7 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
                                 }
                             }
                         } else {
-                            JOptionPane.showMessageDialog(QuanLiKHPanel.this, 
+                            JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, 
                                 "Lỗi khi cập nhật khách hàng trong CSDL!", 
                                 "Lỗi", JOptionPane.ERROR_MESSAGE);
                             dienvaoTable(); // Reset table data
@@ -332,7 +332,7 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
             String keyword = txtTimKH.getText().trim().toLowerCase();
             if (keyword.isEmpty()) {
                 dienvaoTable();
-                JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Vui lòng nhập mã khách hàng!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, "Vui lòng nhập mã khách hàng!", "Thông báo", JOptionPane.WARNING_MESSAGE);
                 txtTimKH.requestFocus();
                 return;
             }
@@ -340,7 +340,7 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
             List<KhachHang> ketQuaTimKiem = khachHangDAO.timKiemKhachHang(keyword);
             tableModel.setRowCount(0);
             if (ketQuaTimKiem.isEmpty()) {
-                JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Không tìm thấy khách hàng với từ khóa: " + keyword, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, "Không tìm thấy khách hàng với từ khóa: " + keyword, "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 txtTimKH.setText("");
                 dienvaoTable();
             } else {
@@ -400,19 +400,19 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
             int selectedRow = table.getSelectedRow();
             if (selectedRow >= 0) {
                 String maKH = (String) tableModel.getValueAt(selectedRow, 0);
-                int confirm = JOptionPane.showConfirmDialog(QuanLiKHPanel.this, "Bạn có chắc muốn xóa khách hàng " + maKH + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+                int confirm = JOptionPane.showConfirmDialog(QuanLiKhachHangPanel.this, "Bạn có chắc muốn xóa khách hàng " + maKH + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     if (khachHangDAO.xoaKhachHang(maKH)) {
                         danhSachKhachHang.removeIf(kh -> kh.getMaKhachHang().equals(maKH));
                         tableModel.removeRow(selectedRow);
                         clearForm();
-                        JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Xóa khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, "Xóa khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                     } else {
-                        JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Khách hàng đã có hoá đơn không thể xoá!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, "Khách hàng đã có hoá đơn không thể xoá!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             } else {
-                JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Vui lòng chọn một khách hàng để xóa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, "Vui lòng chọn một khách hàng để xóa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             }
         } else if (o.equals(btnSua)) {
             int selectedRow = table.getSelectedRow();
@@ -451,16 +451,16 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
 
                         clearForm();
                         txtMaKH.setEditable(true);
-                        JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Cập nhật khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, "Cập nhật khách hàng thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                     } else {
-                        JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Lỗi khi cập nhật khách hàng trong CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, "Lỗi khi cập nhật khách hàng trong CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
                     ex.printStackTrace();
                 }
             } else {
-                JOptionPane.showMessageDialog(QuanLiKHPanel.this, "Vui lòng chọn một khách hàng để sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, "Vui lòng chọn một khách hàng để sửa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             }
         }
     }
@@ -547,8 +547,8 @@ public class QuanLiKHPanel extends JPanel implements ActionListener {
             txtTenKH.requestFocus();
             return false;
         }
-        if (!soDienThoai.matches("\\d{10}")) {
-            JOptionPane.showMessageDialog(this, "Số điện thoại phải là 10 chữ số!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        if (!soDienThoai.matches("^0[35789]\\d{8}$")) {
+            JOptionPane.showMessageDialog(this, "Số điện thoại bắt đầu là số 0 tiếp theo là một trong các chữ số (3|8|7|5|9) còn lại 8 chữ số trong khoảng [0-9]! Tổng cộng 10 số", "Lỗi", JOptionPane.ERROR_MESSAGE);
             txtSoDienThoai.requestFocus();
             return false;
         }

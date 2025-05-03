@@ -23,7 +23,7 @@ public class SanPhamDAO {
 
 
 	public boolean themSanPham(SanPham sanPham) {
-        String sql = "INSERT INTO SanPham(maSanPham, tenSanPham, maLoaiSanPham, soLuongHienCo, giaNhap, urlHinhAnh) VALUES(?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO SanPham(maSanPham, tenSanPham, maLoaiSanPham, soLuongHienCo, giaNhap, giaBan ,urlHinhAnh) VALUES(?, ?, ?, ?, ?,?, ?)";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, sanPham.getMaSanPham());
@@ -31,7 +31,8 @@ public class SanPhamDAO {
             stmt.setString(3, sanPham.getLoaiSanPham().getMaLoaiSanPham());
             stmt.setInt(4, sanPham.getSoLuongHienCo());
             stmt.setDouble(5, sanPham.getGiaNhap());
-            stmt.setString(6, sanPham.getUrlHinhAnh());
+            stmt.setDouble(6, sanPham.getGiaBan());
+            stmt.setString(7, sanPham.getUrlHinhAnh());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -52,15 +53,16 @@ public class SanPhamDAO {
     }
 
     public boolean capNhatSanPham(SanPham sanPham) {
-        String sql = "UPDATE SanPham SET tenSanPham = ?, maLoaiSanPham = ?, soLuongHienCo = ?, giaNhap = ?, urlHinhAnh = ? WHERE maSanPham = ?";
+        String sql = "UPDATE SanPham SET tenSanPham = ?, maLoaiSanPham = ?, soLuongHienCo = ?, giaNhap = ?, giaBan=? , urlHinhAnh = ? WHERE maSanPham = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, sanPham.getTenSanPham());
             stmt.setString(2, sanPham.getLoaiSanPham().getMaLoaiSanPham());
             stmt.setInt(3, sanPham.getSoLuongHienCo());
             stmt.setDouble(4, sanPham.getGiaNhap());
-            stmt.setString(5, sanPham.getUrlHinhAnh());
-            stmt.setString(6, sanPham.getMaSanPham());
+            stmt.setDouble(5, sanPham.getGiaBan());
+            stmt.setString(6, sanPham.getUrlHinhAnh());
+            stmt.setString(7, sanPham.getMaSanPham());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

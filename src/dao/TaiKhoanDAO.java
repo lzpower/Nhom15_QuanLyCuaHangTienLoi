@@ -16,7 +16,8 @@ public class TaiKhoanDAO {
     
     public TaiKhoanDAO() {
         try {
-            con = ConnectDB.getInstance().getConnection();
+            ConnectDB.getInstance();
+			con = ConnectDB.getConnection();
         } catch (Exception e) {
             e.printStackTrace();
         }
