@@ -66,13 +66,15 @@ public class NhanVienDAO {
     }
 
     public NhanVien getNhanVienTheoMa(String maNhanVien) {
-        String sql = "SELECT * FROM NhanVien nv join ChucVu cv on nv.maChucVu=cv.maChucVu WHERE maNhanVien = ?";
+        String sql = "SELECT nv.maNhanVien, nv.tenNhanVien, nv.soDienThoai, cv.maChucVu, cv.tenChucVu " +
+                     "FROM NhanVien nv JOIN ChucVu cv ON nv.maChucVu = cv.maChucVu " +
+                     "WHERE nv.maNhanVien = ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, maNhanVien);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-            	ChucVu chucVu = new ChucVu(rs.getString("maChucVu"),rs.getString("tenChucVu"));
+                ChucVu chucVu = new ChucVu(rs.getString("maChucVu"), rs.getString("tenChucVu"));
                 NhanVien nhanVien = new NhanVien(
                         rs.getString("maNhanVien"),
                         rs.getString("tenNhanVien"),
@@ -88,12 +90,13 @@ public class NhanVienDAO {
 
     public List<NhanVien> getAllNhanVien() {
         List<NhanVien> danhSachNhanVien = new ArrayList<>();
-        String sql = "SELECT * FROM NhanVien nv join ChucVu cv on nv.maChucVu=cv.maChucVu";
+        String sql = "SELECT nv.maNhanVien, nv.tenNhanVien, nv.soDienThoai, cv.maChucVu, cv.tenChucVu " +
+                     "FROM NhanVien nv JOIN ChucVu cv ON nv.maChucVu = cv.maChucVu";
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                ChucVu chucVu = new ChucVu(rs.getString("maChucVu"),rs.getString("tenChucVu"));
+                ChucVu chucVu = new ChucVu(rs.getString("maChucVu"), rs.getString("tenChucVu"));
                 NhanVien nhanVien = new NhanVien(
                         rs.getString("maNhanVien"),
                         rs.getString("tenNhanVien"),
@@ -109,7 +112,9 @@ public class NhanVienDAO {
 
     public List<NhanVien> timKiemNhanVien(String tuKhoa) {
         List<NhanVien> danhSachNhanVien = new ArrayList<>();
-        String sql = "SELECT * FROM NhanVien nv join ChucVu cv on nv.maChucVu=cv.maChucVu WHERE maNhanVien LIKE ? OR tenNhanVien LIKE ? OR soDienThoai LIKE ?";
+        String sql = "SELECT nv.maNhanVien, nv.tenNhanVien, nv.soDienThoai, cv.maChucVu, cv.tenChucVu " +
+                     "FROM NhanVien nv JOIN ChucVu cv ON nv.maChucVu = cv.maChucVu " +
+                     "WHERE nv.maNhanVien LIKE ? OR nv.tenNhanVien LIKE ? OR nv.soDienThoai LIKE ?";
         try {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1, "%" + tuKhoa + "%");
@@ -117,7 +122,7 @@ public class NhanVienDAO {
             stmt.setString(3, "%" + tuKhoa + "%");
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-            	ChucVu chucVu = new ChucVu(rs.getString("maChucVu"),rs.getString("tenChucVu"));
+                ChucVu chucVu = new ChucVu(rs.getString("maChucVu"), rs.getString("tenChucVu"));
                 NhanVien nhanVien = new NhanVien(
                         rs.getString("maNhanVien"),
                         rs.getString("tenNhanVien"),
@@ -134,13 +139,19 @@ public class NhanVienDAO {
     public String taoMaNhanVienMoi() {
         String maNhanVien = "NV";
         String sql = "SELECT TOP 1 maNhanVien FROM NhanVien ORDER BY maNhanVien DESC";
+   
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()) {
                 String maCuoi = rs.getString("maNhanVien");
-                int so = Integer.parseInt(maCuoi.substring(2)) + 1;
-                maNhanVien += String.format("%03d", so);
+                // Extract the numeric part and increment
+                if (maCuoi != null && maCuoi.length() > 2) {
+                    int so = Integer.parseInt(maCuoi.substring(2)) + 1;
+                    maNhanVien += String.format("%03d", so);
+                } else {
+                    maNhanVien += "001";
+                }
             } else {
                 maNhanVien += "001";
             }
@@ -149,5 +160,19 @@ public class NhanVienDAO {
             maNhanVien += "001";
         }
         return maNhanVien;
+    }
+    public NhanVien getNhanVienById(String maNhanVien) {
+        // Phương thức này là một alias cho getNhanVienTheoMa để duy trì tính nhất quán với TaiKhoanDAO
+        return getNhanVienTheoMa(maNhanVien);
+    }
+    // Close resources to prevent memory leaks
+    public void closeConnection() {
+        try {
+            if (con != null && !con.isClosed()) {
+                con.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

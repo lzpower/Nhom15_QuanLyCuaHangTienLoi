@@ -28,6 +28,7 @@ public class GDChinh extends JFrame implements ActionListener{
 	private JButton btnQuanLiKH;
 	private JButton btnDangXuat;
 	private JButton btnNutTam;
+	private JButton btnQuanLiTK;
 	private String vaitro;
 	private String tenNhanVien; // Added to store employee name
 	private String maNhanVien;
@@ -52,6 +53,7 @@ public class GDChinh extends JFrame implements ActionListener{
 						if (nv != null) {
 							this.maNhanVien = nv.getMaNhanVien();
 							this.tenNhanVien = nv.getTenNhanVien();
+							this.vaitro=nv.getChucVu().getTenChucVu();
 						}
 					}
 				}
@@ -104,6 +106,7 @@ public class GDChinh extends JFrame implements ActionListener{
 		btnQuanLiNV = createButton("Quản Lý Nhân Viên","src/img/QuanLyNhanVien.png");
 		btnQuanLiKH = createButton("Quản Lý Khách Hàng","src/img/QuanLyKhachHang.png");
 		btnDangXuat = createButton("Đăng Xuất","src/img/DangXuat.png");
+		btnQuanLiTK = createButton("Quản Lý Tài khoản","src/img/DangXuat.png");
 
 		// Add buttons to left panel
 		leftPanel.add(btnBanHang);
@@ -116,6 +119,8 @@ public class GDChinh extends JFrame implements ActionListener{
 		leftPanel.add(Box.createVerticalStrut(15));
 		leftPanel.add(btnQuanLiNV);
 		leftPanel.add(Box.createVerticalStrut(15));
+		leftPanel.add(btnQuanLiTK);
+		leftPanel.add(Box.createVerticalStrut(15));
 		leftPanel.add(btnQuanLiKH);
 		leftPanel.add(Box.createVerticalStrut(15));
 		leftPanel.add(btnDangXuat);
@@ -123,7 +128,7 @@ public class GDChinh extends JFrame implements ActionListener{
 
 		leftPanel.add(Box.createVerticalGlue());
 		//leftPanel.setBackground((new Color(99, 166, 148)));
-		leftPanel.add(Box.createVerticalStrut(200));
+		leftPanel.add(Box.createVerticalStrut(150));
 		
 		// Add in4 panel at the bottom
 		JPanel in4 = new JPanel();
@@ -163,6 +168,7 @@ public class GDChinh extends JFrame implements ActionListener{
         btnQuanLiNV.addActionListener(this);
         btnQuanLiKH.addActionListener(this);
         btnDangXuat.addActionListener(this);
+        btnQuanLiTK.addActionListener(this);
 		btnBanHang.doClick();
 	}
 	
@@ -228,13 +234,19 @@ public class GDChinh extends JFrame implements ActionListener{
 	        else if (o.equals(btnKhuyenMai)) {
 	        	doiMauNutHienTai(btnKhuyenMai);
 	            showPanel(new KhuyenMaiPanel());
-	        } 
-	        else if (o.equals(btnQuanLiNV)) {
-	            if (vaitro.equalsIgnoreCase("admin")) {
+	        } else if (o == btnQuanLiTK) {
+	            if (vaitro.equalsIgnoreCase("Quản lý")) {
+	                doiMauNutHienTai(btnQuanLiTK);
+	                showPanel(new QuanLiTKPanel());
+	            } else {
+	                JOptionPane.showMessageDialog(this, "Vui lòng đăng nhập dưới quyền quản lý");
+	            }
+	        }else if (o.equals(btnQuanLiNV)) {
+	            if (vaitro.equalsIgnoreCase("Quản lý")) {
 	            	doiMauNutHienTai(btnQuanLiNV);
 	                showPanel(new QuanLiNVPanel());
 	            } else {
-	                JOptionPane.showMessageDialog(this, "Vui lòng đăng nhập dưới quyền admin");
+	                JOptionPane.showMessageDialog(this, "Vui lòng đăng nhập dưới quyền quản lý");
 	            }
 	        } 
 	        else if (o.equals(btnQuanLiKH)) {
