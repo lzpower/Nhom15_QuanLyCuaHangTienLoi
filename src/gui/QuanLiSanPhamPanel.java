@@ -548,8 +548,8 @@ public class QuanLiSanPhamPanel extends JPanel implements ActionListener {
         	JOptionPane.showMessageDialog(this, "Mã sản phẩm phải bắt đầu bằng 893 và các số, tối đa 12 số!");
         	return false;
         }
-        if(!ten.matches(".*\\S.*")) {
-        	JOptionPane.showMessageDialog(this, "Tên sản phẩm phải bao gồm các kí tự!");
+        if(ten.length()>100) {
+        	JOptionPane.showMessageDialog(this, "Tên sản phẩm phải tối đa 100 kí tự.");
         	return false;
         }
         

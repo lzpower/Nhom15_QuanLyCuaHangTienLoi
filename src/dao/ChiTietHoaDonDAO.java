@@ -18,16 +18,11 @@ public class ChiTietHoaDonDAO {
     private SanPhamDAO sanPhamDAO;
 
     public ChiTietHoaDonDAO() {
+    	ConnectDB.getInstance();
         con = ConnectDB.getConnection();
         hoaDonDAO = new HoaDonDAO();
         sanPhamDAO = new SanPhamDAO();
     }
-//
-//    public ChiTietHoaDonDAO(Connection conn) {
-//        this.con = conn;
-//        hoaDonDAO = new HoaDonDAO(conn);
-//        sanPhamDAO = new SanPhamDAO(conn);
-//    }
 
     public boolean themChiTietHoaDon(ChiTietHoaDon chiTiet) {
         String sql = "INSERT INTO ChiTietHoaDon(maHoaDon, maSanPham, soLuong, donGia) VALUES(?, ?, ?, ?)";

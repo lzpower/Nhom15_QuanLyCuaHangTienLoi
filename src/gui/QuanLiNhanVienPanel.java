@@ -146,7 +146,7 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
 
         pTop.add(pFields, BorderLayout.CENTER);
         pTop.add(pButtons, BorderLayout.EAST);
-
+        
         //south
         JPanel pSearch = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pSearch.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
@@ -192,7 +192,7 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
         JScrollPane scrollPane = new JScrollPane(table);
         pCenter.add(scrollPane, BorderLayout.CENTER);
         pBorder.add(pCenter, BorderLayout.CENTER);
-        // Hiển thị danh sách nhân viên ban đầu
+        
         dienvaotable();
 
         // even
@@ -206,12 +206,11 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
                     String tenChucVu = (String) tableModel.getValueAt(row, 2);
                     String soDienThoai = (String) tableModel.getValueAt(row, 3);
                     
-                    // Validate the data based on which column was edited
-                    if (column == 1 && !tenNV.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+                    if (column == 1 && !tenNV.matches("^[a-zA-ZÀ-ỹ\\s]{1,100}$")) {
                         JOptionPane.showMessageDialog(QuanLiNhanVienPanel.this, 
-                            "Tên nhân viên chỉ được chứa chữ cái và khoảng trắng!", 
+                            "Tên nhân viên chỉ được chứa chữ cái và khoảng trắng! Tối đa 100 kí tự.", 
                             "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        dienvaotable(); // Reset table data
+                        dienvaotable();
                         return;
                     }
                     
@@ -219,7 +218,7 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
                         JOptionPane.showMessageDialog(QuanLiNhanVienPanel.this, 
                             "Chức vụ không hợp lệ! Chỉ chấp nhận 'Quản lý' hoặc 'Nhân viên bán hàng'", 
                             "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        dienvaotable(); // Reset table data
+                        dienvaotable();
                         return;
                     }
                     
@@ -227,11 +226,10 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
                         JOptionPane.showMessageDialog(QuanLiNhanVienPanel.this, 
                             "Số điện thoại phải là 10 chữ số!", 
                             "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        dienvaotable(); // Reset table data
+                        dienvaotable();
                         return;
                     }
-                    
-                    // Create ChucVu object based on the selected position
+                   
                     String maChucVu;
                     if (tenChucVu.equals("Quản lý")) {
                         maChucVu = "CV001";
@@ -240,12 +238,9 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
                     }
                     ChucVu chucVu = new ChucVu(maChucVu, tenChucVu);
                     
-                    // Create NhanVien object with updated data
                     NhanVien nhanVien = new NhanVien(maNV, tenNV, chucVu, soDienThoai);
                     
-                    // Update the employee in the database
                     if (nhanVienDAO.capNhatNhanVien(nhanVien)) {
-                        // Update the employee in the list
                         for (int i = 0; i < danhSachNhanVien.size(); i++) {
                             if (danhSachNhanVien.get(i).getMaNhanVien().equals(maNV)) {
                                 danhSachNhanVien.set(i, nhanVien);
@@ -256,7 +251,7 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
                         JOptionPane.showMessageDialog(QuanLiNhanVienPanel.this, 
                             "Lỗi khi cập nhật nhân viên trong CSDL!", 
                             "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        dienvaotable(); // Reset table data
+                        dienvaotable();
                     }
                 }
             }
@@ -342,19 +337,18 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
                     }
                 }
                 String maChucVu;
-                if (tenChucVu.equals("Quản lý")) {
+                if (tenChucVu.equalsIgnoreCase("Quản lý")) {
                     maChucVu = "CV001";
-                } else {
+                } else if(tenChucVu.equalsIgnoreCase("Nhân viên bán hàng")){
                     maChucVu = "CV002";
                 }
-                
-                // Tạo đối tượng ChucVu và NhanVien
+                else {
+                	maChucVu="CV003";
+                }
                 ChucVu chucVu = new ChucVu(maChucVu, tenChucVu);
                 NhanVien nhanVien = new NhanVien(maNV, tenNV, chucVu, soDienThoai);
                 
-                // Thêm nhân viên vào CSDL
                 if (nhanVienDAO.themNhanVien(nhanVien)) {
-                    // Thêm vào danh sách và cập nhật bảng
                     danhSachNhanVien.add(nhanVien);
                     tableModel.addRow(new Object[]{
                             nhanVien.getMaNhanVien(),
@@ -362,12 +356,19 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
                             nhanVien.getChucVu().getTenChucVu(),
                             nhanVien.getSoDienThoai()
                     });
-                    
-                    // Tạo tài khoản tự động cho nhân viên mới
-                    String tenDangNhap = maNV; // Sử dụng mã nhân viên làm tên đăng nhập
-                    String matKhau = "123"; // Mật khẩu mặc định
-                    String vaiTro = tenChucVu.equals("Quản lý") ? "Admin" : "User"; // Vai trò dựa trên chức vụ
-                    
+                    String tenDangNhap = maNV;
+                    String matKhau = "123";
+                    String vaiTro ;
+                    int index=cbxChucVu.getSelectedIndex();
+                    if(index==0) {
+                    	vaiTro="Quản lý";
+                    }
+                    else if(index==1) {
+                    	vaiTro="Nhân viên bán hàng";
+                    }
+                    else {
+                    	vaiTro="Nhân viên kho";
+                    }
                     TaiKhoan taiKhoan = new TaiKhoan(tenDangNhap, matKhau, vaiTro, nhanVien);
                     
                     if (taiKhoanDAO.themTaiKhoan(taiKhoan)) {
@@ -410,31 +411,29 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
         } else if (o.equals(btnSua)) {
             int selectedRow = table.getSelectedRow();
             if (selectedRow >= 0) {
-                // Kiểm tra xem form có hợp lệ không
                 if (!validata()) {
                     return;
                 }
-                
                 try {
                     String maNV = txtMaNV.getText().trim();
                     String tenNV = txtTenNV.getText().trim();
                     String tenChucVu = cbxChucVu.getSelectedItem().toString();
                     String soDienThoai = txtSoDienThoai.getText().trim();
                     
-                    // Tạo mã chức vụ dựa trên tên chức vụ
                     String maChucVu;
-                    if (tenChucVu.equals("Quản lý")) {
+                    if (tenChucVu.equalsIgnoreCase("Quản lý")) {
                         maChucVu = "CV001";
-                    } else {
+                    } else if(tenChucVu.equalsIgnoreCase("Nhân viên bán hàng")){
                         maChucVu = "CV002";
                     }
+                    else {
+                    	maChucVu="CV003";
+                    }
                     
-                    // Tạo đối tượng ChucVu và NhanVien
                     ChucVu chucVu = new ChucVu(maChucVu, tenChucVu);
                     NhanVien nhanVien = new NhanVien(maNV, tenNV, chucVu, soDienThoai);
                     
                     if (nhanVienDAO.capNhatNhanVien(nhanVien)) {
-                        // Cập nhật danh sách và bảng
                         for (int i = 0; i < danhSachNhanVien.size(); i++) {
                             if (danhSachNhanVien.get(i).getMaNhanVien().equals(maNV)) {
                                 danhSachNhanVien.set(i, nhanVien);
@@ -479,7 +478,6 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
         table.clearSelection();
         txtMaNV.setEditable(true);
         
-        // Tự động tạo mã nhân viên mới
         String maNVMoi = nhanVienDAO.taoMaNhanVienMoi();
         txtMaNV.setText(maNVMoi);
     }
@@ -507,8 +505,8 @@ public class QuanLiNhanVienPanel extends JPanel implements ActionListener {
             txtMaNV.requestFocus();
             return false;
         }
-        if (!tenNV.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
-            JOptionPane.showMessageDialog(this, "Tên nhân viên chỉ được chứa chữ cái và khoảng trắng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        if (!tenNV.matches("^[a-zA-ZÀ-ỹ\\s]{1,100}$")) {
+            JOptionPane.showMessageDialog(this, "Tên nhân viên chỉ được chứa chữ cái và khoảng trắng! Tối đa 100 kí tự", "Lỗi", JOptionPane.ERROR_MESSAGE);
             txtTenNV.requestFocus();
             return false;
         }

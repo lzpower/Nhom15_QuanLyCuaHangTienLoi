@@ -22,12 +22,6 @@ public class TaiKhoanDAO {
             e.printStackTrace();
         }
     }
-    
-    /**
-     * Thêm một tài khoản mới vào cơ sở dữ liệu
-     * @param taiKhoan Đối tượng TaiKhoan cần thêm
-     * @return true nếu thêm thành công, false nếu thất bại
-     */
     public boolean themTaiKhoan(TaiKhoan taiKhoan) {
         String sql = "INSERT INTO TaiKhoan (tenDangNhap, matKhau, vaiTro, maNhanVien) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -43,12 +37,6 @@ public class TaiKhoanDAO {
             return false;
         }
     }
-    
-    /**
-     * Cập nhật thông tin tài khoản trong cơ sở dữ liệu
-     * @param taiKhoan Đối tượng TaiKhoan cần cập nhật
-     * @return true nếu cập nhật thành công, false nếu thất bại
-     */
     public boolean capNhatTaiKhoan(TaiKhoan taiKhoan) {
         String sql = "UPDATE TaiKhoan SET matKhau = ?, vaiTro = ? WHERE tenDangNhap = ?";
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -63,12 +51,7 @@ public class TaiKhoanDAO {
             return false;
         }
     }
-    
-    /**
-     * Xóa tài khoản khỏi cơ sở dữ liệu
-     * @param tenDangNhap Tên đăng nhập của tài khoản cần xóa
-     * @return true nếu xóa thành công, false nếu thất bại
-     */
+
     public boolean xoaTaiKhoan(String tenDangNhap) {
         String sql = "DELETE FROM TaiKhoan WHERE tenDangNhap = ?";
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -82,11 +65,6 @@ public class TaiKhoanDAO {
         }
     }
     
-    /**
-     * Lấy tài khoản theo tên đăng nhập
-     * @param tenDangNhap Tên đăng nhập cần tìm
-     * @return Đối tượng TaiKhoan nếu tìm thấy, null nếu không tìm thấy
-     */
     public TaiKhoan getTaiKhoanTheoTenDangNhap(String tenDangNhap) {
         String sql = "SELECT * FROM TaiKhoan WHERE tenDangNhap = ?";
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -111,11 +89,6 @@ public class TaiKhoanDAO {
         return null;
     }
     
-    /**
-     * Lấy tài khoản theo mã nhân viên
-     * @param maNhanVien Mã nhân viên cần tìm
-     * @return Đối tượng TaiKhoan nếu tìm thấy, null nếu không tìm thấy
-     */
     public TaiKhoan getTaiKhoanByMaNhanVien(String maNhanVien) {
         String sql = "SELECT * FROM TaiKhoan WHERE maNhanVien = ?";
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -140,10 +113,6 @@ public class TaiKhoanDAO {
         return null;
     }
     
-    /**
-     * Lấy danh sách tất cả tài khoản
-     * @return Danh sách các đối tượng TaiKhoan
-     */
     public List<TaiKhoan> getAllTaiKhoan() {
         List<TaiKhoan> danhSachTaiKhoan = new ArrayList<>();
         String sql = "SELECT * FROM TaiKhoan";
@@ -170,12 +139,6 @@ public class TaiKhoanDAO {
         return danhSachTaiKhoan;
     }
     
-    /**
-     * Kiểm tra đăng nhập
-     * @param tenDangNhap Tên đăng nhập
-     * @param matKhau Mật khẩu
-     * @return Đối tượng TaiKhoan nếu đăng nhập thành công, null nếu thất bại
-     */
     public TaiKhoan kiemTraDangNhap(String tenDangNhap, String matKhau) {
         String sql = "SELECT * FROM TaiKhoan WHERE tenDangNhap = ? AND matKhau = ?";
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -200,13 +163,6 @@ public class TaiKhoanDAO {
         return null;
     }
     
-    /**
-     * Đổi mật khẩu cho tài khoản
-     * @param tenDangNhap Tên đăng nhập
-     * @param matKhauCu Mật khẩu cũ
-     * @param matKhauMoi Mật khẩu mới
-     * @return true nếu đổi thành công, false nếu thất bại
-     */
     public boolean doiMatKhau(String tenDangNhap, String matKhauCu, String matKhauMoi) {
         // Kiểm tra mật khẩu cũ có đúng không
         TaiKhoan taiKhoan = kiemTraDangNhap(tenDangNhap, matKhauCu);

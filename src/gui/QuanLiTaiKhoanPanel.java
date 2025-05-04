@@ -22,7 +22,7 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
     private DefaultTableModel tableModel;
     private JTable table;
     private JTextField txtTimTK, txtTenDangNhap, txtMatKhau;
-    private JComboBox<String> cbxVaiTro, cbxNhanVien;
+    private JComboBox<String> cbxVaiTro;
     private List<TaiKhoan> danhSachTaiKhoan;
     private TaiKhoanDAO taiKhoanDAO;
     private NhanVienDAO nhanVienDAO;
@@ -32,28 +32,22 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
     private JButton btnThem;
     private JButton btnXoa;
     private JButton btnSua;
-	private JTextField txtNhanVien;
+    private JTextField txtNhanVien;
 
     public QuanLiTaiKhoanPanel() {
         setLayout(new BorderLayout());
 
         try {
-            // Kết nối CSDL
             ConnectDB.getInstance().connect();
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Lỗi kết nối CSDL: " + e.getMessage());
         }
-
-        // Khởi tạo DAO
         taiKhoanDAO = new TaiKhoanDAO();
         nhanVienDAO = new NhanVienDAO();
-        
-        // Lấy danh sách tài khoản và nhân viên từ CSDL
         danhSachTaiKhoan = taiKhoanDAO.getAllTaiKhoan();
         danhSachNhanVien = nhanVienDAO.getAllNhanVien();
 
-        // Tạo giao diện
         JPanel formQuanLiTK = createFormQuanLiTK();
         add(formQuanLiTK, BorderLayout.CENTER);
     }
@@ -119,10 +113,11 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
         pFields.add(lblNhanVien, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        txtNhanVien =new JTextField(30);
+        txtNhanVien = new JTextField(30);
         txtNhanVien.setPreferredSize(new Dimension(400, 25));
         pFields.add(txtNhanVien, gbc);
-
+        txtNhanVien.setEditable(false);
+        
         //panel button
         JPanel pButtons = new JPanel();
         pButtons.setLayout(new BoxLayout(pButtons, BoxLayout.Y_AXIS));
@@ -202,19 +197,19 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
         // Hiển thị danh sách tài khoản ban đầu
         loadTableData();
 
-        // Thêm sự kiện
+        // even
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
-                	String tenNhanVien="";
+                    String tenNhanVien="";
                     int row = table.getSelectedRow();
                     if (row >= 0) {
                         String tenDangNhap = tableModel.getValueAt(row, 0).toString();
                         String matKhau = tableModel.getValueAt(row, 1).toString();
                         String vaiTro = tableModel.getValueAt(row, 2).toString();
                         String maNhanVien = tableModel.getValueAt(row, 3).toString();
-                        tenNhanVien =tableModel.getValueAt(row, 4).toString();
+                        tenNhanVien = tableModel.getValueAt(row, 4).toString();
                         txtTenDangNhap.setText(tenDangNhap);
                         txtMatKhau.setText(matKhau);
                         
@@ -241,7 +236,6 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
         
         btnXoaTrang.addActionListener(this);
         btnTim.addActionListener(this);
-        //btnThem.addActionListener(this);
         btnXoa.addActionListener(this);
         btnSua.addActionListener(this);
         
@@ -272,8 +266,6 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
             loadTableData();
         } else if (o.equals(btnTim)) {
             timKiemTaiKhoan();
-//        } else if (o.equals(btnThem)) {
-//            themTaiKhoan();
         } else if (o.equals(btnXoa)) {
             xoaTaiKhoan();
         } else if (o.equals(btnSua)) {
@@ -334,6 +326,7 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
     private boolean validateInput() {
         String tenDangNhap = txtTenDangNhap.getText().trim();
         String matKhau = txtMatKhau.getText().trim();
+        String nhanVienText = txtNhanVien.getText().trim();
         
         if (tenDangNhap.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Tên đăng nhập không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -347,16 +340,13 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
             return false;
         }
         
-        if (cbxNhanVien.getSelectedIndex() == 0) {
+        if (nhanVienText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            cbxNhanVien.requestFocus();
             return false;
         }
         
         return true;
     }
-    
-
     
     private void xoaTaiKhoan() {
         int selectedRow = table.getSelectedRow();
@@ -367,7 +357,6 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
         
         String tenDangNhap = tableModel.getValueAt(selectedRow, 0).toString();
         
-        // Kiểm tra xem có phải tài khoản admin không
         if (tenDangNhap.equalsIgnoreCase("admin")) {
             JOptionPane.showMessageDialog(this, "Không thể xóa tài khoản admin!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
@@ -380,7 +369,6 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
         if (confirm == JOptionPane.YES_OPTION) {
             boolean success = taiKhoanDAO.xoaTaiKhoan(tenDangNhap);
             if (success) {
-                // Cập nhật danh sách và bảng
                 danhSachTaiKhoan.removeIf(tk -> tk.getTenDangNhap().equals(tenDangNhap));
                 tableModel.removeRow(selectedRow);
                 
@@ -406,30 +394,26 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
         String tenDangNhap = txtTenDangNhap.getText().trim();
         String matKhau = txtMatKhau.getText().trim();
         String vaiTro = cbxVaiTro.getSelectedItem().toString();
-        String selectedNhanVien = cbxNhanVien.getSelectedItem().toString();
         
-        // Kiểm tra xem đã chọn nhân viên chưa
-        if (selectedNhanVien.equals("-- Chọn nhân viên --")) {
+        String nhanVienText = txtNhanVien.getText().trim();
+        if (nhanVienText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        String maNhanVien = selectedNhanVien.split(" - ")[0];
+        String maNhanVien = nhanVienText.split(" - ")[0];
         
-        // Kiểm tra xem có phải đang sửa tài khoản admin không
-        if (tenDangNhap.equalsIgnoreCase("admin") && !vaiTro.equalsIgnoreCase("Admin")) {
+        if (tenDangNhap.equalsIgnoreCase("admin") && !vaiTro.equalsIgnoreCase("Quản lý")) {
             JOptionPane.showMessageDialog(this, "Không thể thay đổi vai trò của tài khoản admin!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        // Lấy nhân viên từ mã
         NhanVien nhanVien = nhanVienDAO.getNhanVienTheoMa(maNhanVien);
         if (nhanVien == null) {
             JOptionPane.showMessageDialog(this, "Không tìm thấy nhân viên với mã: " + maNhanVien, "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        // Kiểm tra nhân viên đã có tài khoản khác chưa
         for (TaiKhoan tk : danhSachTaiKhoan) {
             if (tk.getNhanVien() != null && 
                 tk.getNhanVien().getMaNhanVien().equals(maNhanVien) && 
@@ -439,13 +423,9 @@ public class QuanLiTaiKhoanPanel extends JPanel implements ActionListener {
             }
         }
         
-        // Tạo tài khoản cập nhật
         TaiKhoan taiKhoanCapNhat = new TaiKhoan(tenDangNhap, matKhau, vaiTro, nhanVien);
-        
-        // Cập nhật vào CSDL
         boolean success = taiKhoanDAO.capNhatTaiKhoan(taiKhoanCapNhat);
         if (success) {
-            // Cập nhật danh sách và bảng
             for (int i = 0; i < danhSachTaiKhoan.size(); i++) {
                 if (danhSachTaiKhoan.get(i).getTenDangNhap().equals(tenDangNhap)) {
                     danhSachTaiKhoan.set(i, taiKhoanCapNhat);

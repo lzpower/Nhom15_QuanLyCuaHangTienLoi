@@ -228,9 +228,9 @@ public class QuanLiKhachHangPanel extends JPanel implements ActionListener {
                         int soDiem = Integer.parseInt(tableModel.getValueAt(row, 3).toString());
                         
                         // Validate the data
-                        if (column == 1 && !tenKH.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
+                        if (column == 1 && !tenKH.matches("^[a-zA-ZÀ-ỹ\\s]{1,100}$")) {
                             JOptionPane.showMessageDialog(QuanLiKhachHangPanel.this, 
-                                "Tên khách hàng chỉ được chứa chữ cái và khoảng trắng!", 
+                                "Tên khách hàng chỉ được chứa chữ cái và khoảng trắng! Tối đa 100 kí tự", 
                                 "Lỗi", JOptionPane.ERROR_MESSAGE);
                             dienvaoTable(); // Reset table data
                             return;
@@ -542,8 +542,8 @@ public class QuanLiKhachHangPanel extends JPanel implements ActionListener {
             txtMaKH.requestFocus();
             return false;
         }
-        if (!tenKH.matches("^[a-zA-ZÀ-ỹ\\s]+$")) {
-            JOptionPane.showMessageDialog(this, "Tên khách hàng chỉ được chứa chữ cái và khoảng trắng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        if (!tenKH.matches("^[a-zA-ZÀ-ỹ\\s]{1,100}$")) {
+            JOptionPane.showMessageDialog(this, "Tên khách hàng chỉ được chứa chữ cái và khoảng trắng! Tối đa 100 kí tự", "Lỗi", JOptionPane.ERROR_MESSAGE);
             txtTenKH.requestFocus();
             return false;
         }
